@@ -2,12 +2,8 @@ package com.bookmyshow.main.model;
 
 
 
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,19 +25,18 @@ public class City {
     @Size(max = 255, message = "Image URL must be less than 255 characters")
     private String imageUrl;
     
-    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL)
-    private List<Movie> movies;
+   
 
     public City(Long id, @NotBlank(message = "City name is required") String name,
 			@NotNull(message = "Popular flag is required") Boolean popular,
-			@Size(max = 255, message = "Image URL must be less than 255 characters") String imageUrl,
-			List<Movie> movies) {
+			@Size(max = 255, message = "Image URL must be less than 255 characters") String imageUrl
+			) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.popular = popular;
 		this.imageUrl = imageUrl;
-		this.movies = movies;
+		
 	}
 
 	
@@ -64,15 +59,7 @@ public class City {
 
 
 
-	public List<Movie> getMovies() {
-		return movies;
-	}
-
-
-
-	public void setMovies(List<Movie> movies) {
-		this.movies = movies;
-	}
+	
     
 }
 

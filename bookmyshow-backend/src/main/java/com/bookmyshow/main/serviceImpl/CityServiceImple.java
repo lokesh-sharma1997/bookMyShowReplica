@@ -2,13 +2,6 @@ package com.bookmyshow.main.serviceImpl;
 
 
 
-import com.bookmyshow.main.model.City;
-import com.bookmyshow.main.service.CityService;
-
-import jakarta.annotation.PostConstruct;
-
-import org.springframework.stereotype.Service;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -16,8 +9,33 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bookmyshow.main.dto.CityDto;
+import com.bookmyshow.main.model.City;
+import com.bookmyshow.main.service.CityService;
+
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class CityServiceImple implements CityService {
+	
+	
+	@Autowired
+	public ModelMapper mapper;
+	
+	
+	private  CityDto CityToDto(City city)
+	{
+		return mapper.map(city, CityDto.class);
+	}
+	
+	private  City DtoToCity(CityDto cityDto)
+	{
+		return mapper.map(cityDto, City.class);
+	}
 
     private List<City> cities = new ArrayList<>();
     private AtomicLong idCounter = new AtomicLong(1);
@@ -26,8 +44,7 @@ public class CityServiceImple implements CityService {
     public void loadCitiesFromCsv() {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
                 getClass().getResourceAsStream("/cities.csv")))) {
-
-            // Skip header
+                  
             cities = br.lines().skip(1).map(line -> {
                 String[] data = line.split(",");
                 Long id = idCounter.getAndIncrement();
@@ -43,11 +60,18 @@ public class CityServiceImple implements CityService {
         }
     }
 
-    public List<City> getAllCities() {
-        return cities;
+    public List<CityDto> getAllCities() {
+        return cities.stream()
+                .filter(city -> !city.getPopular()) 
+                .map(this::CityToDto)
+                .collect(Collectors.toList());
     }
 
-    public List<City> getPopularCities() {
-        return cities.stream().filter(City::getPopular).collect(Collectors.toList());
+    
+    public List<CityDto> getPopularCities() { 
+        return cities.stream()
+                .filter(City::getPopular)
+                .map(this::CityToDto)
+                .collect(Collectors.toList());
     }
 }
