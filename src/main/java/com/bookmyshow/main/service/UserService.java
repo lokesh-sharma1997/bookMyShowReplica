@@ -1,34 +1,26 @@
 package com.bookmyshow.main.service;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import com.bookmyshow.main.dto.UserDTO;
-import com.bookmyshow.main.model.User;
 
 
 public interface UserService
 {
-	UserDTO getByUserIdUser(int userId);
-	
-	List<UserDTO> getByNameUser(String name);
+	Optional<UserDTO> getByUserId(int userId);
 
-	UserDTO getByUsernameUser(String username);
-	
-	UserDTO getByEmailUser(String email);
-	
-	List<UserDTO> getByRole(String role);
-	
-	UserDTO getByPhoneNumberUser(long phoneNumber);
-	
-	List<UserDTO> getByCreatedOnDateUser(LocalDate localDate);
-	
-	List<UserDTO> getByUpdatedOnDateUser(LocalDate localDate);
-	
-	List<UserDTO> getAllUser();
+    List<UserDTO> getByName(String name);
 
-	Map<String, Object> createUser(UserDTO userDTO);
+    Optional<UserDTO> getByUsername(String username);
 
-	UserDTO deleteByIdUser(int userId);
+    Optional<UserDTO> getByEmail(String email);
+
+    List<UserDTO> getByRole(String roleName);
+
+    Optional<UserDTO> getByPhoneNumber(long phoneNumber);
+
+    List<UserDTO> getAllUsers();
+
+    boolean deleteById(int userId);
 }

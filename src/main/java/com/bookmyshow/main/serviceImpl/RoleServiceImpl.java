@@ -1,28 +1,86 @@
 package com.bookmyshow.main.serviceImpl;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bookmyshow.main.dto.RoleDTO;
 import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.repository.RoleRepository;
 import com.bookmyshow.main.service.RoleService;
 
 @Service
-public class RoleServiceImpl implements RoleService
-{
+public class RoleServiceImpl implements RoleService {
+
 	@Autowired
-	RoleRepository roleRepository;
+    private RoleRepository roleRepository;
 
-	@Override
-	public Role getByRoleId(String roleId) {
-		return roleRepository.findByRoleId(roleId);
-	}
+    public RoleServiceImpl(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
 
-	@Override
-	public List<Role> getByRoleName(String roleName) {
-		return roleRepository.findByRoleName(roleName);
-	}
+    @Override
+    public Optional<RoleDTO> getByRoleId(int roleId) {
+        return roleRepository.findById(roleId).map(this::convertToDTO);
+    }
+
+    @Override
+    public Optional<RoleDTO> getByRoleName(String roleName) {
+        try {
+            Role.RoleName roleEnum = Role.RoleName.valueOf(roleName.toUpperCase());
+            return roleRepository.findByRoleName(roleEnum)
+                                 .map(this::convertToDTO);
+        } catch (IllegalArgumentException e) {
+            // if input doesn't match enum ADMIN/USER
+            return Optional.empty();
+        }
+    }
+
+
+    @Override
+    public List<RoleDTO> getAllRoles() {
+        return roleRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public RoleDTO createRole(RoleDTO roleDTO) {
+        Role role = convertToEntity(roleDTO);
+        Role savedRole = roleRepository.save(role);
+        return convertToDTO(savedRole);
+    }
+
+    @Override
+    public boolean deleteRole(int roleId) {
+        if (roleRepository.existsById(roleId)) {
+            roleRepository.deleteById(roleId);
+            return true;
+        }
+        return false;
+    }
+
+    // ========================
+    // Helper conversion methods
+    // ========================
+
+    private RoleDTO convertToDTO(Role role) {
+        RoleDTO dto = new RoleDTO();
+        dto.setRoleId(role.getRoleId());
+        dto.setRoleName(role.getRoleName().name()); // enum → String
+        return dto;
+    }
+
+    private Role convertToEntity(RoleDTO dto) {
+        Role role = new Role();
+        role.setRoleId(dto.getRoleId());
+        if (dto.getRoleName() != null) {
+            role.setRoleName(Role.RoleName.valueOf(dto.getRoleName().toUpperCase())); // String → enum
+        }
+        return role;
+    }
 
 }
