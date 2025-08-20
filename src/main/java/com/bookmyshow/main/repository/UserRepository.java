@@ -1,28 +1,31 @@
 package com.bookmyshow.main.repository;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.model.User;
 
 public interface UserRepository extends JpaRepository<User, Integer>
 {
 	User findByUserId(int userId);
 
-	List<User> findByNameUser(String name);
+	List<User> findByName(String name);
 
-	User findByUsernameUser(String username);
+	User findByUsername(String username);
 
-	User findByEmailUser(String email);
+	Optional<User> findByEmailIgnoreCase(String email);
 
-	List<User> findByRole(String role);
 
-	User findByPhoneNumberUser(long phoneNumber);
+	List<User> findByRole(Role role);
 
-	List<User> findByCreatedOnDateUser(LocalDate localDate);
+	User findByPhoneNumber(long phoneNumber);
+	
+	 boolean existsByUsername(String username);
+	 boolean deleteByUserId(int id);
 
-	List<User> findByUpdatedOnDateUser(LocalDate localDate);
-
+	 
+	 
 }
