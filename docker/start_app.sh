@@ -25,6 +25,8 @@ echo "DB_USER:                $DB_USER"
 echo "DB_PASS:                $DB_PASS"
 echo "SECRET:                $SECRET"
 
+echo "Done"
+
 
 
 sed -i "s;##DB_IP##;$DB_IP;"                      $config_file
