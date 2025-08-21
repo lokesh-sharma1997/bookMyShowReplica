@@ -1,0 +1,7 @@
+/home/vidhi/Downloads/bookmyshowGit/bookMyShowReplica/src/main/java/com/bookmyshow/main/BookmyshowBackendApplication.java
+/home/vidhi/Downloads/bookmyshowGit/bookMyShowReplica/src/main/java/com/bookmyshow/main/controller/TheatreController.java
+/home/vidhi/Downloads/bookmyshowGit/bookMyShowReplica/src/main/java/com/bookmyshow/main/dto/TheatreDto.java
+/home/vidhi/Downloads/bookmyshowGit/bookMyShowReplica/src/main/java/com/bookmyshow/main/model/Theatre.java
+/home/vidhi/Downloads/bookmyshowGit/bookMyShowReplica/src/main/java/com/bookmyshow/main/repository/TheatreRepository.java
+/home/vidhi/Downloads/bookmyshowGit/bookMyShowReplica/src/main/java/com/bookmyshow/main/service/TheatreService.java
+/home/vidhi/Downloads/bookmyshowGit/bookMyShowReplica/src/main/java/com/bookmyshow/main/serviceImpl/TheatreServiceImpl.java

@@ -12,11 +12,18 @@ public class BookmyshowBackendApplication {
 		SpringApplication.run(BookmyshowBackendApplication.class, args);
 		System.out.println("===> BookMyShow Project Started... <===");
 	}
+<<<<<<< HEAD
 	
 
+=======
+>>>>>>> master
 	@Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 }
