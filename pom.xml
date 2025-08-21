@@ -12,6 +12,7 @@
 	<artifactId>bookmyshow-backend</artifactId>
 	<version>1.0</version>
 	<name>bookmyshow-backend</name>
+	<packaging>jar</packaging>
 	<description>This is demo project of BookMyShow using SpringBoot</description>
 	<url/>
 	<licenses>

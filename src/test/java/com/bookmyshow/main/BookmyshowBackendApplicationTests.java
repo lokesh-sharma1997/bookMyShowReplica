@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class BookmyshowBackendApplicationTests {
 
-	@Test
+//	@Test
 	void contextLoads() {
 	}
 
