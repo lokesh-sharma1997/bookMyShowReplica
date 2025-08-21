@@ -31,6 +31,6 @@ sed -i "s;##SECRET##;$SECRET;"                      $config_file
 
 echo "Using java options config: $JAVA_OPTS"
 
-java ${JAVA_OPTS} -jar  -Dspring.config.location=/app/bookMyShow/application.properties  /app/bookMyShow/bookmyshow-backend-*-SNAPSHOT.jar 2>&1 | tee -a /app/bookMyShow/server.log
+java ${JAVA_OPTS} -jar  -Dspring.config.location=/app/bookMyShow/application.properties  /app/bookMyShow/bookmyshow-backend-1.0.jar 2>&1 | tee -a /app/bookMyShow/server.log
 
  
