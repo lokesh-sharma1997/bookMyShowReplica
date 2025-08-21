@@ -98,27 +98,50 @@ public class UserServiceImpl implements UserService {
                 .map(this::convertToDTO);
     }
 
+//    @Override
+//    public List<UserDTO> getByRole(String roleName) {
+//        try {
+//            // Convert incoming String to Enum
+//            Role.RoleName roleEnum = Role.RoleName.valueOf(roleName.toUpperCase());
+//
+//            Optional<Role> roleOpt = roleRepository.findByRoleName(roleEnum);
+//            if (roleOpt.isEmpty()) {
+//                return List.of();
+//            }
+//
+//            return userRepository.findByRole(roleOpt.get())
+//                                 .stream()
+//                                 .map(this::convertToDTO)
+//                                 .collect(Collectors.toList());
+//
+//        } catch (IllegalArgumentException e) {
+//            throw new RuntimeException("Invalid role: " + roleName);
+//        }
+//    }
+
+
     @Override
     public List<UserDTO> getByRole(String roleName) {
+        // Attempt to convert roleName to Enum
+        Role.RoleName roleEnum;
         try {
-            // Convert incoming String to Enum
-            Role.RoleName roleEnum = Role.RoleName.valueOf(roleName.toUpperCase());
-
-            Optional<Role> roleOpt = roleRepository.findByRoleName(roleEnum);
-            if (roleOpt.isEmpty()) {
-                return List.of();
-            }
-
-            return userRepository.findByRole(roleOpt.get())
-                                 .stream()
-                                 .map(this::convertToDTO)
-                                 .collect(Collectors.toList());
-
+            roleEnum = Role.RoleName.valueOf(roleName.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid role: " + roleName);
+            throw new IllegalArgumentException("Invalid role: " + roleName);
         }
-    }
 
+        // Fetch Role entity
+        Optional<Role> roleOpt = roleRepository.findByRoleName(roleEnum);
+        if (roleOpt.isEmpty()) {
+            return List.of(); // Return empty list, controller handles 404
+        }
+
+        // Fetch Users and convert to DTO
+        return userRepository.findByRole(roleOpt.get())
+                             .stream()
+                             .map(this::convertToDTO)
+                             .collect(Collectors.toList());
+    }
 
 
     @Override

@@ -46,7 +46,7 @@ public class RoleServiceImpl implements RoleService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
+/**
     @Override
     public RoleDTO createRole(RoleDTO roleDTO) {
         Role role = convertToEntity(roleDTO);
@@ -62,7 +62,7 @@ public class RoleServiceImpl implements RoleService {
         }
         return false;
     }
-
+**/
     // ========================
     // Helper conversion methods
     // ========================

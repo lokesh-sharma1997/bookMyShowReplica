@@ -40,13 +40,13 @@ public class RoleController {
         return ResponseEntity.ok(roleService.getAllRoles());
     }
 
-    // 🔹 Create Role
+    /** 🔹 Create Role
     @PostMapping("/create-role")
     public ResponseEntity<RoleDTO> createRole(@RequestBody RoleDTO roleDTO) {
         return ResponseEntity.ok(roleService.createRole(roleDTO));
     }
 
-    // 🔹 Delete Role
+     🔹 Delete Role
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable int id) {
         boolean deleted = roleService.deleteRole(id);
@@ -55,4 +55,5 @@ public class RoleController {
         }
         return ResponseEntity.notFound().build();
     }
+    **/
 }

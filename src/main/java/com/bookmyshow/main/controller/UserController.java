@@ -3,6 +3,7 @@ package com.bookmyshow.main.controller;
 import com.bookmyshow.main.dto.UserDTO;
 import com.bookmyshow.main.service.UserService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,19 +63,23 @@ public class UserController {
     }
 
 
- // 🔹 Search by Role
-    @GetMapping("/search/role/{roleName}")
+    @GetMapping("/role/{roleName}")
     public ResponseEntity<?> getByRole(@PathVariable String roleName) {
         try {
             List<UserDTO> users = userService.getByRole(roleName);
             if (users.isEmpty()) {
-                return ResponseEntity.status(404).body("No users found with role: " + roleName);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                     .body("No users found with role: " + roleName);
             }
             return ResponseEntity.ok(users);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid role name: " + roleName);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("An unexpected error occurred");
         }
     }
+
 
 
     // 🔹 Search by Phone Number
