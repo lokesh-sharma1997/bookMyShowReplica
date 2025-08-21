@@ -4,15 +4,6 @@
 
 echo "Starting bookMyShow server"
 
-/app/bookMyShow/host_entry.sh $HOSTS
- 
- echo "Initializing the database..."
-/app/bookMyShow/init_db.sh
-if [ $? -ne 0 ]; then
-    echo "Database initialization failed. Exiting."
-    exit 1
-fi
-
 export config_file=/app/bookMyShow/application.properties
 #fi
 echo "BOOKMYSHOW:              $BOOKMYSHOW"
