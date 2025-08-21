@@ -12,8 +12,10 @@ public class BookmyshowBackendApplication {
 		SpringApplication.run(BookmyshowBackendApplication.class, args);
 		System.out.println("===> BookMyShow Project Started... <===");
 		System.out.println("git");
+		System.out.println("mmmm");
+		
 	}
-	//syso
+	
 
 	
 
