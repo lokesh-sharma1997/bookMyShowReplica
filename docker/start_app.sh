@@ -4,15 +4,6 @@
 
 echo "Starting bookMyShow server"
 
-/app/bookMyShow/host_entry.sh $HOSTS
- 
- echo "Initializing the database..."
-/app/bookMyShow/init_db.sh
-if [ $? -ne 0 ]; then
-    echo "Database initialization failed. Exiting."
-    exit 1
-fi
-
 export config_file=/app/bookMyShow/application.properties
 #fi
 echo "BOOKMYSHOW:              $BOOKMYSHOW"
@@ -40,6 +31,6 @@ sed -i "s;##SECRET##;$SECRET;"                      $config_file
 
 echo "Using java options config: $JAVA_OPTS"
 
-java ${JAVA_OPTS} -jar  -Dspring.config.location=/app/bookMyShow/application.properties  /app/bookMyShow/bookmyshow-backend-*-SNAPSHOT.jar 2>&1 | tee -a /app/bookMyShow/server.log
+java ${JAVA_OPTS} -jar  -Dspring.config.location=/app/bookMyShow/application.properties  /app/bookMyShow/bookmyshow-backend-1.0.jar 2>&1 | tee -a /app/bookMyShow/server.log
 
  
