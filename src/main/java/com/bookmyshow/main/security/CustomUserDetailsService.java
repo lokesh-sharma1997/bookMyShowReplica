@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(u.getUsername())
-                .password(u.getPassword()) // must be BCrypt encoded in DB
+                .password(u.getPassword()) 
                 .authorities(List.of(new SimpleGrantedAuthority(role)))
                 .accountLocked(false)
                 .disabled(Boolean.TRUE.equals(u.getDeleteFlag()))
