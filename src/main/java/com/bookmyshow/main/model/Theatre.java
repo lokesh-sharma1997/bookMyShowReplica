@@ -9,7 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-
+import lombok.Data;
+@Data
 @Entity
 @Table(name = "theatre")
 public class Theatre {
@@ -27,43 +28,5 @@ public class Theatre {
     @NotBlank(message = "city is required")
     //ManyToOne()
 	private String city;
-	public Long getId() {
-		return id;
-	}
-	public String getName() {
-		return name;
-	}
-	public Theatre() {
-		super();
-	}
-	public Theatre(Long id, String name, String loaction, String city) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.loaction = loaction;
-		this.city = city;
-	}
-	@Override
-	public String toString() {
-		return "Theatre [id=" + id + ", name=" + name + ", loaction=" + loaction + ", city=" + city + "]";
-	}
-	public String getLoaction() {
-		return loaction;
-	}
-	public String getCity() {
-		return city;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public void setLoaction(String loaction) {
-		this.loaction = loaction;
-	}
-	public void setCity(String city) {
-		this.city = city;
-	}
 	
 }
