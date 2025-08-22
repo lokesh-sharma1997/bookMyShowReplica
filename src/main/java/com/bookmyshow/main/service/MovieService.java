@@ -13,5 +13,10 @@ public interface MovieService {
     List<MovieDto> getAllMovies();
     MovieDto updateMovie(Long id, MovieDto movieDto);
     void deleteMovie(Long id);
+    List<MovieDto> filterMovies(  List<String> languages,
+            List<String> genres,
+            List<String> formats,
+            String releaseMonth);
+
 }
 

@@ -10,7 +10,7 @@ public class BookmyshowBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BookmyshowBackendApplication.class, args);
-		System.out.println("===> BookMyShow Project Started... <===");
+		System.out.println("===> BookMyShow Project Started..... <===");
 	}
 	
 
