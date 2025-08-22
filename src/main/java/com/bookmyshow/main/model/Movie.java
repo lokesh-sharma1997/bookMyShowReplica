@@ -19,13 +19,13 @@ public class Movie {
     @NotBlank(message = "Movie name is required")
     private String name;
 
-//    @ElementCollection
+  
     private List<String> language;
 
    
     private List<String> genre;
 
-//    @ElementCollection
+   
     private List<String> format;
     @NotBlank(message = "Description is required")
     private String description;
@@ -35,9 +35,9 @@ public class Movie {
 
     @NotNull(message = "Release date is required")
     private LocalDate releaseDate;
-//
-//    @Lob
-//    @Column(columnDefinition = "TEXT")
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String imageurl; 
 
     private Double rating;

@@ -1,23 +1,21 @@
 package com.bookmyshow.main.serviceImpl;
 
 
-import com.bookmyshow.main.dto.MovieDto;
-import com.bookmyshow.main.model.Movie;
-import com.bookmyshow.main.repository.MovieRepository;
-import com.bookmyshow.main.service.MovieService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.bookmyshow.main.dto.MovieDto;
+import com.bookmyshow.main.model.Movie;
+import com.bookmyshow.main.repository.MovieRepository;
+import com.bookmyshow.main.service.MovieService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class MovieServiceImpl implements MovieService {
@@ -34,26 +32,11 @@ public class MovieServiceImpl implements MovieService {
 
     
     
-//    @Override
-//    public MovieDto createMovie(MovieDto movieDto, MultipartFile poster) throws IOException {
-//        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
-//        Movie movie = toEntity(movieDto);
-//        movie.setImageurl(base64Image);
-//        return toDto(movieRepository.save(movie));
-//    }
-//
     @Override
     public MovieDto createMovie(MovieDto movieDto, MultipartFile poster) throws IOException {
-        
-        String fileName = UUID.randomUUID() + "_" + poster.getOriginalFilename();
-        Path path = Paths.get("uploads/" + fileName);
-        Files.createDirectories(path.getParent());
-        Files.write(path, poster.getBytes());
-
-    
-        movieDto.setImageurl("/uploads/" + fileName);
-
+        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
         Movie movie = toEntity(movieDto);
+        movie.setImageurl(base64Image);
         return toDto(movieRepository.save(movie));
     }
 
