@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,6 +87,21 @@ public class MovieController {
             @RequestParam(required = false) String releaseMonth
     ) {
         return movieService.filterMovies(languages, genres, formats, releaseMonth);
+    }
+    @Operation(summary = "Get All languages")
+    @GetMapping("/languages")
+    public ResponseEntity<List<String>> getLanguages() {
+        return ResponseEntity.ok(movieService.getAllLanguages());
+    }
+    @Operation(summary = "Get All Genres")
+    @GetMapping("/genres")
+    public ResponseEntity<List<String>> getGenres() {
+        return ResponseEntity.ok(movieService.getAllGenres());
+    }
+    @Operation(summary = "Get All Formats")
+    @GetMapping("/formats")
+    public ResponseEntity<List<String>> getFormats() {
+        return ResponseEntity.ok(movieService.getAllFormats());
     }
 
 }

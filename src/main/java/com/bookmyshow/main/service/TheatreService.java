@@ -13,5 +13,7 @@ public interface TheatreService {
 
     List<TheatreDto> getTheatresByName(String name);
 
-    boolean deleteTheatre(Long id);
+   
+
+	boolean softDeleteTheatre(Long id);
 }
