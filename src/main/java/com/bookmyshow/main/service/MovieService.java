@@ -1,10 +1,11 @@
 package com.bookmyshow.main.service;
 
-import com.bookmyshow.main.dto.MovieDto;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.bookmyshow.main.dto.MovieDto;
 
 public interface MovieService {
     MovieDto createMovie(MovieDto movieDto, MultipartFile poster) throws IOException;

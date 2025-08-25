@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.UserDTO;
 import com.bookmyshow.main.model.Role;
-import com.bookmyshow.main.model.User;
+import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.repository.RoleRepository;
 import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.service.UserService;
@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
 
     // ✅ Convert Entity -> DTO
-    private UserDTO convertToDTO(User user) {
+    private UserDTO convertToDTO(UserMaster user) {
         UserDTO dto = new UserDTO();
         dto.setUserId(user.getUserId());
         dto.setName(user.getName());
@@ -45,8 +45,8 @@ public class UserServiceImpl implements UserService {
     }
 
     // ✅ Convert DTO -> Entity
-    private User convertToEntity(UserDTO dto) {
-        User user = new User();
+    private UserMaster convertToEntity(UserDTO dto) {
+        UserMaster user = new UserMaster();
         user.setUserId(dto.getUserId());
         user.setName(dto.getName());
         user.setUsername(dto.getUsername());

@@ -4,9 +4,11 @@ package com.bookmyshow.main.serviceImpl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,8 +21,6 @@ import com.bookmyshow.main.model.Movie;
 import com.bookmyshow.main.repository.MovieRepository;
 import com.bookmyshow.main.service.MovieService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.Collections;
 
 @Service
 public class MovieServiceImpl implements MovieService {
