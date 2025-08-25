@@ -2,6 +2,7 @@ package com.bookmyshow.main.model;
 
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,7 +31,7 @@ public class City {
     @NotNull(message = "Popular flag is required")
     private Boolean popular;
 
-    @Size(max = 255, message = "Image URL must be less than 255 characters")
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
     
    

@@ -20,12 +20,19 @@ public class Movie {
     private String name;
 
   
+    @ElementCollection
+    @CollectionTable(name = "movie_languages", joinColumns = @JoinColumn(name = "movie_id"))
+    @Column(name = "language")
     private List<String> language;
-
-   
+ 
+    @ElementCollection
+    @CollectionTable(name = "movie_genres", joinColumns = @JoinColumn(name = "movie_id"))
+    @Column(name = "genre")
     private List<String> genre;
-
-   
+ 
+    @ElementCollection
+    @CollectionTable(name = "movie_formats", joinColumns = @JoinColumn(name = "movie_id"))
+    @Column(name = "format")
     private List<String> format;
     @NotBlank(message = "Description is required")
     private String description;

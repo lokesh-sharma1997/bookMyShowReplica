@@ -24,9 +24,13 @@ public class Theatre {
     
     //@NotBlank(message="location is required")
 	private String loaction;
+	
+	private Boolean deleted = false;
     
     @NotBlank(message = "city is required")
     //ManyToOne()
 	private String city;
+
+	
 	
 }

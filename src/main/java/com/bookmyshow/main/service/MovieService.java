@@ -17,6 +17,8 @@ public interface MovieService {
             List<String> genres,
             List<String> formats,
             String releaseMonth);
-
+    List<String> getAllLanguages();
+    List<String> getAllGenres();
+    List<String> getAllFormats();
 }
 

@@ -15,4 +15,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     List<Movie> findAll(Specification<Movie> spec);
 
+	Optional<Movie> findByDeletedFalse();
+
+	
+
 }

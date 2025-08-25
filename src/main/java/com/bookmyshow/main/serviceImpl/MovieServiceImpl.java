@@ -2,8 +2,10 @@ package com.bookmyshow.main.serviceImpl;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import com.bookmyshow.main.model.Movie;
 import com.bookmyshow.main.repository.MovieRepository;
 import com.bookmyshow.main.service.MovieService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.Collections;
 
 @Service
 public class MovieServiceImpl implements MovieService {
@@ -114,5 +118,41 @@ public class MovieServiceImpl implements MovieService {
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
+    
+    public List<String> getAllLanguages() {
+        Set<String> languages = movieRepository.findByDeletedFalse()
+                .stream()
+                .filter(m -> m.getLanguage() != null)
+                .flatMap(m -> m.getLanguage().stream())
+                .collect(Collectors.toSet());
+        List<String> sortedLanguages = new ArrayList<>(languages);
+        Collections.sort(sortedLanguages);
+        return sortedLanguages;
+    }
+ 
+    // Genres
+    public List<String> getAllGenres() {
+        Set<String> genres = movieRepository.findByDeletedFalse()
+                .stream()
+                .filter(m -> m.getGenre() != null)
+                .flatMap(m -> m.getGenre().stream())
+                .collect(Collectors.toSet());
+        List<String> sortedGenres = new ArrayList<>(genres);
+        Collections.sort(sortedGenres);
+        return sortedGenres;
+    }
+ 
+    // Formats
+    public List<String> getAllFormats() {
+        Set<String> formats = movieRepository.findByDeletedFalse()
+                .stream()
+                .filter(m -> m.getFormat() != null)
+                .flatMap(m -> m.getFormat().stream())
+                .collect(Collectors.toSet());
+        List<String> sortedFormats = new ArrayList<>(formats);
+        Collections.sort(sortedFormats);
+        return sortedFormats;
+    }
+ 
 
 }
