@@ -47,9 +47,9 @@ public class UserMaster {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
-	@Min(value = 1000000000L, message = "Phone number must be 10 digits")
-	@Max(value = 9999999999L, message = "Phone number must be 10 digits")
-	private long phoneNumber;
+	 
+	@Size(max=10,  message="Mobile number cannot contain more than ten characters")
+	private String phoneNumber;
 
 	@CreationTimestamp
 	@Column(updatable = false)

@@ -87,7 +87,7 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/search/phone/{phone}")
-    public ResponseEntity<?> getByPhone(@PathVariable long phone) {
+    public ResponseEntity<?> getByPhone(@PathVariable String phone) {
         Optional<UserDTO> user = userService.getByPhoneNumber(phone);
         return user.map(ResponseEntity::ok)
                    .orElseGet(() -> ResponseEntity.notFound().build());

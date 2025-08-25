@@ -10,5 +10,5 @@ public class RegisterRequest {
     private String password;   // raw password (will be encoded before saving)
     private String email;      // user email
     private RoleName roleName;   // ADMIN / USER / etc
-    private long phoneNumber;
+    private String phoneNumber;
 }
