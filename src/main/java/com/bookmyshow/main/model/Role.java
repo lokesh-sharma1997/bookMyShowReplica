@@ -28,7 +28,7 @@ public class Role {
     private RoleName roleName;   // Example: ADMIN, USER
     
     @OneToMany(mappedBy = "role")
-    private List<User> users;
+    private List<UserMaster> users;
     
     public enum RoleName {
         USER,

@@ -1,12 +1,13 @@
 package com.bookmyshow.main.controller;
 
-import com.bookmyshow.main.dto.RoleDTO;
-import com.bookmyshow.main.service.RoleService;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import com.bookmyshow.main.dto.RoleDTO;
+import com.bookmyshow.main.service.RoleService;
 
 @RestController
 @RequestMapping("/api/roles")

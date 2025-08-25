@@ -1,12 +1,14 @@
 package com.bookmyshow.main.model;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Data;
 
-import java.time.LocalDate;
-import java.util.List;
 @Data
 @Entity
 @Table(name = "movies")
