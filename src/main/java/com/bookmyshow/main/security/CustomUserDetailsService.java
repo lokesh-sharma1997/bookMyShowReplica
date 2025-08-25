@@ -33,5 +33,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .build();
         }
         throw new RuntimeException("User not found with username: " + username);
+
     }
 }

@@ -81,4 +81,15 @@ public class MovieController {
         movieService.deleteMovie(id);
         return ResponseEntity.noContent().build();
     }
+    @Operation(summary = "movie filter")
+    @GetMapping("/filter")
+    public List<MovieDto> filterMovies(
+            @RequestParam(required = false) List<String> languages,
+            @RequestParam(required = false) List<String> genres,
+            @RequestParam(required = false) List<String> formats,
+            @RequestParam(required = false) String releaseMonth
+    ) {
+        return movieService.filterMovies(languages, genres, formats, releaseMonth);
+    }
+
 }
