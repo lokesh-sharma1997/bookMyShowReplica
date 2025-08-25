@@ -12,6 +12,7 @@ import org.springframework.beans.factory. annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,11 +50,14 @@ public class TheatreServiceImpl implements TheatreService {
                 .collect(Collectors.toList());
     }
 
-   public boolean deleteTheatre(Long id) {
-        if (theatreRepository.existsById(id)) {
-            theatreRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
+   public boolean softDeleteTheatre(Long id) {
+	    Optional<Theatre> optionalTheatre = theatreRepository.findById(id);
+	    if (optionalTheatre.isPresent()) {
+	        Theatre theatre = optionalTheatre.get();
+	        theatre.setDeleted(true);
+	        theatreRepository.save(theatre);
+	        return true;
+	    }
+	    return false;
+	}
 }

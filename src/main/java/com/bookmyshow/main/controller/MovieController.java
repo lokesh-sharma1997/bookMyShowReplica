@@ -88,5 +88,20 @@ public class MovieController {
     ) {
         return movieService.filterMovies(languages, genres, formats, releaseMonth);
     }
+    @Operation(summary = "Get All languages")
+    @GetMapping("/languages")
+    public ResponseEntity<List<String>> getLanguages() {
+        return ResponseEntity.ok(movieService.getAllLanguages());
+    }
+    @Operation(summary = "Get All Genres")
+    @GetMapping("/genres")
+    public ResponseEntity<List<String>> getGenres() {
+        return ResponseEntity.ok(movieService.getAllGenres());
+    }
+    @Operation(summary = "Get All Formats")
+    @GetMapping("/formats")
+    public ResponseEntity<List<String>> getFormats() {
+        return ResponseEntity.ok(movieService.getAllFormats());
+    }
 
 }
