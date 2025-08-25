@@ -18,7 +18,7 @@ public interface UserService
 
     List<UserDTO> getByRole(String roleName);
 
-    Optional<UserDTO> getByPhoneNumber(long phoneNumber);
+    Optional<UserDTO> getByPhoneNumber(String phone);
 
     List<UserDTO> getAllUsers();
 

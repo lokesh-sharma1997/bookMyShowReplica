@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Optional<UserDTO> getByPhoneNumber(long phoneNumber) {
+    public Optional<UserDTO> getByPhoneNumber(String phoneNumber) {
         return Optional.ofNullable(userRepository.findByPhoneNumber(phoneNumber))
                        .map(this::convertToDTO);
     }

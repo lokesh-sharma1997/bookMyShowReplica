@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<UserMaster, Integer>
 
 	List<UserMaster> findByRole(Role role);
 
-    UserMaster findByPhoneNumber(long phoneNumber);
+    UserMaster findByPhoneNumber(String phoneNumber);
 	
 	 boolean existsByUsername(String username);
 	 boolean deleteByUserId(int id);

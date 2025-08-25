@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -33,9 +31,8 @@ public class UserDTO {
     private String email;
     
     @JsonProperty("phoneNumber")
-	@Min(value = 1000000000L, message = "Phone number must be at least 10 digits")
-    @Max(value = 9999999999L, message = "Phone number must be at most 10 digits")
-    private long phoneNumber;
+	 @Size(max=10,message="Phone number cannot be more than 10 characters.")
+    private String phoneNumber;
     
     @JsonProperty("roleName")
     @NotBlank(message = "Role name is required")
