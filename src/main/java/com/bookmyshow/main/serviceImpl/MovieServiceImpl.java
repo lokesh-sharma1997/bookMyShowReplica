@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import java.util.Base64;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bookmyshow.main.Specification.MovieSpecification;
 import com.bookmyshow.main.dto.MovieDto;
 import com.bookmyshow.main.model.Movie;
 import com.bookmyshow.main.repository.MovieRepository;
@@ -35,49 +38,50 @@ public class MovieServiceImpl implements MovieService {
 
     
     
-//    @Override
-//    public MovieDto createMovie(MovieDto movieDto, MultipartFile poster) throws IOException {
-//        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
-//        Movie movie = toEntity(movieDto);
-//        movie.setImageurl(base64Image);
-//        return toDto(movieRepository.save(movie));
-//    }
-//
     @Override
     public MovieDto createMovie(MovieDto movieDto, MultipartFile poster) throws IOException {
-        
-        String fileName = UUID.randomUUID() + "_" + poster.getOriginalFilename();
-        Path path = Paths.get("uploads/" + fileName);
-        Files.createDirectories(path.getParent());
-        Files.write(path, poster.getBytes());
-
-    
-        movieDto.setImageurl("/uploads/" + fileName);
-
+        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
         Movie movie = toEntity(movieDto);
+        movie.setImageurl(base64Image);
         return toDto(movieRepository.save(movie));
     }
 
     @Override
     public MovieDto getMovieById(Long id) {
-    	System.out.println("DEBUG: fetching movie id = " + id);
-        return movieRepository.findById(id)
-                .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+        if (movie.getDeleted()) {
+            throw new RuntimeException("Movie is deleted");
+        }
+
+        return toDto(movie);
     }
+
+
 
     @Override
     public MovieDto getMovieByName(String name) {
-        return movieRepository.findByName(name)
-                .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Movie not found with name: " + name));
+        Movie movie = movieRepository.findByName(name)
+                .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+        if (movie.getDeleted()) {
+            throw new RuntimeException("Movie is deleted");
+        }
+
+        return toDto(movie);
     }
+
 
 
     @Override
     public List<MovieDto> getAllMovies() {
-        return movieRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return movieRepository.findAll().stream()
+                .filter(movie -> !movie.getDeleted()) 
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
+
 
     @Override
     public MovieDto updateMovie(Long id, MovieDto movieDto) {
@@ -102,4 +106,18 @@ public class MovieServiceImpl implements MovieService {
         movie.setDeleted(true);
         movieRepository.save(movie);
     }
+    
+    public List<MovieDto> filterMovies(
+            List<String> languages,
+            List<String> genres,
+            List<String> formats,
+            String releaseMonth
+    ) {
+        Specification<Movie> spec = MovieSpecification.filterMovies(languages, genres, formats, releaseMonth);
+        return movieRepository.findAll(spec).stream()
+                .filter(movie -> !movie.getDeleted())   
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
 }
