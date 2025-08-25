@@ -1,13 +1,16 @@
 package com.bookmyshow.main.security;
 
-import com.bookmyshow.main.model.User;
-import com.bookmyshow.main.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.bookmyshow.main.dto.JwtDTO;
+import com.bookmyshow.main.model.UserMaster;
+import com.bookmyshow.main.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -17,19 +20,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.bookmyshow.main.model.User u = userRepository.findByUsername(username);
-        if (u == null) throw new UsernameNotFoundException("User not found: " + username);
-
-        String role = (u.getRole() != null && u.getRole().getRoleName() != null)
-                ? "ROLE_" + u.getRole().getRoleName()
-                : "ROLE_USER";
-
-        return org.springframework.security.core.userdetails.User
-                .withUsername(u.getUsername())
-                .password(u.getPassword()) // must be BCrypt encoded in DB
-                .authorities(List.of(new SimpleGrantedAuthority(role)))
-                .accountLocked(false)
-                .disabled(Boolean.TRUE.equals(u.getDeleteFlag()))
-                .build();
+        UserMaster data = userRepository.findByUsername(username);
+        JwtDTO jwtDTO = new JwtDTO();
+        jwtDTO.setUsername(data.getUsername());
+        jwtDTO.setPassword(data.getPassword());
+        jwtDTO.setRoleName(String.valueOf(data.getRole().getRoleName()));
+        if (jwtDTO != null) {
+            return User.builder()
+                    .username(jwtDTO.getUsername())
+                    .password(jwtDTO.getPassword())
+                    .roles(jwtDTO.getRoleName())
+                    .build();
+        }
+        throw new RuntimeException("User not found with username: " + username);
     }
 }

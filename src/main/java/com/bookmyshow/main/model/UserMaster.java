@@ -23,7 +23,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "user_master")
-public class User {
+public class UserMaster {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")

@@ -6,22 +6,22 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.bookmyshow.main.model.Role;
-import com.bookmyshow.main.model.User;
+import com.bookmyshow.main.model.UserMaster;
 
-public interface UserRepository extends JpaRepository<User, Integer>
+public interface UserRepository extends JpaRepository<UserMaster, Integer>
 {
-	User findByUserId(int userId);
+    UserMaster findByUserId(int userId);
 
-	List<User> findByName(String name);
+	List<UserMaster> findByName(String name);
 
-	User findByUsername(String username);
+    UserMaster findByUsername(String username);
 
-	Optional<User> findByEmailIgnoreCase(String email);
+	Optional<UserMaster> findByEmailIgnoreCase(String email);
 
 
-	List<User> findByRole(Role role);
+	List<UserMaster> findByRole(Role role);
 
-	User findByPhoneNumber(long phoneNumber);
+    UserMaster findByPhoneNumber(long phoneNumber);
 	
 	 boolean existsByUsername(String username);
 	 boolean deleteByUserId(int id);
