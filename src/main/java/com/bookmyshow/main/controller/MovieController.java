@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,29 +49,32 @@ public class MovieController {
     }
 
     @Operation(summary = "Get movie by ID")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<MovieDto> getMovieById(@PathVariable Long id) {
         return ResponseEntity.ok(movieService.getMovieById(id));
     }
 
     @Operation(summary = "Get movie by name")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/by-name/{name}")
     public ResponseEntity<MovieDto> getMovieByName(@PathVariable String name) {
         return ResponseEntity.ok(movieService.getMovieByName(name));
     }
 
     @Operation(summary = "Get all movies")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping
     public ResponseEntity<List<MovieDto>> getAllMovies() {
         return ResponseEntity.ok(movieService.getAllMovies());
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Update a movie")
     @PutMapping("/{id}")
-    public ResponseEntity<MovieDto> updateMovie(@PathVariable Long id, @RequestBody MovieDto movieDto) {
+        public ResponseEntity<MovieDto> updateMovie(@PathVariable Long id, @RequestBody MovieDto movieDto) {
         return ResponseEntity.ok(movieService.updateMovie(id, movieDto));
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Delete a movie")
     @PatchMapping("/{id}")
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {

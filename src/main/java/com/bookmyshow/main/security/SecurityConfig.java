@@ -2,14 +2,11 @@ package com.bookmyshow.main.security;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,8 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
- 
 
 @Configuration
 @EnableWebSecurity
@@ -41,7 +36,7 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-            	.requestMatchers("/auth/**", "/api/auth/**","/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/auth/**", "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -58,24 +53,24 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+            .userDetailsService(userDetailsService)
+            .passwordEncoder(passwordEncoder())
+            .and()
+            .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
-
-     
 }
