@@ -44,7 +44,8 @@ public class Movie {
 
     @NotNull(message = "Release date is required")
     private LocalDate releaseDate;
-
+    @NotBlank(message = "ContentType is required")
+    private String contentType;
     @Lob
     @Column(columnDefinition = "TEXT")
     private String imageurl; 

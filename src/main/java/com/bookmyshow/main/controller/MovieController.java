@@ -50,20 +50,20 @@ public class MovieController {
 
     @Operation(summary = "Get movie by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<MovieDto> getMovieById(@PathVariable Long id) {
-        return ResponseEntity.ok(movieService.getMovieById(id));
+    public ResponseEntity<MovieDto> getMovieById(@PathVariable Long id,@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(movieService.getMovieById(id,contentType));
     }
 
     @Operation(summary = "Get movie by name")
     @GetMapping("/by-name/{name}")
-    public ResponseEntity<MovieDto> getMovieByName(@PathVariable String name) {
-        return ResponseEntity.ok(movieService.getMovieByName(name));
+    public ResponseEntity<MovieDto> getMovieByName(@PathVariable String name,@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(movieService.getMovieByName(name,contentType));
     }
 
     @Operation(summary = "Get all movies")
     @GetMapping
-    public ResponseEntity<List<MovieDto>> getAllMovies() {
-        return ResponseEntity.ok(movieService.getAllMovies());
+    public ResponseEntity<List<MovieDto>> getAllMovies(@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(movieService.getAllMovies(contentType));
     }
 
     @Operation(summary = "Update a movie")
@@ -90,18 +90,18 @@ public class MovieController {
     }
     @Operation(summary = "Get All languages")
     @GetMapping("/languages")
-    public ResponseEntity<List<String>> getLanguages() {
-        return ResponseEntity.ok(movieService.getAllLanguages());
+    public ResponseEntity<List<String>> getLanguages(@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(movieService.getAllLanguages(contentType));
     }
     @Operation(summary = "Get All Genres")
     @GetMapping("/genres")
-    public ResponseEntity<List<String>> getGenres() {
-        return ResponseEntity.ok(movieService.getAllGenres());
+    public ResponseEntity<List<String>> getGenres(@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(movieService.getAllGenres(contentType));
     }
     @Operation(summary = "Get All Formats")
     @GetMapping("/formats")
-    public ResponseEntity<List<String>> getFormats() {
-        return ResponseEntity.ok(movieService.getAllFormats());
+    public ResponseEntity<List<String>> getFormats(@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(movieService.getAllFormats(contentType));
     }
 
 }
