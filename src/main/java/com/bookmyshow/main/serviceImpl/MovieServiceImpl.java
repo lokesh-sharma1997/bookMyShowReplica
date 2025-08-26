@@ -3,8 +3,10 @@ package com.bookmyshow.main.serviceImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.bookmyshow.main.Specification.MovieSpecification;
 import com.bookmyshow.main.dto.MovieDto;
 import com.bookmyshow.main.model.Movie;
@@ -42,25 +43,39 @@ public class MovieServiceImpl implements MovieService {
         String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
         Movie movie = toEntity(movieDto);
         movie.setImageurl(base64Image);
+        String eventType = movieDto.getContentType();
+        
+        // Step 1: Predefined values
+        Set<String> predefined = new HashSet<>(Arrays.asList(
+                "Movie", "Show", "Cartoon", "Event"
+        ));
+     
+        // Step 2: Agar predefined me hai to wahi use hoga
+        if (predefined.contains(eventType)) {
+            movie.setContentType(eventType);
+        } else {
+            // Step 3: New type ho to bhi save kar dena
+            movie.setContentType(eventType);
+        }
         return toDto(movieRepository.save(movie));
     }
 
     @Override
-    public MovieDto getMovieById(Long id) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
+    public MovieDto getMovieById(Long id, String contentType) {
+        System.out.println("DEBUG: fetching movie id = " + id);
 
-        if (movie.getDeleted()) {
-            throw new RuntimeException("Movie is deleted");
-        }
-
-        return toDto(movie);
+        return movieRepository.findById(id)
+                .filter(movie -> !movie.getDeleted() &&
+                        (contentType == null || contentType.isEmpty() || contentType.equalsIgnoreCase(movie.getContentType())))
+                .map(this::toDto)
+                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
     }
 
 
 
+
     @Override
-    public MovieDto getMovieByName(String name) {
+    public MovieDto getMovieByName(String name,String contentType) {
         Movie movie = movieRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("Movie not found"));
 
@@ -74,12 +89,14 @@ public class MovieServiceImpl implements MovieService {
 
 
     @Override
-    public List<MovieDto> getAllMovies() {
+    public List<MovieDto> getAllMovies(String contentType) {
         return movieRepository.findAll().stream()
-                .filter(movie -> !movie.getDeleted()) 
+                .filter(movie -> !movie.getDeleted() &&
+                        (contentType == null || contentType.isEmpty() || contentType.equalsIgnoreCase(movie.getContentType())))
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
+
 
 
     @Override
@@ -119,9 +136,11 @@ public class MovieServiceImpl implements MovieService {
                 .collect(Collectors.toList());
     }
     
-    public List<String> getAllLanguages() {
+    public List<String> getAllLanguages(String contentType) {
         Set<String> languages = movieRepository.findByDeletedFalse()
                 .stream()
+                .filter(m -> contentType == null || contentType.isEmpty() ||
+                contentType.equalsIgnoreCase(m.getContentType()))
                 .filter(m -> m.getLanguage() != null)
                 .flatMap(m -> m.getLanguage().stream())
                 .collect(Collectors.toSet());
@@ -131,9 +150,11 @@ public class MovieServiceImpl implements MovieService {
     }
  
     // Genres
-    public List<String> getAllGenres() {
+    public List<String> getAllGenres(String contentType) {
         Set<String> genres = movieRepository.findByDeletedFalse()
                 .stream()
+                .filter(m -> contentType == null || contentType.isEmpty() ||
+                contentType.equalsIgnoreCase(m.getContentType()))
                 .filter(m -> m.getGenre() != null)
                 .flatMap(m -> m.getGenre().stream())
                 .collect(Collectors.toSet());
@@ -143,9 +164,11 @@ public class MovieServiceImpl implements MovieService {
     }
  
     // Formats
-    public List<String> getAllFormats() {
+    public List<String> getAllFormats(String contentType) {
         Set<String> formats = movieRepository.findByDeletedFalse()
                 .stream()
+                .filter(m -> contentType == null || contentType.isEmpty() ||
+                contentType.equalsIgnoreCase(m.getContentType()))
                 .filter(m -> m.getFormat() != null)
                 .flatMap(m -> m.getFormat().stream())
                 .collect(Collectors.toSet());

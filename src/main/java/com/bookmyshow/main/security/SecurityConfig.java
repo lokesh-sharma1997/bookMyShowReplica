@@ -34,7 +34,7 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-            	.requestMatchers("/auth/**", "/api/auth/**","/swagger-ui/**", "/v3/api-docs/**").permitAll()
+            	.requestMatchers("/auth/**", "/api/auth/**","/movies/**","/city/**","/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))

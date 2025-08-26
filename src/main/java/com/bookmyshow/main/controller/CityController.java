@@ -10,7 +10,7 @@ import com.bookmyshow.main.dto.CityDto;
 import com.bookmyshow.main.service.CityService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/city")
 public class CityController {
 
 	@Autowired
@@ -18,12 +18,12 @@ public class CityController {
 
     
 
-    @GetMapping("/cities/all")
+    @GetMapping("/all")
     public List<CityDto> getAllCities() {
         return cityService.getAllCities();
     }
 
-    @GetMapping("/api/cities/popular")
+    @GetMapping("/popular")
     public List<CityDto> getPopularCities() {
         return cityService.getPopularCities();
     }

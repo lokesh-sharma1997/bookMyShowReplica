@@ -20,4 +20,5 @@ public class MovieDto {
     private Double rating;
     private Double likes;
     private Boolean currentlyPlaying;
+    private String contentType;
 }
