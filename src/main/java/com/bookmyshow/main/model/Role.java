@@ -30,6 +30,8 @@ public class Role {
     @OneToMany(mappedBy = "role")
     private List<UserMaster> users;
     
+    
+    
     public enum RoleName {
         USER,
         ADMIN
