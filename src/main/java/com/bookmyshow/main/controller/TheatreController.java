@@ -3,6 +3,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,17 +25,18 @@ public class TheatreController {
 	@Autowired
 	private TheatreService theatreService;
 	
-
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/createTheatre")
 	public ResponseEntity<TheatreDto> createTheatre(@RequestBody TheatreDto theatreDto){
         TheatreDto created = theatreService.createTheatre(theatreDto);
         return ResponseEntity.ok(created);
 	}
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
     @GetMapping("/getAll")
     public ResponseEntity<List<TheatreDto>> getAllTheatres() {
         return ResponseEntity.ok(theatreService.getAllTheatres());
     }
-
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
     @GetMapping("/getByName")
     public ResponseEntity<List<TheatreDto>> getTheatreByName(@RequestParam String name) {
         List<TheatreDto> theatres = theatreService.getTheatresByName(name);
@@ -43,7 +45,7 @@ public class TheatreController {
         }
         return ResponseEntity.ok(theatres);
     }
-
+	@PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/delete")
     public ResponseEntity<Void> softDeleteTheatre(@PathVariable Long id) {
         if (theatreService.softDeleteTheatre(id)) {

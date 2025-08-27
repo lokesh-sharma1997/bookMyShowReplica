@@ -1,4 +1,4 @@
-package com.bookmyshow.main.Specification;
+package com.bookmyshow.main.specification;
 
 
 
