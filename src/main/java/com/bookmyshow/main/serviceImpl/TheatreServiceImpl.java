@@ -8,6 +8,7 @@ import com.bookmyshow.main.repository.TheatreRepository;
 import com.bookmyshow.main.service.TheatreService;
 
 import org.modelmapper.ModelMapper;
+
 import org.springframework.beans.factory. annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +20,12 @@ import java.util.stream.Collectors;
 public class TheatreServiceImpl implements TheatreService {
 
     @Autowired
-    private TheatreRepository theatreRepository;
+	private  TheatreRepository theatreRepository;
 
     @Autowired
     private ModelMapper modelMapper;
+    
+
 
    private TheatreDto entityToDto(Theatre entity) {
         return modelMapper.map(entity, TheatreDto.class);
