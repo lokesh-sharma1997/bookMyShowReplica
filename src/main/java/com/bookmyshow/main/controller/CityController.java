@@ -1,4 +1,5 @@
 package com.bookmyshow.main.controller;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +15,15 @@ import com.bookmyshow.main.service.CityService;
 public class CityController {
 
 	@Autowired
-    private  CityService cityService;
+	private CityService cityService;
 
-    
+	@GetMapping("/all")
+	public List<CityDto> getAllCities() {
+		return cityService.getAllCities();
+	}
 
-    @GetMapping("/all")
-    public List<CityDto> getAllCities() {
-        return cityService.getAllCities();
-    }
-
-    @GetMapping("/popular")
-    public List<CityDto> getPopularCities() {
-        return cityService.getPopularCities();
-    }
+	@GetMapping("/popular")
+	public List<CityDto> getPopularCities() {
+		return cityService.getPopularCities();
+	}
 }

@@ -16,11 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.bookmyshow.main.Specification.MovieSpecification;
+
 import com.bookmyshow.main.dto.MovieDto;
 import com.bookmyshow.main.model.Movie;
 import com.bookmyshow.main.repository.MovieRepository;
 import com.bookmyshow.main.service.MovieService;
+import com.bookmyshow.main.specification.MovieSpecification;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
