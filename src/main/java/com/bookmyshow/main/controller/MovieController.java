@@ -40,7 +40,7 @@ public class MovieController {
 
     @Operation(summary = "Create a new event", description = "Add a new event with poster image")
     @ApiResponse(responseCode = "200", description = "event created successfully")
-    @PostMapping(value="/creteevent", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value="/create-event", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EventDto> createEvent(
     		@RequestPart("event") String eventJson,
             @RequestPart("poster") MultipartFile poster,
@@ -63,14 +63,14 @@ public class MovieController {
     }
 
     @Operation(summary = "Get all event")
-    @GetMapping
+    @GetMapping("/get-all-events")
     public ResponseEntity<List<EventDto>> getAllEvent(@RequestParam(required = false) String contentType) {
         return ResponseEntity.ok(eventService.getAllEventByType(contentType));
     }
 
 
     @Operation(summary = "Update a event")
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EventDto> updateEvent(
             @PathVariable Long id,
             @RequestPart("Event") String eventJson,
@@ -85,7 +85,7 @@ public class MovieController {
 
 
     @Operation(summary = "Delete a event")
-    @PatchMapping("/{id}")
+    @PatchMapping("/delete/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
     	eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();

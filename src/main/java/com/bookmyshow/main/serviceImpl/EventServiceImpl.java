@@ -16,14 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.bookmyshow.main.Specification.MovieSpecification;
+
+import com.bookmyshow.main.dto.CastDto;
 import com.bookmyshow.main.dto.EventDto;
 import com.bookmyshow.main.model.Cast;
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.service.EventService;
+import com.bookmyshow.main.specification.MovieSpecification;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.bookmyshow.main.dto.CastDto;
 
 
 @Service
