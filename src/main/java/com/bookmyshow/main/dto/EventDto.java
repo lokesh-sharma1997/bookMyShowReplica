@@ -4,7 +4,7 @@ import java.util.List;
 
 import lombok.Data;
 @Data
-public class MovieDto {
+public class EventDto {
     private Long id;
     private String name;
     private List<String> language;
@@ -21,4 +21,5 @@ public class MovieDto {
     private Double likes;
     private Boolean currentlyPlaying;
     private String contentType;
+    private List<CastDto> cast; 
 }

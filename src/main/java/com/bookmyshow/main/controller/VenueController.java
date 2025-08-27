@@ -1,4 +1,6 @@
 package com.bookmyshow.main.controller;
+
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,41 +14,41 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bookmyshow.main.dto.TheatreDto;
-import com.bookmyshow.main.service.TheatreService;
+import com.bookmyshow.main.dto.VenueDto;
+import com.bookmyshow.main.service.VenueService;
 
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/theatre")
-public class TheatreController {
+@RequestMapping("/venue")
+public class VenueController {
 
 	@Autowired
-	private TheatreService theatreService;
+	private VenueService venueService;
 	
 
-	@PostMapping("/createTheatre")
-	public ResponseEntity<TheatreDto> createTheatre(@RequestBody TheatreDto theatreDto){
-        TheatreDto created = theatreService.createTheatre(theatreDto);
+	@PostMapping("/createVenue")
+	public ResponseEntity<VenueDto> createTheatre(@RequestBody VenueDto theatreDto){
+		VenueDto created = venueService.createVenue(theatreDto);
         return ResponseEntity.ok(created);
 	}
     @GetMapping("/getAll")
-    public ResponseEntity<List<TheatreDto>> getAllTheatres() {
-        return ResponseEntity.ok(theatreService.getAllTheatres());
+    public ResponseEntity<List<VenueDto>> getAllVenues() {
+        return ResponseEntity.ok(venueService.getAllVenues());
     }
 
     @GetMapping("/getByName")
-    public ResponseEntity<List<TheatreDto>> getTheatreByName(@RequestParam String name) {
-        List<TheatreDto> theatres = theatreService.getTheatresByName(name);
+    public ResponseEntity<List<VenueDto>> getVenueByName(@RequestParam String name) {
+        List<VenueDto> theatres = venueService.getVenuesByName(name);
         if (theatres.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(theatres);
     }
 
-    @PatchMapping("/{id}/delete")
-    public ResponseEntity<Void> softDeleteTheatre(@PathVariable Long id) {
-        if (theatreService.softDeleteTheatre(id)) {
+    @PatchMapping("/delete/{id}")
+    public ResponseEntity<Void> softDeleteVenue(@PathVariable Long id) {
+        if (venueService.softDeleteVenue(id)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();

@@ -8,32 +8,36 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 @Entity
 @Table(name = "movies")
-public class Movie {
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Movie name is required")
+    @NotBlank(message = "Event name is required")
     private String name;
 
   
     @ElementCollection
-    @CollectionTable(name = "movie_languages", joinColumns = @JoinColumn(name = "movie_id"))
+    @CollectionTable(name = "Event_languages", joinColumns = @JoinColumn(name = "Event_id"))
     @Column(name = "language")
     private List<String> language;
  
     @ElementCollection
-    @CollectionTable(name = "movie_genres", joinColumns = @JoinColumn(name = "movie_id"))
+    @CollectionTable(name = "Event_genres", joinColumns = @JoinColumn(name = "Event_id"))
     @Column(name = "genre")
     private List<String> genre;
  
     @ElementCollection
-    @CollectionTable(name = "movie_formats", joinColumns = @JoinColumn(name = "movie_id"))
+    @CollectionTable(name = "Event_formats", joinColumns = @JoinColumn(name = "Event_id"))
     @Column(name = "format")
     private List<String> format;
     @NotBlank(message = "Description is required")
@@ -46,7 +50,7 @@ public class Movie {
     private LocalDate releaseDate;
     @NotBlank(message = "ContentType is required")
     private String contentType;
-    @Lob
+    
     @Column(columnDefinition = "TEXT")
     private String imageurl; 
 
@@ -58,9 +62,13 @@ public class Movie {
 
     private Boolean deleted = false;
 
+    @ElementCollection
+    @CollectionTable(name = "Event_cast", joinColumns = @JoinColumn(name = "Event_id"))
+    private List<Cast> cast;
     
-    
-  
+   
+
+
     
 
     

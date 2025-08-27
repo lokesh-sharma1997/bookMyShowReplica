@@ -1,5 +1,6 @@
 package com.bookmyshow.main.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,91 +18,104 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.bookmyshow.main.dto.MovieDto;
-import com.bookmyshow.main.service.MovieService;
+import com.bookmyshow.main.dto.EventDto;
+import com.bookmyshow.main.dto.EventFilterRequest;
+import com.bookmyshow.main.service.EventService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.io.IOException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/movies")
-@Tag(name = "Movie Controller", description = "Manage movies in BookMyShow app")
+@RequestMapping("/events")
+@Tag(name = "event Controller", description = "Manage events in BookMyShow app")
 public class MovieController {
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    private MovieService movieService;
+    private EventService eventService;
 
-    @Operation(summary = "Create a new movie", description = "Add a new movie with poster image")
-    @ApiResponse(responseCode = "200", description = "Movie created successfully")
-    @PostMapping(value="/cretemovie", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MovieDto> createMovie(
-    		@RequestPart("movie") String movieJson,
-            @RequestPart("poster") MultipartFile poster) throws IOException, java.io.IOException {
+    @Operation(summary = "Create a new event", description = "Add a new event with poster image")
+    @ApiResponse(responseCode = "200", description = "event created successfully")
+    @PostMapping(value="/creteevent", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EventDto> createEvent(
+    		@RequestPart("event") String eventJson,
+            @RequestPart("poster") MultipartFile poster,
+            @RequestPart(value = "castImages", required = false) List<MultipartFile> castImages) throws IOException, java.io.IOException {
 
-        MovieDto movieDto = objectMapper.readValue(movieJson, MovieDto.class);
-        return ResponseEntity.ok(movieService.createMovie(movieDto, poster));
+    	EventDto eventDto = objectMapper.readValue(eventJson, EventDto.class);
+        return ResponseEntity.ok(eventService.createEvent(eventDto, poster,castImages));
     }
 
-    @Operation(summary = "Get movie by ID")
+    @Operation(summary = "Get event by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<MovieDto> getMovieById(@PathVariable Long id,@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(movieService.getMovieById(id,contentType));
+    public ResponseEntity<EventDto> getEventById(@PathVariable Long id,@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(eventService.getEventById(id,contentType));
     }
 
-    @Operation(summary = "Get movie by name")
+    @Operation(summary = "Get event by name")
     @GetMapping("/by-name/{name}")
-    public ResponseEntity<MovieDto> getMovieByName(@PathVariable String name,@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(movieService.getMovieByName(name,contentType));
+    public ResponseEntity<EventDto> getEventByName(@PathVariable String name,@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(eventService.getEventByName(name,contentType));
     }
 
-    @Operation(summary = "Get all movies")
+    @Operation(summary = "Get all event")
     @GetMapping
-    public ResponseEntity<List<MovieDto>> getAllMovies(@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(movieService.getAllMovies(contentType));
+    public ResponseEntity<List<EventDto>> getAllEvent(@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(eventService.getAllEventByType(contentType));
     }
 
-    @Operation(summary = "Update a movie")
-    @PutMapping("/{id}")
-    public ResponseEntity<MovieDto> updateMovie(@PathVariable Long id, @RequestBody MovieDto movieDto) {
-        return ResponseEntity.ok(movieService.updateMovie(id, movieDto));
+
+    @Operation(summary = "Update a event")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EventDto> updateEvent(
+            @PathVariable Long id,
+            @RequestPart("Event") String eventJson,
+            @RequestPart(value = "poster", required = false) MultipartFile poster,
+            @RequestPart(value = "castImages", required = false) List<MultipartFile> castImages
+    ) throws IOException {
+        // JSON string ko MovieDto me convert karna
+    	EventDto eventDto = objectMapper.readValue(eventJson, EventDto.class);
+        return ResponseEntity.ok(eventService.createEvent(eventDto, poster,castImages));
     }
 
-    @Operation(summary = "Delete a movie")
+
+
+    @Operation(summary = "Delete a event")
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
-        movieService.deleteMovie(id);
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
+    	eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
-    @Operation(summary = "movie filter")
-    @GetMapping("/filter")
-    public List<MovieDto> filterMovies(
-            @RequestParam(required = false) List<String> languages,
-            @RequestParam(required = false) List<String> genres,
-            @RequestParam(required = false) List<String> formats,
-            @RequestParam(required = false) String releaseMonth
-    ) {
-        return movieService.filterMovies(languages, genres, formats, releaseMonth);
+
+    @Operation(summary = "event filter")
+    @PostMapping("/filter")
+    public List<EventDto> filterEvent(@RequestBody EventFilterRequest filterRequest) {
+        return eventService.filterEvents(
+                filterRequest.getLanguages(),
+                filterRequest.getGenres(),
+                filterRequest.getFormats(),
+                filterRequest.getReleaseMonth()
+        );
     }
+
     @Operation(summary = "Get All languages")
     @GetMapping("/languages")
     public ResponseEntity<List<String>> getLanguages(@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(movieService.getAllLanguages(contentType));
+        return ResponseEntity.ok(eventService.getAllLanguages(contentType));
     }
     @Operation(summary = "Get All Genres")
     @GetMapping("/genres")
     public ResponseEntity<List<String>> getGenres(@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(movieService.getAllGenres(contentType));
+        return ResponseEntity.ok(eventService.getAllGenres(contentType));
     }
     @Operation(summary = "Get All Formats")
     @GetMapping("/formats")
     public ResponseEntity<List<String>> getFormats(@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(movieService.getAllFormats(contentType));
+        return ResponseEntity.ok(eventService.getAllFormats(contentType));
     }
 
 }
