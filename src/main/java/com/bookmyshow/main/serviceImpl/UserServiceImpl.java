@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.UserDTO;
+import com.bookmyshow.main.exception.RoleNotFoundException;
+import com.bookmyshow.main.exception.UserNotFoundException;
 import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.repository.RoleRepository;
@@ -60,7 +62,7 @@ public class UserServiceImpl implements UserService {
                 Optional<Role> roleOpt = roleRepository.findByRoleName(roleEnum);
                 roleOpt.ifPresent(user::setRole);
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid role: " + dto.getRoleName());
+                throw new RoleNotFoundException("Invalid role: " + dto.getRoleName());
             }
         }
 
@@ -75,7 +77,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserDTO> getByUserId(int userId) {
         return Optional.ofNullable(userRepository.findByUserId(userId))
-                       .map(this::convertToDTO);
+                .map(this::convertToDTO)
+                .or(() -> { throw new UserNotFoundException("User not found with ID: " + userId); });
     }
 
     @Override
@@ -122,25 +125,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> getByRole(String roleName) {
-        // Attempt to convert roleName to Enum
         Role.RoleName roleEnum;
         try {
             roleEnum = Role.RoleName.valueOf(roleName.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid role: " + roleName);
+            throw new RoleNotFoundException("Invalid role: " + roleName);
         }
-
-        // Fetch Role entity
-        Optional<Role> roleOpt = roleRepository.findByRoleName(roleEnum);
-        if (roleOpt.isEmpty()) {
-            return List.of(); // Return empty list, controller handles 404
-        }
-
-        // Fetch Users and convert to DTO
-        return userRepository.findByRole(roleOpt.get())
-                             .stream()
-                             .map(this::convertToDTO)
-                             .collect(Collectors.toList());
+        Role role = roleRepository.findByRoleName(roleEnum)
+                .orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
+        return userRepository.findByRole(role)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
 
@@ -167,7 +163,7 @@ public class UserServiceImpl implements UserService {
             user.setDeleteFlag(user.getDeleteFlag() == null ? true : !user.getDeleteFlag());
             userRepository.save(user);
             return true;
-        }).orElse(false);
+        }).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
     }
 
 }

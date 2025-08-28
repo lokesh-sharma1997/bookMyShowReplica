@@ -1,6 +1,7 @@
 package com.bookmyshow.main.controller;
 
-import org.springframework.http.MediaType; // Import MediaType
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,29 +21,17 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
 	private final AuthService authService;
-
+	
 	@PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE) // Specify produces
 	public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequest req) {
-		try {
-			String token = authService.login(req); // Get JWT token as String
-			ApiResponse<String> response = new ApiResponse<>(200, "Login successful", true, token);
-			return ResponseEntity.ok(response);
-		} catch (RuntimeException ex) {
-			ApiResponse<String> errorResponse = new ApiResponse<>(401, ex.getMessage(), false, null);
-			return ResponseEntity.status(401).body(errorResponse);
-		}
+		String token = authService.login(req);
+	    return ResponseEntity.ok(new ApiResponse<>(200, "Login successful", true, token));
 	}
 
 	@PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE) // Specify produces
 	public ResponseEntity<ApiResponse<String>> register(@RequestBody RegisterRequest req) {
-		try {
-
-			String message = authService.register(req);
-			ApiResponse<String> response = new ApiResponse<>(200, "Registration successful", true, message);
-			return ResponseEntity.ok(response);
-		} catch (RuntimeException ex) {
-			ApiResponse<String> errorResponse = new ApiResponse<>(400, ex.getMessage(), false, null);
-			return ResponseEntity.badRequest().body(errorResponse);
-		}
+		String message = authService.register(req);
+	    return ResponseEntity.status(HttpStatus.CREATED)
+	            .body(new ApiResponse<>(201, message, true, null));
 	}
 }

@@ -2,6 +2,10 @@ package com.bookmyshow.main.serviceImpl;
 
 import com.bookmyshow.main.dto.LoginRequest;
 import com.bookmyshow.main.dto.RegisterRequest;
+import com.bookmyshow.main.exception.InvalidCredentialsException;
+import com.bookmyshow.main.exception.ResourceAlreadyExistsException;
+import com.bookmyshow.main.exception.RoleNotFoundException;
+import com.bookmyshow.main.exception.UserNotFoundException;
 import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.repository.RoleRepository;
@@ -36,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
             //  Fetch user to extract role
             UserMaster user = userRepository.findByUsername(req.getUsername());
             if (user == null || user.getRole() == null) {
-                throw new RuntimeException("User role not found");
+                throw new UserNotFoundException("User or role not found for username: " + req.getUsername());
             }
 
             String role = user.getRole().getRoleName().name(); // e.g. ADMIN, USER
@@ -44,15 +48,14 @@ public class AuthServiceImpl implements AuthService {
             //  Generate token with role and return as string
             return jwtService.generateToken(req.getUsername(), role);  // Return the JWT token as a string
         } catch (AuthenticationException ex) {
-            throw new RuntimeException("Invalid credentials");
-        //	return ex.getMessage();
+            throw new InvalidCredentialsException("Invalid credentials for username: " + req.getUsername());
         }
     }
 
     @Override
     public String register(RegisterRequest req) {
         if (userRepository.existsByUsername(req.getUsername())) {
-            throw new RuntimeException("Username already taken");
+            throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
         }
 
         UserMaster user = new UserMaster();
@@ -64,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Fetch and assign role
         Role role = roleRepository.findByRoleName(req.getRoleName())
-                .orElseThrow(() -> new RuntimeException("Role not found: " + req.getRoleName()));
+                .orElseThrow(() -> new RoleNotFoundException("Role not found: " + req.getRoleName()));
         user.setRole(role);
 
         userRepository.save(user);
