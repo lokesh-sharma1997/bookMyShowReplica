@@ -87,12 +87,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventDto getEventById(Long id, String contentType) {
+    public EventDto getEventById(Long id) {
        
 
         return eventRepository.findById(id)
-                .filter(movie -> !movie.getDeleted() &&
-                        (contentType == null || contentType.isEmpty() || contentType.equalsIgnoreCase(movie.getContentType())))
+                .filter(movie -> !movie.getDeleted() 
+                        )
                 .map(this::toDto)
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
     }
