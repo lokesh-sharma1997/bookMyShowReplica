@@ -32,9 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class EventServiceImpl implements EventService {
 
-    private final CityServiceImple cityServiceImple;
 
-    private final SecurityConfig securityConfig;
 	@Autowired
 	private ObjectMapper objectMapper;
     @Autowired
@@ -43,10 +41,7 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private ModelMapper mapper;
 
-    EventServiceImpl(SecurityConfig securityConfig, CityServiceImple cityServiceImple) {
-        this.securityConfig = securityConfig;
-        this.cityServiceImple = cityServiceImple;
-    }
+
 
     private EventDto toDto(Event movie) { return mapper.map(movie, EventDto.class); }
     private Event toEntity(EventDto dto) { return mapper.map(dto, Event.class); }
