@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.bookmyshow.main.dto.RoleDTO;
@@ -19,7 +20,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    // 🔹 Get Role by ID
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getRoleById(@PathVariable int id) {
         Optional<RoleDTO> role = roleService.getByRoleId(id);
@@ -27,7 +28,7 @@ public class RoleController {
                    .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 🔹 Get Role by Name
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search/{name}")
     public ResponseEntity<?> getRoleByName(@PathVariable String name) {
         Optional<RoleDTO> role = roleService.getByRoleName(name);
@@ -35,19 +36,19 @@ public class RoleController {
                    .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 🔹 Get All Roles
-    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/get-all-roles")
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         return ResponseEntity.ok(roleService.getAllRoles());
     }
 
-    /** 🔹 Create Role
+    /**  Create Role
     @PostMapping("/create-role")
     public ResponseEntity<RoleDTO> createRole(@RequestBody RoleDTO roleDTO) {
         return ResponseEntity.ok(roleService.createRole(roleDTO));
     }
 
-     🔹 Delete Role
+      Delete Role
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable int id) {
         boolean deleted = roleService.deleteRole(id);
