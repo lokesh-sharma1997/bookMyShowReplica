@@ -96,7 +96,7 @@ public class EventController {
     }
 
     @Operation(summary = "event filter")
-    @PostMapping("/filter")
+    @GetMapping("/filter")
     public List<EventDto> filterEvent(@RequestBody EventFilterRequest filterRequest) {
         return eventService.filterEvents(
                 filterRequest.getLanguages(),

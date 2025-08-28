@@ -32,6 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class EventServiceImpl implements EventService {
 
+    private final CityServiceImple cityServiceImple;
+
     private final SecurityConfig securityConfig;
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -41,8 +43,9 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private ModelMapper mapper;
 
-    EventServiceImpl(SecurityConfig securityConfig) {
+    EventServiceImpl(SecurityConfig securityConfig, CityServiceImple cityServiceImple) {
         this.securityConfig = securityConfig;
+        this.cityServiceImple = cityServiceImple;
     }
 
     private EventDto toDto(Event movie) { return mapper.map(movie, EventDto.class); }
@@ -140,7 +143,10 @@ public class EventServiceImpl implements EventService {
                     dto.setGenre(event.getGenre() != null ? event.getGenre() : new ArrayList<>());
 
                     // imdbVotes (placeholder)
-                    dto.setImdbVotes("0");
+                    dto.setImdbVotes(event.getVotes() != null
+                            ? event.getVotes().toString()
+                            : "N/A");
+
 
                     // imdbRating
                     dto.setImdbRating(event.getRating() != null
@@ -177,6 +183,7 @@ public class EventServiceImpl implements EventService {
         event.setReleaseDate(eventDto.getReleaseDate());
         event.setRating(eventDto.getRating());
         event.setLikes(eventDto.getLikes());
+        event.setVotes(eventDto.getVotes());
         event.setCurrentlyPlaying(eventDto.getCurrentlyPlaying());
 
         // Cast update

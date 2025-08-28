@@ -19,6 +19,7 @@ public class EventDto {
     private String imageurl;
     private Double rating;
     private Double likes;
+    private Double votes;
     private Boolean currentlyPlaying;
     private String contentType;
     private List<CastDto> cast; 
