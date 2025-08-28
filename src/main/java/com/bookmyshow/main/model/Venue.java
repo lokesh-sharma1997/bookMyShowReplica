@@ -2,6 +2,8 @@ package com.bookmyshow.main.model;
 
 
 
+
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,21 +11,26 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "theatre")
-public class Theatre {
+@Table(name = "venue")
+public class Venue {
      
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-    @NotBlank(message = "Theatre name is required")
+    @NotBlank(message = "Venue name is required")
      private String name;
     
     //@NotBlank(message="location is required")
-	private String loaction;
+	private String location;
 	
 	private Boolean deleted = false;
     

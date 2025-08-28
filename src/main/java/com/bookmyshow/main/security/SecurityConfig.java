@@ -37,14 +37,14 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
                 // Permitting all GET requests and filtering movies
-                .requestMatchers("/movies/**").permitAll() // Allow GET requests to movies and filters
-                .requestMatchers("/movies/filter").permitAll() // Allow filtering movies for all users
+                .requestMatchers("/events/get-all-events").permitAll() // Allow GET requests to movies and filters
+                .requestMatchers("/events/filter").permitAll() // Allow filtering movies for all users
 
                 // Restricting the movie creation (POST), update (PUT), and delete (PATCH) operations
-                .requestMatchers(HttpMethod.POST, "/movies/createmovie").authenticated() // Only authenticated users can create a movie
-                .requestMatchers(HttpMethod.PUT, "/movies/update/**").hasRole("ADMIN") // Only ADMIN role can update movies
-                .requestMatchers(HttpMethod.PATCH, "/movies/delete/**").hasRole("ADMIN") // Only ADMIN role can delete movies
-                .requestMatchers(HttpMethod.POST, "/theatre/createTheatre/**").hasRole("ADMIN") // Only ADMIN role can delete movies
+                .requestMatchers(HttpMethod.POST, "/events/create-event").authenticated() // Only authenticated users can create a movie
+                .requestMatchers(HttpMethod.PUT, "/events/update/**").hasRole("ADMIN") // Only ADMIN role can update movies
+                .requestMatchers(HttpMethod.PATCH, "/events/delete/**").hasRole("ADMIN") // Only ADMIN role can delete movies
+                .requestMatchers(HttpMethod.POST, "/venue/create-venue/**").hasRole("ADMIN") // Only ADMIN role can delete movies
 
                 // Allowing all authentication related endpoints
                 .requestMatchers("/auth/**", "/api/auth/**").permitAll() // Public auth endpoints (e.g., login, registration)

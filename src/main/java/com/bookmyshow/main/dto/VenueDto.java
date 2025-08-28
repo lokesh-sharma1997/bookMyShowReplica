@@ -3,9 +3,14 @@ package com.bookmyshow.main.dto;
 
 
 
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 @Data
-public class TheatreDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class VenueDto {
 
     private String name;
 
@@ -13,5 +18,6 @@ public class TheatreDto {
 
     private String city;
 
+	
 }
 
