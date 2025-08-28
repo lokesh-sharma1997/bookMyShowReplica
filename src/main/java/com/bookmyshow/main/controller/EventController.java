@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bookmyshow.main.dto.EventDto;
 import com.bookmyshow.main.dto.EventFilterRequest;
+import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.service.EventService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,7 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/events")
 @Tag(name = "event Controller", description = "Manage events in BookMyShow app")
-public class MovieController {
+public class EventController {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -61,12 +62,15 @@ public class MovieController {
     public ResponseEntity<EventDto> getEventByName(@PathVariable String name,@RequestParam(required = false) String contentType) {
         return ResponseEntity.ok(eventService.getEventByName(name,contentType));
     }
-
+    
     @Operation(summary = "Get all event")
     @GetMapping("/get-all-events")
-    public ResponseEntity<List<EventDto>> getAllEvent(@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(eventService.getAllEventByType(contentType));
-    }
+        public ResponseEntity<List<EventResponseDto>> getEventsByType(
+                @RequestParam(required = false) String contentType) {
+            List<EventResponseDto> events = eventService.getAllEventByType(contentType);
+            return ResponseEntity.ok(events);
+        }
+    
 
 
     @Operation(summary = "Update a event")

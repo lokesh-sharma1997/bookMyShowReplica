@@ -19,9 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bookmyshow.main.dto.CastDto;
 import com.bookmyshow.main.dto.EventDto;
+import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.model.Cast;
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.repository.EventRepository;
+import com.bookmyshow.main.security.SecurityConfig;
 import com.bookmyshow.main.service.EventService;
 import com.bookmyshow.main.specification.MovieSpecification;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class EventServiceImpl implements EventService {
+
+    private final SecurityConfig securityConfig;
 	@Autowired
 	private ObjectMapper objectMapper;
     @Autowired
@@ -36,6 +40,10 @@ public class EventServiceImpl implements EventService {
 
     @Autowired
     private ModelMapper mapper;
+
+    EventServiceImpl(SecurityConfig securityConfig) {
+        this.securityConfig = securityConfig;
+    }
 
     private EventDto toDto(Event movie) { return mapper.map(movie, EventDto.class); }
     private Event toEntity(EventDto dto) { return mapper.map(dto, Event.class); }
@@ -107,33 +115,47 @@ public class EventServiceImpl implements EventService {
     }
 
 
-
-
-
     @Override
-    public List<EventDto> getAllEventByType(String contentType) {
+    public List<EventResponseDto> getAllEventByType(String contentType) {
         return eventRepository.findAll().stream()
                 .filter(event -> !event.getDeleted() &&
-                        (contentType == null || contentType.isEmpty() || contentType.equalsIgnoreCase(event.getContentType())))
+                        (contentType == null || contentType.isEmpty()
+                         || contentType.equalsIgnoreCase(event.getContentType())))
                 .map(event -> {
-                EventDto dto = mapper.map(event, EventDto.class);
-                    if (event.getCast() != null) {
-                        dto.setCast(
-                        		event.getCast().stream()
-                                 .map(c -> {
-                                     CastDto castDto = new CastDto();
-                                     castDto.setActorName(c.getActorName());
-                                     castDto.setImg(c.getImg());
-                                     return castDto;
-                                 })
-                                 .collect(Collectors.toList())
-                        );
-                    }
+                    EventResponseDto dto = new EventResponseDto();
+
+                    // movieId
+                    dto.setEventId(event.getId());
+
+                    // title
+                    dto.setTitle(event.getName());
+
+                    // likes
+                    dto.setLikes(event.getLikes() != null ? event.getLikes().toString() : "0");
+
+                    // poster
+                    dto.setPoster(event.getImageurl());
+
+                    // ✅ genre (already List<String> in Event entity)
+                    dto.setGenre(event.getGenre() != null ? event.getGenre() : new ArrayList<>());
+
+                    // imdbVotes (placeholder)
+                    dto.setImdbVotes("0");
+
+                    // imdbRating
+                    dto.setImdbRating(event.getRating() != null
+                            ? event.getRating().toString()
+                            : "N/A");
+
+                    // releasedFlag
+                    dto.setReleasedFlag(event.getCurrentlyPlaying() != null
+                            ? event.getCurrentlyPlaying()
+                            : false);
+
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
-
 
 
     @Override
