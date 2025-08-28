@@ -10,7 +10,7 @@ public interface UserService
 {
 	Optional<UserDTO> getByUserId(int userId);
 
-    List<UserDTO> getByName(String name);
+	List<UserDTO> getByName(String name);
 
     Optional<UserDTO> getByUsername(String username);
 
