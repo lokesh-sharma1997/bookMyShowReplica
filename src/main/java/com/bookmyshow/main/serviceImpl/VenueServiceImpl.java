@@ -1,66 +1,67 @@
 package com.bookmyshow.main.serviceImpl;
 
-
-
-import com.bookmyshow.main.dto.TheatreDto;
-import com.bookmyshow.main.model.Theatre;
-import com.bookmyshow.main.repository.TheatreRepository;
-import com.bookmyshow.main.service.TheatreService;
-
-import org.modelmapper.ModelMapper;
-
-import org.springframework.beans.factory. annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bookmyshow.main.dto.VenueDto;
+import com.bookmyshow.main.model.Venue;
+import com.bookmyshow.main.repository.VenueRepository;
+import com.bookmyshow.main.service.VenueService;
+
 @Service
-public class TheatreServiceImpl implements TheatreService {
+public class VenueServiceImpl implements VenueService {
 
     @Autowired
-	private  TheatreRepository theatreRepository;
+    private VenueRepository venueRepository;
 
     @Autowired
     private ModelMapper modelMapper;
-    
 
-
-   private TheatreDto entityToDto(Theatre entity) {
-        return modelMapper.map(entity, TheatreDto.class);
+    private VenueDto entityToDto(Venue entity) {
+        return modelMapper.map(entity, VenueDto.class);
     }
 
-   private Theatre dtoToEntity(TheatreDto dto) {
-        return modelMapper.map(dto, Theatre.class);
+    private Venue dtoToEntity(VenueDto dto) {
+        return modelMapper.map(dto, Venue.class);
     }
-    public TheatreDto createTheatre(TheatreDto dto) {
-        Theatre entity = dtoToEntity(dto);
-        Theatre saved = theatreRepository.save(entity);
+
+    @Override
+    public VenueDto createVenue(VenueDto dto) {
+        Venue entity = dtoToEntity(dto);
+        Venue saved = venueRepository.save(entity);
         return entityToDto(saved);
     }
-   public List<TheatreDto> getAllTheatres() {
-        return theatreRepository.findAll()
+
+    @Override
+    public List<VenueDto> getAllVenues() {
+        return venueRepository.findAll()
                 .stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }
 
-   public List<TheatreDto> getTheatresByName(String name) {
-        return theatreRepository.findBynameIgnoreCase(name)
+    @Override
+    public List<VenueDto> getVenuesByName(String name) {
+        return venueRepository.findBynameIgnoreCase(name)
                 .stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }
 
-   public boolean softDeleteTheatre(Long id) {
-	    Optional<Theatre> optionalTheatre = theatreRepository.findById(id);
-	    if (optionalTheatre.isPresent()) {
-	        Theatre theatre = optionalTheatre.get();
-	        theatre.setDeleted(true);
-	        theatreRepository.save(theatre);
-	        return true;
-	    }
-	    return false;
-	}
+    @Override
+    public boolean softDeleteVenue(Long id) {
+        Optional<Venue> optionalVenue = venueRepository.findById(id);
+        if (optionalVenue.isPresent()) {
+            Venue venue = optionalVenue.get();
+            venue.setDeleted(true);
+            venueRepository.save(venue);
+            return true;
+        }
+        return false;
+    }
 }

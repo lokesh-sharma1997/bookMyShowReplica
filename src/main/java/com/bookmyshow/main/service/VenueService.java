@@ -1,19 +1,18 @@
 package com.bookmyshow.main.service;
 
-
-import com.bookmyshow.main.dto.TheatreDto;
-
 import java.util.List;
 
-public interface TheatreService {
+import com.bookmyshow.main.dto.VenueDto;
 
-    TheatreDto createTheatre(TheatreDto dto);
+public interface VenueService {
 
-    List<TheatreDto> getAllTheatres();
+	VenueDto createVenue(VenueDto dto);
 
-    List<TheatreDto> getTheatresByName(String name);
+    List<VenueDto> getAllVenues();
+
+    List<VenueDto> getVenuesByName(String name);
 
    
 
-	boolean softDeleteTheatre(Long id);
+	boolean softDeleteVenue(Long id);
 }

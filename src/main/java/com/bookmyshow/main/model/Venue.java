@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -17,24 +18,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "theatre")
-public class Theatre {
+@Table(name = "venue")
+public class Venue {
      
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-    @NotBlank(message = "Theatre name is required")
+    @NotBlank(message = "Venue name is required")
      private String name;
     
     //@NotBlank(message="location is required")
-	private String loaction;
+	private String location;
 	
 	private Boolean deleted = false;
     
     @NotBlank(message = "city is required")
-    //ManyToOne()
-	private String city;
+	private String  city;
 
 	
 	

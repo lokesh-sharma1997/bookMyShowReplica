@@ -1,14 +1,15 @@
-package com.bookmyshow.main.service;
 
-import com.bookmyshow.main.dto.TheatreDto;
-import com.bookmyshow.main.model.Theatre;
-import com.bookmyshow.main.repository.TheatreRepository;
-import com.bookmyshow.main.serviceImpl.TheatreServiceImpl;
+package com.bookmyshow.main.serviceImpl;
+
+import com.bookmyshow.main.dto.VenueDto;
+import com.bookmyshow.main.model.Venue;
+import com.bookmyshow.main.repository.VenueRepository;
+import com.bookmyshow.main.serviceImpl.VenueServiceImpl;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -17,37 +18,36 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class TheatreServiceImplTest {
+class VenueServiceImplTest {
 
-    private TheatreRepository theatreRepository;
+    private VenueRepository venueRepository;
     private ModelMapper modelMapper;
-    private TheatreServiceImpl theatreService;
+    private VenueServiceImpl venueService;
 
     @BeforeEach
     void setUp() throws Exception {
-        theatreRepository = mock(TheatreRepository.class);
+        venueRepository = mock(VenueRepository.class);
         modelMapper = new ModelMapper();
-        theatreService = new TheatreServiceImpl();
+        venueService = new VenueServiceImpl();
 
-        Field repoField = TheatreServiceImpl.class.getDeclaredField("theatreRepository");
+        java.lang.reflect.Field repoField = VenueServiceImpl.class.getDeclaredField("venueRepository");
         repoField.setAccessible(true);
-        repoField.set(theatreService, theatreRepository);
+        repoField.set(venueService, venueRepository);
 
-        Field mapperField = TheatreServiceImpl.class.getDeclaredField("modelMapper");
+        java.lang.reflect.Field mapperField = VenueServiceImpl.class.getDeclaredField("modelMapper");
         mapperField.setAccessible(true);
-        mapperField.set(theatreService, modelMapper);
+        mapperField.set(venueService, modelMapper);
     }
 
     @Test
-    void testCreateTheatre() {
-        TheatreDto dto = new TheatreDto("Inox", "Rajouri Garden", "Delhi");
+    void testCreateVenue() {
+        VenueDto dto = new VenueDto("Inox", "Rajouri Garden", "Delhi");
+        Venue venueEntity = modelMapper.map(dto, Venue.class);
+        venueEntity.setId(1L); 
 
-        Theatre entity = modelMapper.map(dto, Theatre.class);
-        entity.setId(1L);  
+        when(venueRepository.save(any(Venue.class))).thenReturn(venueEntity);
 
-        when(theatreRepository.save(any(Theatre.class))).thenReturn(entity);
-
-        TheatreDto result = theatreService.createTheatre(dto);
+        VenueDto result = venueService.createVenue(dto);
 
         assertNotNull(result);
         assertEquals("Inox", result.getName());
@@ -55,53 +55,62 @@ class TheatreServiceImplTest {
     }
 
     @Test
-    void testGetAllTheatres() {
-        Theatre t1 = new Theatre(1L, "Inox", "Rajouri", false, "Delhi");
-        Theatre t2 = new Theatre(2L, "PVR", "Saket", false, "Delhi");
+    void testGetAllVenues() {
+        Venue v1 = new Venue(1L, "Inox", "Rajouri Garden", false, "Delhi");
+        Venue v2 = new Venue(2L, "PVR", "Saket", false, "Delhi");
 
-        when(theatreRepository.findAll()).thenReturn(Arrays.asList(t1, t2));
+        when(venueRepository.findAll()).thenReturn(Arrays.asList(v1, v2));
 
-        List<TheatreDto> result = theatreService.getAllTheatres();
+        List<VenueDto> result = venueService.getAllVenues();
 
         assertEquals(2, result.size());
         assertEquals("PVR", result.get(1).getName());
     }
 
     @Test
-    void testGetTheatresByName_found() {
-        Theatre t1 = new Theatre(1L, "Inox", "CP", false, "Delhi");
+    void testGetVenuesByName_found() {
+        Venue v1 = new Venue(1L, "Inox", "CP", false, "Delhi");
 
-        when(theatreRepository.findBynameIgnoreCase("inox"))
-                .thenReturn(Collections.singletonList(t1));
+        when(venueRepository.findBynameIgnoreCase("inox"))
+                .thenReturn(Collections.singletonList(v1));
 
-        List<TheatreDto> result = theatreService.getTheatresByName("inox");
+        List<VenueDto> result = venueService.getVenuesByName("inox");
 
         assertEquals(1, result.size());
         assertEquals("Inox", result.get(0).getName());
     }
 
     @Test
-    void testSoftDeleteTheatre_success() {
-        Theatre theatre = new Theatre(1L, "PVR", "Vikaspuri", false, "Delhi");
+    void testGetVenuesByName_notFound() {
+        when(venueRepository.findBynameIgnoreCase("abc"))
+                .thenReturn(Collections.emptyList());
 
-        when(theatreRepository.findById(1L)).thenReturn(Optional.of(theatre));
-        when(theatreRepository.save(any(Theatre.class))).thenReturn(theatre);
+        List<VenueDto> result = venueService.getVenuesByName("abc");
 
-        boolean result = theatreService.softDeleteTheatre(1L);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testSoftDeleteVenue_success() {
+        Venue venue = new Venue(1L, "PVR", "Vikaspuri", false, "Delhi");
+
+        when(venueRepository.findById(1L)).thenReturn(Optional.of(venue));
+        when(venueRepository.save(any(Venue.class))).thenReturn(venue);
+
+        boolean result = venueService.softDeleteVenue(1L);
 
         assertTrue(result);
-        verify(theatreRepository, times(1)).save(theatre);
-        assertTrue(theatre.getDeleted());
+        assertTrue(venue.getDeleted());
+        verify(venueRepository, times(1)).save(venue);
     }
-    
-    @Test
-    void testSoftDeleteTheatre_notFound() {
-        when(theatreRepository.findById(99L)).thenReturn(Optional.empty());
 
-        boolean result = theatreService.softDeleteTheatre(99L);
+    @Test
+    void testSoftDeleteVenue_notFound() {
+        when(venueRepository.findById(99L)).thenReturn(Optional.empty());
+
+        boolean result = venueService.softDeleteVenue(99L);
 
         assertFalse(result);
-        verify(theatreRepository, never()).save(any());
+        verify(venueRepository, never()).save(any());
     }
 }
-    
