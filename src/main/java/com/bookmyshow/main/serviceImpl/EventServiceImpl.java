@@ -235,20 +235,34 @@ public class EventServiceImpl implements EventService {
 
 	    return events.stream()
 	            .filter(event -> !event.getDeleted())
-	            .map(event -> {
-	                EventResponseDto dto = new EventResponseDto();
-	                dto.setEventId(event.getId());
-	                dto.setTitle(event.getName());
-	                dto.setLikes(event.getLikes() != null ? event.getLikes().toString() : "0");
-	                dto.setPoster(event.getImageurl());
-	                dto.setGenre(event.getGenre() != null ? event.getGenre() : new ArrayList<>());
-	                dto.setImdbVotes("0");
-	                dto.setImdbRating(event.getRating() != null ? event.getRating().toString() : "N/A");
-	                dto.setReleasedFlag(event.getCurrentlyPlaying() != null ? event.getCurrentlyPlaying() : false);
-	                return dto;
-	            })
+	            .map(this::mapToResponseDto)
 	            .collect(Collectors.toList());
 	}
+
+
+//	@Override
+//	public List<EventResponseDto> getByEventCategory(String categoryType) {
+//	    List<Event> events = eventRepository.findByCategoryTypeIgnoreCase(categoryType);
+//
+//	    return events.stream()
+//	            .filter(event -> !event.getDeleted())
+//	            .map(this::mapToResponseDto)
+//	            .collect(Collectors.toList());
+//	}
+
+	private EventResponseDto mapToResponseDto(Event event) {
+	    EventResponseDto dto = new EventResponseDto();
+	    dto.setEventId(event.getId());
+	    dto.setTitle(event.getName());
+	    dto.setLikes(event.getLikes() != null ? event.getLikes().toString() : "0");
+	    dto.setPoster(event.getImageurl());
+	    dto.setGenre(event.getGenre() != null ? event.getGenre() : new ArrayList<>());
+	    dto.setImdbVotes("0");
+	    dto.setImdbRating(event.getRating() != null ? event.getRating().toString() : "N/A");
+	    dto.setReleasedFlag(event.getCurrentlyPlaying() != null ? event.getCurrentlyPlaying() : false);
+	    return dto;
+	}
+
 
 
 

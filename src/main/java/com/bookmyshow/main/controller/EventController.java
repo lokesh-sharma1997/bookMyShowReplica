@@ -130,6 +130,12 @@ public class EventController {
         return ResponseEntity.ok(popularEvents);
     }
 
+//    @Operation(summary = "${event.getByCategoryEvent}")
+//    @GetMapping("/get-by-category")
+//    public ResponseEntity<List<EventResponseDto>> getByCategoryEvent(@RequestParam(required = true) String categoryType){
+//    	List<EventResponseDto> categoryWiseEvent = eventService.getByEventCategory(categoryType);
+//    	return ResponseEntity.ok(categoryWiseEvent);
+//    }
 
 
 }
