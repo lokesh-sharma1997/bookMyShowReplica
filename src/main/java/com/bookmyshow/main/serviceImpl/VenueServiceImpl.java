@@ -53,6 +53,7 @@ public class VenueServiceImpl implements VenueService {
     public List<VenueDto> getAllVenues() {
         return venueRepository.findAll()
                 .stream()
+                .filter(data -> data.getDeleted()!= true)
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }
