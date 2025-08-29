@@ -10,7 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScreenDto {
-    private String screenId;         
+
+    private Long screenId;
     private String name;             
     private List<SeatDto> layout;    
 }

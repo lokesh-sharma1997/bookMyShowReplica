@@ -63,7 +63,6 @@ public class VenueServiceImpl implements VenueService {
         List<VenueDto> venueDtos = new ArrayList<>();
         for (Venue venue : venues) {
             VenueDto venueDto = new VenueDto();
-            venueDto.setId(venue.getId());
             venueDto.setName(venue.getName());
             venueDto.setLocation(venue.getLocation());
             venueDto.setCity(venue.getCity());

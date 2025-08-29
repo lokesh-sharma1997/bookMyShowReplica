@@ -15,6 +15,5 @@ public class Seat {
     private String row;      
     private Long number;  
     private String category;
-    @Column(name = "screen_id")
     private Long screenId;
 }

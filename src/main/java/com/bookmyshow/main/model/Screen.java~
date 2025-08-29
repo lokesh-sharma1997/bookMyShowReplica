@@ -18,6 +18,5 @@ public class Screen {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @Column(name = "venue_id")
     private Long venueId;
 }
