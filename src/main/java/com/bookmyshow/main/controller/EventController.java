@@ -53,8 +53,8 @@ public class EventController {
 
     @Operation(summary = "Get event by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<EventDto> getEventById(@PathVariable Long id,@RequestParam(required = false) String contentType) {
-        return ResponseEntity.ok(eventService.getEventById(id,contentType));
+    public ResponseEntity<EventDto> getEventById(@PathVariable Long id) {
+        return ResponseEntity.ok(eventService.getEventById(id));
     }
 
     @Operation(summary = "Get event by name")
@@ -96,7 +96,7 @@ public class EventController {
     }
 
     @Operation(summary = "event filter")
-    @PostMapping("/filter")
+    @GetMapping("/filter")
     public List<EventDto> filterEvent(@RequestBody EventFilterRequest filterRequest) {
         return eventService.filterEvents(
                 filterRequest.getLanguages(),
