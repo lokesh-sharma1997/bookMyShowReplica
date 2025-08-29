@@ -43,6 +43,7 @@ public class UserController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.getAllUsers}")
 	public ResponseEntity<ApiResponse<UsersResponse>> getAllUsers() {
 		List<UserDTO> users = userService.getAllUsers();
 		if (users.isEmpty()) {
@@ -54,6 +55,7 @@ public class UserController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@PatchMapping(value = "/delete-user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.deleteUser}")
 	public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable int id) {
 		boolean deleted = userService.deleteById(id);
 		if (!deleted) {
@@ -65,6 +67,7 @@ public class UserController {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping(value = "/search/name/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.getUserByName}")
 	public ResponseEntity<ApiResponse<UsersResponse>> getByName(@PathVariable String name) {
 		List<UserDTO> users = userService.getByName(name); // make sure this returns List<UserDTO>
 
@@ -78,6 +81,7 @@ public class UserController {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping(value = "/search/username/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.getUserByUsername}")
 	public ResponseEntity<ApiResponse<UserResponse>> getByUsername(@PathVariable String username) {
 		UserDTO user = userService.getByUsername(username)
 				.orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
@@ -86,6 +90,7 @@ public class UserController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping(value = "/role/{roleName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.getUserByRole}")
 	public ResponseEntity<ApiResponse<UsersResponse>> getByRole(@PathVariable String roleName) {
 		List<UserDTO> users;
 		try {
@@ -100,6 +105,7 @@ public class UserController {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping(value = "/search/phone/{phone}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.getUserByPhone}")
 	public ResponseEntity<ApiResponse<UserResponse>> getByPhone(@PathVariable String phone) {
 		UserDTO user = userService.getByPhoneNumber(phone)
 				.orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phone));

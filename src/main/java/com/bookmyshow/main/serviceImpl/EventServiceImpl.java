@@ -221,5 +221,36 @@ public class EventServiceImpl implements EventService {
 		Collections.sort(sortedFormats);
 		return sortedFormats;
 	}
+	
+	
+	@Override
+	public List<EventResponseDto> getPopularEvents(String contentType) {
+	    List<Event> events;
+
+	    if (contentType != null && !contentType.isEmpty()) {
+	        events = eventRepository.findTop10ByContentTypeOrderByReleaseDateDesc(contentType);
+	    } else {
+	        events = eventRepository.findTop10ByOrderByReleaseDateDesc();
+	    }
+
+	    return events.stream()
+	            .filter(event -> !event.getDeleted())
+	            .limit(10)
+	            .map(event -> {
+	                EventResponseDto dto = new EventResponseDto();
+	                dto.setEventId(event.getId());
+	                dto.setTitle(event.getName());
+	                dto.setLikes(event.getLikes() != null ? event.getLikes().toString() : "0");
+	                dto.setPoster(event.getImageurl());
+	                dto.setGenre(event.getGenre() != null ? event.getGenre() : new ArrayList<>());
+	                dto.setImdbVotes("0");
+	                dto.setImdbRating(event.getRating() != null ? event.getRating().toString() : "N/A");
+	                dto.setReleasedFlag(event.getCurrentlyPlaying() != null ? event.getCurrentlyPlaying() : false);
+	                return dto;
+	            })
+	            .collect(Collectors.toList());
+	}
+
+
 
 }

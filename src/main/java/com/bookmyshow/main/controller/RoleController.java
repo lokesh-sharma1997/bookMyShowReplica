@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import com.bookmyshow.main.dto.RoleDTO;
 import com.bookmyshow.main.service.RoleService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
 @RequestMapping("/api/roles")
 public class RoleController {
@@ -22,6 +24,7 @@ public class RoleController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
+    @Operation(summary = "${role.getRoleById}")
     public ResponseEntity<?> getRoleById(@PathVariable int id) {
         Optional<RoleDTO> role = roleService.getByRoleId(id);
         return role.map(ResponseEntity::ok)
@@ -30,6 +33,7 @@ public class RoleController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search/{name}")
+    @Operation(summary = "${role.getRoleByName}")
     public ResponseEntity<?> getRoleByName(@PathVariable String name) {
         Optional<RoleDTO> role = roleService.getByRoleName(name);
         return role.map(ResponseEntity::ok)
@@ -38,6 +42,7 @@ public class RoleController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-all-roles")
+    @Operation(summary = "${role.getAllRoles}")
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         return ResponseEntity.ok(roleService.getAllRoles());
     }

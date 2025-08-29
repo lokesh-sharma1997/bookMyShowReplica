@@ -25,5 +25,7 @@ public interface EventService {
     List<String> getAllFormats(String contentType);
     List<EventResponseDto> getAllEventByType(String contentType);
 	
+    public List<EventResponseDto> getPopularEvents(String contentType);
+    
 }
 

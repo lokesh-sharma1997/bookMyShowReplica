@@ -121,5 +121,13 @@ public class EventController {
     public ResponseEntity<List<String>> getFormats(@RequestParam(required = false) String contentType) {
         return ResponseEntity.ok(eventService.getAllFormats(contentType));
     }
+    
+    @Operation(summary = "${event.getPopularEvents}")
+    @GetMapping("/get-popular-events")
+    public ResponseEntity<List<EventResponseDto>> getPopularEvents(@RequestParam(required = false) String contentType) {
+        List<EventResponseDto> popularEvents = eventService.getPopularEvents(contentType);
+        return ResponseEntity.ok(popularEvents);
+    }
+
 
 }

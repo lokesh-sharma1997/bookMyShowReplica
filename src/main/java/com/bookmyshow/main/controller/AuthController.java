@@ -14,6 +14,7 @@ import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.response.TokenResponse;
 import com.bookmyshow.main.service.AuthService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,12 +25,14 @@ public class AuthController {
 	private final AuthService authService;
 	
 	@PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${auth.login}")
 	public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest req) {
 	    String token = authService.login(req);
 	    return ResponseEntity.ok(new ApiResponse<>(200, "Login successful", true, new TokenResponse(token)));
 	}
 
 	@PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE) // Specify produces
+	@Operation(summary = "${auth.register}")
 	public ResponseEntity<ApiResponse<String>> register(@RequestBody RegisterRequest req) {
 		String message = authService.register(req);
 	    return ResponseEntity.status(HttpStatus.CREATED)
