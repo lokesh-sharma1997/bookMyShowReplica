@@ -53,8 +53,8 @@ public class EventController {
 
     @Operation(summary = "Get event by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<EventDto> getEventById(@PathVariable Long id) {
-        return ResponseEntity.ok(eventService.getEventById(id));
+    public ResponseEntity<EventDto> getEventById(@PathVariable Long id,@RequestParam(required = false) String contentType) {
+        return ResponseEntity.ok(eventService.getEventById(id,contentType));
     }
 
     @Operation(summary = "Get event by name")
@@ -96,7 +96,7 @@ public class EventController {
     }
 
     @Operation(summary = "event filter")
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     public List<EventDto> filterEvent(@RequestBody EventFilterRequest filterRequest) {
         return eventService.filterEvents(
                 filterRequest.getLanguages(),
@@ -121,5 +121,21 @@ public class EventController {
     public ResponseEntity<List<String>> getFormats(@RequestParam(required = false) String contentType) {
         return ResponseEntity.ok(eventService.getAllFormats(contentType));
     }
+    
+    @Operation(summary = "${event.getPopularEvents}")
+    @GetMapping("/get-popular-events")
+    public ResponseEntity<List<EventResponseDto>> getPopularEvents(
+            @RequestParam(required = false) String contentType) {
+        List<EventResponseDto> popularEvents = eventService.getPopularEvents(contentType);
+        return ResponseEntity.ok(popularEvents);
+    }
+
+//    @Operation(summary = "${event.getByCategoryEvent}")
+//    @GetMapping("/get-by-category")
+//    public ResponseEntity<List<EventResponseDto>> getByCategoryEvent(@RequestParam(required = true) String categoryType){
+//    	List<EventResponseDto> categoryWiseEvent = eventService.getByEventCategory(categoryType);
+//    	return ResponseEntity.ok(categoryWiseEvent);
+//    }
+
 
 }

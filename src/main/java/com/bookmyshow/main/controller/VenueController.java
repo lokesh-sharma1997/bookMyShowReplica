@@ -31,7 +31,7 @@ public class VenueController {
         return ResponseEntity.ok(created);
 	}
 
-	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	
 	@GetMapping("/getAll")
 	public ResponseEntity<List<VenueDto>> getAllVenues() {
 		return ResponseEntity.ok(venueService.getAllVenues());

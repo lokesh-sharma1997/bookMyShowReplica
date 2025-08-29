@@ -57,8 +57,6 @@ public class Event {
     private Double rating;
     
     private Double likes;
-    
-    private Double votes;
 
     private Boolean currentlyPlaying;
 

@@ -23,4 +23,5 @@ public class EventDto {
     private Boolean currentlyPlaying;
     private String contentType;
     private List<CastDto> cast; 
+    private String categoryType;
 }

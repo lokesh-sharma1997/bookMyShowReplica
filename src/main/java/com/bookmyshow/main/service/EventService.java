@@ -10,7 +10,7 @@ import com.bookmyshow.main.dto.EventResponseDto;
 
 public interface EventService {
 	EventDto createEvent(EventDto movieDto, MultipartFile poster,List<MultipartFile> castImages) throws IOException;
-	EventDto getEventById(Long id);
+	EventDto getEventById(Long id,String contentType);
 	EventDto getEventByName(String name,String contentType);
 //    List<EventDto> getAllEventByType(String contentType);
     EventDto updateEvent(Long id, EventDto movieDto, MultipartFile poster, List<MultipartFile> castImages) throws IOException;
@@ -25,5 +25,9 @@ public interface EventService {
     List<String> getAllFormats(String contentType);
     List<EventResponseDto> getAllEventByType(String contentType);
 	
-}
+    List<EventResponseDto> getPopularEvents(String contentType);
+    
+//	List<EventResponseDto> getByEventCategory(String categoryType);
 
+    
+}
