@@ -12,10 +12,8 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @SpringBootApplication
-
 @SecurityScheme(name="bookmyshow",scheme = "Bearer",type = 
 SecuritySchemeType.HTTP,in = SecuritySchemeIn.HEADER,bearerFormat = "jwt")
-
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 

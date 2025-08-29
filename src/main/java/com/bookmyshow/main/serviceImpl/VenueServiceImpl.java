@@ -1,5 +1,6 @@
 package com.bookmyshow.main.serviceImpl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -8,10 +9,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bookmyshow.main.dto.ScreenDto;
+import com.bookmyshow.main.dto.SeatDto;
 import com.bookmyshow.main.dto.VenueDto;
+import com.bookmyshow.main.model.Screen;
+import com.bookmyshow.main.model.Seat;
 import com.bookmyshow.main.model.Venue;
-import com.bookmyshow.main.repository.VenueRepository;
+import com.bookmyshow.main.repository.*;
 import com.bookmyshow.main.service.VenueService;
+
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -19,6 +25,12 @@ public class VenueServiceImpl implements VenueService {
     @Autowired
     private VenueRepository venueRepository;
 
+    @Autowired
+    private ScreenRepository screenRepository;
+    
+    @Autowired	
+    private SeatRepository seatRepository;
+    
     @Autowired
     private ModelMapper modelMapper;
 
@@ -44,13 +56,47 @@ public class VenueServiceImpl implements VenueService {
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }
-
+    
     @Override
-    public List<VenueDto> getVenuesByName(String name) {
-        return venueRepository.findBynameIgnoreCase(name)
-                .stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
+    public List<VenueDto> getVenuesByCity(String city) {
+        List<Venue> venues = venueRepository.findByCity(city);
+
+        List<VenueDto> venueDtos = new ArrayList<>();
+        for (Venue venue : venues) {
+            VenueDto venueDto = new VenueDto();
+            venueDto.setName(venue.getName());
+            venueDto.setLocation(venue.getLocation());
+            venueDto.setCity(venue.getCity());
+
+            List<Screen> screens = screenRepository.findByVenueId(venue.getId());
+            List<ScreenDto> screenDtos = new ArrayList<>();
+
+            for (Screen screen : screens) {
+                ScreenDto screenDto = new ScreenDto();
+               screenDto.setName(screen.getName());
+
+                List<Seat> seats = seatRepository.findByScreenId(screen.getId());
+                List<SeatDto> seatDtos = new ArrayList<>();
+
+                for (Seat seat : seats) {
+                    SeatDto seatDto = new SeatDto();
+                    seatDto.setSeatId(seat.getSeatId());
+                    seatDto.setRow(seat.getRow());
+                    seatDto.setNumber(seat.getNumber());
+                    seatDto.setCategory(seat.getCategory());
+
+                    seatDtos.add(seatDto); 
+                }
+
+                screenDto.setLayout(seatDtos); 
+                screenDtos.add(screenDto);      
+            }
+
+            venueDto.setScreens(screenDtos); 
+            venueDtos.add(venueDto);         
+        }
+
+        return venueDtos; 
     }
 
     @Override

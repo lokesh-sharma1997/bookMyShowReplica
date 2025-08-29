@@ -1,4 +1,5 @@
 package com.bookmyshow.main.controller;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bookmyshow.main.dto.VenueDto;
 import com.bookmyshow.main.service.VenueService;
 
-import org.springframework.web.bind.annotation.RequestBody;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 
 @RestController
 @RequestMapping("/venue")
@@ -35,13 +37,13 @@ public class VenueController {
         return ResponseEntity.ok(venueService.getAllVenues());
     }
 
-    @GetMapping("/getByName")
-    public ResponseEntity<List<VenueDto>> getVenueByName(@RequestParam String name) {
-        List<VenueDto> theatres = venueService.getVenuesByName(name);
-        if (theatres.isEmpty()) {
+    @GetMapping("venue/getByCity")
+    public ResponseEntity<List<VenueDto>> getVenuesByCity(@RequestParam String name) {
+        List<VenueDto> venues = venueService.getVenuesByCity(name);
+        if (venues.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(theatres);
+        return ResponseEntity.ok(venues);
     }
 
     @PatchMapping("/delete/{id}")

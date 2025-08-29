@@ -3,6 +3,9 @@ package com.bookmyshow.main.dto;
 
 
 
+
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +19,8 @@ public class VenueDto {
     private String location;
 
     private String city;
+
+    private List<ScreenDto> screens; 
 
 	
 }

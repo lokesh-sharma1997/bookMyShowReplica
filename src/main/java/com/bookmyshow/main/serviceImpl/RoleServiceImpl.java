@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.RoleDTO;
+import com.bookmyshow.main.exception.RoleNotFoundException;
 import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.repository.RoleRepository;
 import com.bookmyshow.main.service.RoleService;
@@ -32,12 +33,13 @@ public class RoleServiceImpl implements RoleService {
         try {
             Role.RoleName roleEnum = Role.RoleName.valueOf(roleName.toUpperCase());
             return roleRepository.findByRoleName(roleEnum)
-                                 .map(this::convertToDTO);
+                    .map(this::convertToDTO)
+                    .or(() -> { throw new RoleNotFoundException("Role not found: " + roleName); });
         } catch (IllegalArgumentException e) {
-            // if input doesn't match enum ADMIN/USER
-            return Optional.empty();
+            throw new RoleNotFoundException("Invalid role name: " + roleName);
         }
     }
+
 
 
     @Override

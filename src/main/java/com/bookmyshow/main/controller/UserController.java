@@ -1,15 +1,22 @@
 package com.bookmyshow.main.controller;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.bookmyshow.main.dto.UserDTO;
+import com.bookmyshow.main.exception.UserNotFoundException;
+import com.bookmyshow.main.exception.RoleNotFoundException;
+import com.bookmyshow.main.response.ApiResponse;
+import com.bookmyshow.main.response.UserResponse;
+import com.bookmyshow.main.response.UsersResponse;
 import com.bookmyshow.main.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,78 +25,84 @@ import io.swagger.v3.oas.annotations.Operation;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserService userService;
+	private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+	public UserController(UserService userService) {
+		this.userService = userService;
+	}
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @GetMapping("/{id}")
-    @Operation(summary = "${user.getUserById}")
-    public ResponseEntity<?> getUserById(@PathVariable int id) {
-        Optional<UserDTO> user = userService.getByUserId(id);
-        return user.map(ResponseEntity::ok)
-                   .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-    @GetMapping("/test-auth")
-    public ResponseEntity<?> testAuth(Authentication auth) {
-        return ResponseEntity.ok(auth);
-    }
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.getUserById}")
+	public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable int id) {
+		UserDTO user = userService.getByUserId(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
+		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
+	}
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/delete-user/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable int id) {
-        boolean deleted = userService.deleteById(id);
-        if (deleted) {
-            return ResponseEntity.ok("User deleted successfully");
-        }
-        return ResponseEntity.status(404).body("User not found");
-    }
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<UsersResponse>> getAllUsers() {
+		List<UserDTO> users = userService.getAllUsers();
+		if (users.isEmpty()) {
+			throw new UserNotFoundException("No users found");
+		}
+		UsersResponse usersResponse = new UsersResponse(users);
+		return ResponseEntity.ok(new ApiResponse<>(200, "All users retrieved", true, usersResponse));
+	}
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @GetMapping("/search/name/{name}")
-    public ResponseEntity<List<UserDTO>> getByName(@PathVariable String name) {
-        return ResponseEntity.ok(userService.getByName(name));
-    }
+	@PreAuthorize("hasRole('ADMIN')")
+	@PatchMapping(value = "/delete-user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable int id) {
+		boolean deleted = userService.deleteById(id);
+		if (!deleted) {
+			throw new UserNotFoundException("User not found with id: " + id);
+		}
+		return ResponseEntity
+				.ok(new ApiResponse<>(200, "User deleted successfully", true, "User with ID " + id + " deleted"));
+	}
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @GetMapping("/search/username/{username}")
-    public ResponseEntity<?> getByUsername(@PathVariable String username) {
-        Optional<UserDTO> user = userService.getByUsername(username);
-        return user.map(ResponseEntity::ok)
-                   .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@GetMapping(value = "/search/name/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<UsersResponse>> getByName(@PathVariable String name) {
+		List<UserDTO> users = userService.getByName(name); // make sure this returns List<UserDTO>
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/role/{roleName}")
-    public ResponseEntity<?> getByRole(@PathVariable String roleName) {
-        try {
-            List<UserDTO> users = userService.getByRole(roleName);
-            if (users.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                     .body("No users found with role: " + roleName);
-            }
-            return ResponseEntity.ok(users);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid role name: " + roleName);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("An unexpected error occurred");
-        }
-    }
+		if (users.isEmpty()) {
+			throw new UserNotFoundException("No users found with name: " + name);
+		}
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    @GetMapping("/search/phone/{phone}")
-    public ResponseEntity<?> getByPhone(@PathVariable String phone) {
-        Optional<UserDTO> user = userService.getByPhoneNumber(phone);
-        return user.map(ResponseEntity::ok)
-                   .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+		UsersResponse usersResponse = new UsersResponse(users);
+		return ResponseEntity.ok(new ApiResponse<>(200, "Users found", true, usersResponse));
+	}
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@GetMapping(value = "/search/username/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<UserResponse>> getByUsername(@PathVariable String username) {
+		UserDTO user = userService.getByUsername(username)
+				.orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
+	}
+
+	@PreAuthorize("hasRole('ADMIN')")
+	@GetMapping(value = "/role/{roleName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<UsersResponse>> getByRole(@PathVariable String roleName) {
+		List<UserDTO> users;
+		try {
+			users = userService.getByRole(roleName);
+		} catch (IllegalArgumentException e) {
+			throw new RoleNotFoundException("Invalid role name: " + roleName);
+		}
+
+		return ResponseEntity
+				.ok(new ApiResponse<>(200, "Users found with role: " + roleName, true, new UsersResponse(users)));
+	}
+
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	@GetMapping(value = "/search/phone/{phone}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<UserResponse>> getByPhone(@PathVariable String phone) {
+		UserDTO user = userService.getByPhoneNumber(phone)
+				.orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phone));
+		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
+	}
 }
