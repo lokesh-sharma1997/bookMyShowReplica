@@ -235,7 +235,6 @@ public class EventServiceImpl implements EventService {
 
 	    return events.stream()
 	            .filter(event -> !event.getDeleted())
-	            .limit(10)
 	            .map(event -> {
 	                EventResponseDto dto = new EventResponseDto();
 	                dto.setEventId(event.getId());

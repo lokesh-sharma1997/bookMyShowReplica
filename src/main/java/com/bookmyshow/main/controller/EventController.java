@@ -124,10 +124,12 @@ public class EventController {
     
     @Operation(summary = "${event.getPopularEvents}")
     @GetMapping("/get-popular-events")
-    public ResponseEntity<List<EventResponseDto>> getPopularEvents(@RequestParam(required = false) String contentType) {
+    public ResponseEntity<List<EventResponseDto>> getPopularEvents(
+            @RequestParam(required = false) String contentType) {
         List<EventResponseDto> popularEvents = eventService.getPopularEvents(contentType);
         return ResponseEntity.ok(popularEvents);
     }
+
 
 
 }

@@ -26,6 +26,6 @@ public interface EventService {
     List<EventResponseDto> getAllEventByType(String contentType);
 	
     public List<EventResponseDto> getPopularEvents(String contentType);
+
     
 }
-
