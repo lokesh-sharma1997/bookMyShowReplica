@@ -34,12 +34,12 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(authz -> authz
 				// Permitting all GET requests and filtering movies
-				.requestMatchers("/events/get-all-events", "/city/**").permitAll() // Allow GET requests to movies and
-																					// filters
-				.requestMatchers("/events/filter").permitAll() // Allow filtering movies for all users
+				.requestMatchers("/events/get-all-events", "/city/**", "/venue/getAll", "/events/{id}",
+						"/events/filter")
+				.permitAll()
 
 				// Restricting the movie creation (POST), update (PUT), and delete (PATCH)
-				// operations
+
 				.requestMatchers(HttpMethod.POST, "/events/create-event").authenticated() // Only authenticated users
 																							// can create a movie
 				.requestMatchers(HttpMethod.PUT, "/events/update/**").hasRole("ADMIN") // Only ADMIN role can update

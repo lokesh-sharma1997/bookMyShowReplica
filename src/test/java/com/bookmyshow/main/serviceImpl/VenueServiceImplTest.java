@@ -37,7 +37,6 @@ class VenueServiceImplTest {
         modelMapper = new ModelMapper();
         venueService = new VenueServiceImpl();
 
-        // Inject mocks into venueService using reflection (since no constructor injection)
         java.lang.reflect.Field venueRepoField = VenueServiceImpl.class.getDeclaredField("venueRepository");
         venueRepoField.setAccessible(true);
         venueRepoField.set(venueService, venueRepository);
@@ -57,7 +56,6 @@ class VenueServiceImplTest {
 
     @Test
     void testCreateVenue() {
-        // Using no-arg constructor + setters due to VenueDto constructor absence
         VenueDto dto = new VenueDto();
         dto.setName("Inox");
         dto.setLocation("Rajouri Garden");

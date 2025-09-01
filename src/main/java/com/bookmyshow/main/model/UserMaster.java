@@ -34,7 +34,7 @@ public class UserMaster {
 
 	@Column(unique = true, updatable = false, nullable = false) // Unique and non-updatable field
 	private String username;
-	
+
 	@Column(nullable = false)
 	@Size(min = 8, message = "Password must be at least 8 characters long")
 	private String password; // Size(min = 8, message = "Password must be at least 8 characters long")
@@ -47,8 +47,7 @@ public class UserMaster {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
-	 
-	@Size(max=10,  message="Mobile number cannot contain more than ten characters")
+	@Size(max = 10, message = "Mobile number cannot contain more than ten characters")
 	private String phoneNumber;
 
 	@CreationTimestamp
@@ -57,6 +56,6 @@ public class UserMaster {
 
 	@UpdateTimestamp
 	private LocalDateTime updatedOn;
-	
+
 	private Boolean deleteFlag = false;
 }

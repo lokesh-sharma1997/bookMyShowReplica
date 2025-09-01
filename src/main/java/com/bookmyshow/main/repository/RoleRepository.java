@@ -6,12 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.bookmyshow.main.model.Role;
 
-public interface RoleRepository extends JpaRepository<Role, Integer>{
+public interface RoleRepository extends JpaRepository<Role, Integer> {
 
 	Optional<Role> findByRoleId(int roleId);
 
-    
-
-	Optional<Role> findByRoleName(Role.RoleName roleName);
+	Optional<Role> findByRoleName(String roleName);
 
 }

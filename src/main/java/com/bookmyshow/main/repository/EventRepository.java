@@ -19,4 +19,12 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
 	List<Event> findByDeletedFalse();
 	List<Event> findByDeletedFalseAndContentTypeIgnoreCase(String contentType);
+	
+	List<Event> findTop10ByContentTypeOrderByReleaseDateDesc(String contentType);
+
+	List<Event> findTop10ByOrderByReleaseDateDesc();
+	
+//	List<Event> findByCategoryTypeIgnoreCase(String categoryType);
+
+
 }

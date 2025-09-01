@@ -36,7 +36,6 @@ public class VenueController {
     public ResponseEntity<List<VenueDto>> getAllVenues() {
         return ResponseEntity.ok(venueService.getAllVenues());
     }
-
     @GetMapping("venue/getByCity")
     public ResponseEntity<List<VenueDto>> getVenuesByCity(@RequestParam String name) {
         List<VenueDto> venues = venueService.getVenuesByCity(name);
@@ -45,7 +44,7 @@ public class VenueController {
         }
         return ResponseEntity.ok(venues);
     }
-
+	
     @PatchMapping("/delete/{id}")
     public ResponseEntity<Void> softDeleteVenue(@PathVariable Long id) {
         if (venueService.softDeleteVenue(id)) {
