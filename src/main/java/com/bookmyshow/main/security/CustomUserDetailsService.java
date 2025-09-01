@@ -21,7 +21,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		UserMaster data = userRepository.findByUsername(username);
+		if (data == null) {
+			throw new UsernameNotFoundException("User not found with username: " + username);
+		}
 		JwtDTO jwtDTO = new JwtDTO();
+		jwtDTO.setId(data.getUserId());
 		jwtDTO.setUsername(data.getUsername());
 		jwtDTO.setPassword(data.getPassword());
 		jwtDTO.setRoleName(String.valueOf(data.getRole().getRoleName()));
