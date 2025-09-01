@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class UserDTO {
 
-	private int userId;
+	private Long userId;
 
 	@JsonProperty("name")
 	@NotBlank(message = "Name is required")
