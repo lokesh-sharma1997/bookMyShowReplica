@@ -15,6 +15,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.bookmyshow.main.util.AESUtil;
+
 import org.springframework.http.HttpMethod;
 
 @Configuration
@@ -35,30 +38,10 @@ public class SecurityConfig {
 		http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(authz -> authz
 				// Permitting all GET requests and filtering movies
 				.requestMatchers("/events/get-all-events", "/city/**", "/venue/getAll", "/events/{id}",
-						"/events/filter")
-				.permitAll()
-
-				// Restricting the movie creation (POST), update (PUT), and delete (PATCH)
-
-				.requestMatchers(HttpMethod.POST, "/events/create-event").authenticated() // Only authenticated users
-																							// can create a movie
-				.requestMatchers(HttpMethod.PUT, "/events/update/**").hasRole("ADMIN") // Only ADMIN role can update
-																						// movies
-				.requestMatchers(HttpMethod.PATCH, "/events/delete/**").hasRole("ADMIN") // Only ADMIN role can delete
-																							// movies
-				.requestMatchers(HttpMethod.POST, "/venue/create-venue/**").hasRole("ADMIN") // Only ADMIN role can
-																								// delete movies
-
-				// Allowing all authentication related endpoints
-				.requestMatchers("/auth/**", "/api/auth/**").permitAll() // Public auth endpoints (e.g., login,
-																			// registration)
-
-				// Swagger UI and API documentation
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
-				// Any other request requires authentication
-				.anyRequest().authenticated()).cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enabling
-																													// CORS
+						"/events/filter", "/auth/**", "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
+				.permitAll().anyRequest().authenticated())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enabling
+																					// CORS
 				.userDetailsService(userDetailsService) // Custom user details service
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Adding JWT
 																										// filter before
@@ -89,4 +72,16 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
+	
+//	public static void main(String[] args) throws Exception {
+//		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
+//	    String password = "Tarun@01";
+//
+//	    String encrypted = AESUtil.encrypt(password, key);
+//	    String decrypted = AESUtil.decrypt(encrypted, key);
+//
+//	    System.out.println("Encrypted: " + encrypted);
+//	    System.out.println("Decrypted: " + decrypted);
+//
+//	}
 }
