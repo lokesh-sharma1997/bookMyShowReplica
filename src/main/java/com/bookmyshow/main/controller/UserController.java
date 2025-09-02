@@ -68,26 +68,23 @@ public class UserController {
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	@GetMapping(value = "/search/name/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getUserByName}")
-	public ResponseEntity<ApiResponse<UsersResponse>> getByName(@PathVariable String name) {
-		List<UserDTO> users = userService.getByName(name); // make sure this returns List<UserDTO>
+	@GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<UsersResponse>> searchUser(@RequestParam(required = false) String name,
+			@RequestParam(required = false) String username, @RequestParam(required = false) String email,
+			@RequestParam(required = false) String phoneNumber) {
 
-		if (users.isEmpty()) {
-			throw new UserNotFoundException("No users found with name: " + name);
+		if ((name == null || name.isEmpty()) && (username == null || username.isEmpty())
+				&& (email == null || email.isEmpty()) && (phoneNumber == null || phoneNumber.isEmpty())) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse<>(400, "At least one search parameter must be provided", false, null));
 		}
 
-		UsersResponse usersResponse = new UsersResponse(users);
-		return ResponseEntity.ok(new ApiResponse<>(200, "Users found", true, usersResponse));
-	}
+		List<UserDTO> users = userService.searchUser(name, username, phoneNumber, email);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	@GetMapping(value = "/search/username/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getUserByUsername}")
-	public ResponseEntity<ApiResponse<UserResponse>> getByUsername(@PathVariable String username) {
-		UserDTO user = userService.getByUsername(username)
-				.orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
-		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
+		UsersResponse usersResponse = new UsersResponse(users);
+
+		return ResponseEntity
+				.ok(new ApiResponse<>(200, users.isEmpty() ? "No user found" : "User found", true, usersResponse));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
@@ -103,15 +100,6 @@ public class UserController {
 
 		return ResponseEntity
 				.ok(new ApiResponse<>(200, "Users found with role: " + roleName, true, new UsersResponse(users)));
-	}
-
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	@GetMapping(value = "/search/phone/{phone}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getUserByPhone}")
-	public ResponseEntity<ApiResponse<UserResponse>> getByPhone(@PathVariable String phone) {
-		UserDTO user = userService.getByPhoneNumber(phone)
-				.orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phone));
-		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
 	}
 
 	@PutMapping("/{userId}/role")
