@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
-	@Value("${aesSecretKey}")
+	@Value("${app.jwt.secret}")
 	String secretKey;
 	@Override
 	public String login(LoginRequest req) {
