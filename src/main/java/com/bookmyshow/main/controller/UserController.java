@@ -44,7 +44,7 @@ public class UserController {
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
-	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/get-all-users", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "${user.getAllUsers}")
 	public ResponseEntity<ApiResponse<UsersResponse>> getAllUsers() {
 		List<UserDTO> users = userService.getAllUsers();
@@ -113,7 +113,7 @@ public class UserController {
 				.orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phone));
 		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
 	}
-
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{userId}/role")
 	@Operation(summary = "${user.updateUserRole}")
 	public ResponseEntity<ApiResponse<UserDTO>> updateUserRole(@PathVariable int userId,

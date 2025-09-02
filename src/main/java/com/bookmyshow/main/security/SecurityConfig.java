@@ -30,43 +30,31 @@ public class SecurityConfig {
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 	}
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(authz -> authz
-				// Permitting all GET requests and filtering movies
-				.requestMatchers("/events/get-all-events", "/city/**", "/venue/getAll", "/events/{id}",
-						"/events/filter")
-				.permitAll()
+	 @Bean
+	    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	        http
+	            .csrf(AbstractHttpConfigurer::disable)
+	            .authorizeHttpRequests(authz -> authz
+	                .requestMatchers(
+	                    "/events/get-all-events",
+	                    "/city/**",
+	                    "/venue/getAll",
+	                    "/events/{id}",
+	                    "/events/filter",
+	                    "/api/users/validate/username",
+	                    "/auth/**",
+	                    "/api/auth/**",
+	                    "/swagger-ui/**",
+	                    "/v3/api-docs/**"
+	                ).permitAll()
+	                .anyRequest().authenticated()
+	            )
+	            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+	            .userDetailsService(userDetailsService)
+	            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-				// Restricting the movie creation (POST), update (PUT), and delete (PATCH)
-
-				.requestMatchers(HttpMethod.POST, "/events/create-event").authenticated() // Only authenticated users
-																							// can create a movie
-				.requestMatchers(HttpMethod.PUT, "/events/update/**").hasRole("ADMIN") // Only ADMIN role can update
-																						// movies
-				.requestMatchers(HttpMethod.PATCH, "/events/delete/**").hasRole("ADMIN") // Only ADMIN role can delete
-																							// movies
-				.requestMatchers(HttpMethod.POST, "/venue/create-venue/**").hasRole("ADMIN") // Only ADMIN role can
-																								// delete movies
-
-				// Allowing all authentication related endpoints
-				.requestMatchers("/auth/**", "/api/auth/**").permitAll() // Public auth endpoints (e.g., login,
-																			// registration)
-
-				// Swagger UI and API documentation
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
-				// Any other request requires authentication
-				.anyRequest().authenticated()).cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enabling
-																													// CORS
-				.userDetailsService(userDetailsService) // Custom user details service
-				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Adding JWT
-																										// filter before
-																										// authentication
-																										// filter
-
-		return http.build();
-	}
+	        return http.build();
+	    }
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {

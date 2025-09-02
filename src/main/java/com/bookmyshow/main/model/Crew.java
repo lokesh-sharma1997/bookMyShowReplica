@@ -1,7 +1,5 @@
 package com.bookmyshow.main.model;
 
-
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
@@ -11,20 +9,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-
 @Entity
-@Table(name = "cast")
+@Table(name = "crew")
 @Data
 @Embeddable
-public class Cast {
+public class Crew {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long castId;
+    private Long crewId;
     
     @Column(nullable = false, unique = true)
-    private String actorName;
+    private String memberName;
     
     @Column(columnDefinition = "TEXT")
-    private String castImg;
+    private String crewImg;
 }
-

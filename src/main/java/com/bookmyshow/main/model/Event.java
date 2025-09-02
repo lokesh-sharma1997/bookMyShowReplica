@@ -12,64 +12,95 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Data
-@Getter
-@Setter
 @Entity
 @Table(name = "events")
 public class Event {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "event_id")
+	private Long eventId;
 
-    @NotBlank(message = "Event name is required")
-    private String name;
+	@Column(nullable = false)
+	@NotBlank(message = "Event name is required")
+	private String name;
 
-  
-    @ElementCollection
-    @CollectionTable(name = "Event_languages", joinColumns = @JoinColumn(name = "Event_id"))
-    @Column(name = "language")
-    private List<String> language;
- 
-    @ElementCollection
-    @CollectionTable(name = "Event_genres", joinColumns = @JoinColumn(name = "Event_id"))
-    @Column(name = "genre")
-    private List<String> genre;
- 
-    @ElementCollection
-    @CollectionTable(name = "Event_formats", joinColumns = @JoinColumn(name = "Event_id"))
-    @Column(name = "format")
-    private List<String> format;
-    @NotBlank(message = "Description is required")
-    private String description;
+	@NotBlank(message = "Description is required")
+	private String description;
 
-    @NotBlank(message = "Duration is required")
-    private String duration;
+	@NotBlank(message = "Run Time is required")
+	private String runTime;
 
-    @NotNull(message = "Release date is required")
-    private LocalDate releaseDate;
-    @NotBlank(message = "ContentType is required")
-    private String contentType;
-    
-    @Column(columnDefinition = "TEXT")
-    private String imageurl; 
+	private LocalDate startDate;
 
-    private Double rating;
-    
-    private Double likes;
+	private LocalDate endDate;
 
-    private Boolean currentlyPlaying;
+	@NotBlank(message = "Event Type is required")
+	private String eventType;
 
-    private Boolean deleted = false;
+	@Column(columnDefinition = "TEXT")
+	private String imageurl;
 
-    @ElementCollection
-    @CollectionTable(name = "Event_cast", joinColumns = @JoinColumn(name = "Event_id"))
-    private List<Cast> cast;
-    
-   
+	private Double imdbRating;
 
+	private Double likes;
 
-    
+	private Double votes;
 
-    
+	private Boolean currentlyPlaying;
+
+	private Boolean deleted = false;
+
+	private int ageLimit;
+
+	@OneToMany
+    @JoinTable(
+        name = "event_language_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "language_id")
+    )
+	private List<Languages> languages;
+
+	@OneToMany(mappedBy = "generes")
+	@Column(name = "genres")
+	private List<Genres> genres;
+
+	@OneToMany(mappedBy = "format")
+	@Column(name = "format")
+	private List<Format> format;
+
+	@OneToMany(mappedBy = "tag")
+	@Column(name = "tag")
+	private List<Tag> tag;
+
+	@OneToMany(mappedBy = "releaseMonth")
+	@Column(name = "releaseMonth")
+	private List<ReleaseMonth> releaseMonth;
+
+	private LocalDate releasingOn;
+
+	@OneToMany(mappedBy = "date")
+	@Column(name = "date")
+	private LocalDate date;
+
+	@OneToMany(mappedBy = "categories")
+	@Column(name = "categories")
+	private List<Categories> categories;
+
+	@OneToMany(mappedBy = "moreFilters")
+	@Column(name = "moreFilters")
+	private List<MoreFilters> moreFilters;
+
+	@OneToMany(mappedBy = "price")
+	@Column(name = "price")
+	private List<Price> price;
+
+	@OneToMany(mappedBy = "cast")
+	@Column(name = "cast")
+	private List<Cast> cast;
+
+	@OneToMany(mappedBy = "crew")
+	@Column(name = "crew")
+	private List<Crew> crew;
+
 }
