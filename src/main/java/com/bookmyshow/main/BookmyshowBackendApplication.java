@@ -30,7 +30,7 @@ public class BookmyshowBackendApplication {
 		
 		System.out.println("===> BookMyShow Project Started..... <===");
 //		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
-//	    String password = "Lokesh@01";
+//	    String password = "Mansi@01";
 //
 //	    String encrypted = AESUtil.encrypt(password, key);
 //	    String decrypted = AESUtil.decrypt(encrypted, key);

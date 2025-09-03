@@ -1,23 +1,17 @@
 package com.bookmyshow.main.repository;
-
-
-
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import com.bookmyshow.main.model.Screen;
-import com.bookmyshow.main.model.Seat;
+
 import com.bookmyshow.main.model.Venue;
 
 import java.util.List;
  
 
 public interface VenueRepository extends JpaRepository<Venue, Long> {
-	 List<Venue> findBynameIgnoreCase(String name);
-	    List<Venue> findByCity(String city);
-	    List<Venue> findByCityIgnoreCase(String city);
-	  
-
-
-
+	@Query("SELECT v FROM Venue v WHERE LOWER(v.address.city) = LOWER(:city)")
+    List<Venue> findByCity(@Param("city") String city);
+    List<Venue> findByAddressCity(String city);
 
 }

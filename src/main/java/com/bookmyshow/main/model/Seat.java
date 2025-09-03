@@ -1,20 +1,20 @@
-package com.bookmyshow.main.model;
-
-import jakarta.persistence.*;
-import lombok.*;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "seat")
-public class Seat {
-
-    @Id
-    private Long id;
-    private String row;      
-    private Long number;  
-    private String category;
-    @Column(name = "screen_id")
-    private Long screenId;
-}
+//package com.bookmyshow.main.model;
+//
+//import jakarta.persistence.*;
+//import lombok.*;
+//
+//@Data
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@Entity
+//@Table(name = "seat")
+//public class Seat {
+//
+//    @Id
+//    private Long id;
+//    private String row;      
+//    private Long number;  
+//    private String category;
+//    @Column(name = "screen_id")
+//    private Long screenId;
+//}

@@ -1,6 +1,6 @@
 package com.bookmyshow.main.serviceImpl;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9,15 +9,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bookmyshow.main.dto.ScreenDto;
-import com.bookmyshow.main.dto.SeatDto;
-import com.bookmyshow.main.dto.VenueDto;
-import com.bookmyshow.main.model.Screen;
-import com.bookmyshow.main.model.Seat;
+import com.bookmyshow.main.dto.AddressDTO;
+import com.bookmyshow.main.dto.VenueDTO;
 import com.bookmyshow.main.model.Venue;
-import com.bookmyshow.main.repository.*;
+import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
-
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -26,71 +22,61 @@ public class VenueServiceImpl implements VenueService {
     private VenueRepository venueRepository;
 
     @Autowired
-    private ScreenRepository screenRepository;
-    
-    @Autowired	
-    private SeatRepository seatRepository;
-    
-    @Autowired
     private ModelMapper modelMapper;
 
-    private VenueDto entityToDto(Venue entity) {
-        return modelMapper.map(entity, VenueDto.class);
+    private VenueDTO entityToDto(Venue entity) {
+        return modelMapper.map(entity, VenueDTO.class);
     }
 
-    private Venue dtoToEntity(VenueDto dto) {
+    private Venue dtoToEntity(VenueDTO dto) {
         return modelMapper.map(dto, Venue.class);
     }
 
     @Override
-    public VenueDto createVenue(VenueDto dto) {
+    public VenueDTO createVenue(VenueDTO dto) {
         Venue entity = dtoToEntity(dto);
         Venue saved = venueRepository.save(entity);
         return entityToDto(saved);
     }
 
     @Override
-    public List<VenueDto> getAllVenues() {
+    public List<VenueDTO> getAllVenues() {
         return venueRepository.findAll()
                 .stream()
-                .filter(data -> data.getDeleted()!= true)
+                .filter(data -> !Boolean.TRUE.equals(data.getDeleted()))
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
-    public List<VenueDto> getVenuesByCity(String city) {
-        List<Venue> venues = venueRepository.findByCity(city);
-        List<VenueDto> venueDtos = new ArrayList<>();
-        for (Venue venue : venues) {
-            VenueDto venueDto = new VenueDto();
-            venueDto.setId(venue.getId());
-            venueDto.setName(venue.getName());
-            venueDto.setLocation(venue.getLocation());
-            venueDto.setCity(venue.getCity());
-            List<Screen> screens = screenRepository.findByVenueId(venue.getId());
-            List<ScreenDto> screenDtos = new ArrayList<>();
-            for (Screen screen : screens) {
-                ScreenDto screenDto = new ScreenDto();
-                screenDto.setScreenId(screen.getId());
-                screenDto.setName(screen.getName());
-                List<Seat> seats = seatRepository.findByScreenId(screen.getId());
-                List<SeatDto> seatDtos = new ArrayList<>();
-                for (Seat seat : seats) {
-                    SeatDto seatDto = new SeatDto();
-                    seatDto.setSeatId(seat.getId());
-                    seatDto.setRow(seat.getRow());
-                    seatDto.setNumber(seat.getNumber());
-                    seatDto.setCategory(seat.getCategory());
-                    seatDtos.add(seatDto); 
-                }
-                screenDto.setLayout(seatDtos); 
-                screenDtos.add(screenDto);      
+    public List<VenueDTO> getVenuesByCity(String city) {
+        List<Venue> venues = venueRepository.findByAddressCity(city);
+
+        return venues.stream().map(venue -> {
+            VenueDTO dto = new VenueDTO();
+
+            dto.setId(venue.getId());
+            dto.setVenueName(venue.getVenueName());
+            dto.setVenueCapacity(venue.getVenueCapacity());
+            dto.setVenueFor(venue.getVenueFor());
+            dto.setVenueType(venue.getVenueType());
+            dto.setSupportedCategories(
+                venue.getSupportedCategories() != null ? venue.getSupportedCategories() : Collections.emptySet()
+            );
+            dto.setAdditionalFields(venue.getAdditionalFields());
+            dto.setDeleted(venue.getDeleted());
+
+            if (venue.getAddress() != null) {
+                AddressDTO addressDto = new AddressDTO(
+                    venue.getAddress().getStreet(),
+                    venue.getAddress().getCity(),
+                    venue.getAddress().getPin()
+                );
+                dto.setAddress(addressDto);
             }
-            venueDto.setScreens(screenDtos); 
-            venueDtos.add(venueDto);         
-        }
-        return venueDtos; 
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
