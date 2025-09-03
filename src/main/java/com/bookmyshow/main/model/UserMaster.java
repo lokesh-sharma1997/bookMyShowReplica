@@ -44,7 +44,6 @@ public class UserMaster {
 
 	@ManyToOne
 	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
-	@Enumerated(EnumType.STRING)
 	private Role role;
 
 	@Size(max = 10, message = "Mobile number cannot contain more than ten characters")
