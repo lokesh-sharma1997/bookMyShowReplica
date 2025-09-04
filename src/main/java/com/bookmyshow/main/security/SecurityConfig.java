@@ -15,9 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import com.bookmyshow.main.util.AESUtil;
-
 import org.springframework.http.HttpMethod;
 
 @Configuration
@@ -75,8 +73,8 @@ public class SecurityConfig {
 	
 //	public static void main(String[] args) throws Exception {
 //		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
-//	    String password = "kashish01";
-//
+//	    String password = "kashish@2004";
+//	  //  Rxkkl5rEjlXnRmij/MRUjw==
 //	    String encrypted = AESUtil.encrypt(password, key);
 //	    String decrypted = AESUtil.decrypt(encrypted, key);
 //

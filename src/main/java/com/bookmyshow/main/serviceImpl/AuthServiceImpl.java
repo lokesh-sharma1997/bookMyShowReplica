@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public String register(RegisterRequest req) {
+	public String register(RegisterRequest req){
 		if (userRepository.existsByUsername(req.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
 		}
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
 		UserMaster user = new UserMaster();
 		user.setName(req.getName());
 		user.setUsername(req.getUsername());
-		user.setPassword(passwordEncoder.encode(req.getPassword()));
+		user.setPassword(passwordEncoder.encode(decryptedPassword));
 		user.setEmail(req.getEmail());
 		user.setPhoneNumber(req.getPhoneNumber());
 
