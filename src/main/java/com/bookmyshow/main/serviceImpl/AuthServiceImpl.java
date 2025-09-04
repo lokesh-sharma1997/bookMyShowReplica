@@ -34,10 +34,11 @@ public class AuthServiceImpl implements AuthService {
 	private final RoleRepository roleRepository;
 	@Value("${app.jwt.secret}")
 	String secretKey;
+
 	@Override
 	public String login(LoginRequest req) {
 		try {
-			
+
 			String decryptedPassword = AESUtil.decrypt(req.getPassword(), secretKey);
 			// Authenticate credentials
 			authenticationManager
@@ -66,7 +67,8 @@ public class AuthServiceImpl implements AuthService {
 		if (userRepository.existsByUsername(req.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
 		}
-
+ try {
+	 String decryptedPassword=AESUtil.decrypt(req.getPassword(), secretKey);
 		UserMaster user = new UserMaster();
 		user.setName(req.getName());
 		user.setUsername(req.getUsername());
@@ -82,5 +84,9 @@ public class AuthServiceImpl implements AuthService {
 		userRepository.save(user);
 
 		return "User registered successfully";
+	}
+ catch(Exception e) {
+	 throw new RuntimeException("Password decryption failing during registration"+e.getMessage(),e);
+       }
 	}
 }

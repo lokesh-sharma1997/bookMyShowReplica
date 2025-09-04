@@ -98,12 +98,17 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean deleteById(int userId) {
-		return userRepository.findById(userId).map(user -> {
-			user.setDeleteFlag(user.getDeleteFlag() == null ? true : !user.getDeleteFlag());
-			userRepository.save(user);
-			return true;
-		}).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+	    return userRepository.findById(userId).map(user -> {
+	        if (Boolean.TRUE.equals(user.getDeleteFlag())) {
+	            throw new RuntimeException("User already deleted with ID: " + userId);
+	        }
+
+	        user.setDeleteFlag(true);  
+	        userRepository.save(user);
+	        return true;
+	    }).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 	}
+
 
 	@Override
 	public void updateUserRole(int userId, String roleName) {
