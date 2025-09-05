@@ -1,7 +1,10 @@
 package com.bookmyshow.main.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -51,56 +54,114 @@ public class Event {
 
 	private Boolean deleted = false;
 
-	private int ageLimit;
+	private Integer ageLimit;
 
-	@OneToMany
+	@ManyToMany
     @JoinTable(
         name = "event_language_map",
         joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "language_id")
+        inverseJoinColumns = @JoinColumn(name = "language_id", referencedColumnName = "languageId")
     )
 	private List<Languages> languages;
 
-	@OneToMany(mappedBy = "generes")
-	@Column(name = "genres")
+	@ManyToMany
+    @JoinTable(
+        name = "event_genres_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "genres_id", referencedColumnName = "genreId")
+    )
 	private List<Genres> genres;
 
-	@OneToMany(mappedBy = "format")
-	@Column(name = "format")
+	@ManyToMany
+    @JoinTable(
+        name = "event_format_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "format_id", referencedColumnName = "formatId")
+    )
 	private List<Format> format;
 
-	@OneToMany(mappedBy = "tag")
-	@Column(name = "tag")
+	@ManyToMany
+    @JoinTable(
+        name = "event_tag_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "tagId")
+    )
 	private List<Tag> tag;
 
-	@OneToMany(mappedBy = "releaseMonth")
-	@Column(name = "releaseMonth")
+	@ManyToMany
+    @JoinTable(
+        name = "event_releaseMonth_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "releaseMonth_id", referencedColumnName = "releaseMonthId")
+    )
 	private List<ReleaseMonth> releaseMonth;
 
 	private LocalDate releasingOn;
 
-	@OneToMany(mappedBy = "date")
-	@Column(name = "date")
-	private LocalDate date;
+	@ManyToMany
+    @JoinTable(
+        name = "event_date_filter_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "date_filter_id", referencedColumnName = "dateFilterId")
+    )
+	private List<DateFilter> dateFilter;
 
-	@OneToMany(mappedBy = "categories")
-	@Column(name = "categories")
+	@ManyToMany
+    @JoinTable(
+        name = "event_categories_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "categories_id", referencedColumnName = "categoryId")
+    )
 	private List<Categories> categories;
 
-	@OneToMany(mappedBy = "moreFilters")
-	@Column(name = "moreFilters")
+	@ManyToMany
+    @JoinTable(
+        name = "event_moreFilters_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "moreFilters_id", referencedColumnName = "filterId")
+    )
 	private List<MoreFilters> moreFilters;
 
-	@OneToMany(mappedBy = "price")
-	@Column(name = "price")
+	@ManyToMany
+    @JoinTable(
+        name = "event_price_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "price_id", referencedColumnName = "priceId")
+    )
 	private List<Price> price;
 
-	@OneToMany(mappedBy = "cast")
-	@Column(name = "cast")
+	@ManyToMany
+    @JoinTable(
+        name = "event_cast_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "cast_id", referencedColumnName = "castId")
+    )
 	private List<Cast> cast;
+	
+//	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Cast> cast;
 
-	@OneToMany(mappedBy = "crew")
-	@Column(name = "crew")
+	@ManyToMany
+    @JoinTable(
+        name = "event_crew_map",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "crew_id", referencedColumnName = "crewId")
+    )
 	private List<Crew> crew;
 
+	
+	
+	
+	  @ManyToMany
+	    @JoinTable(
+	        name = "event_city_map",
+	        joinColumns = @JoinColumn(name = "event_id"),
+	        inverseJoinColumns = @JoinColumn(name = "city_id")
+	    )
+	    private List<City> city = new ArrayList<>();
+	
+	
+	
+	
+	
 }

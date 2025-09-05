@@ -15,6 +15,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.bookmyshow.main.util.AESUtil;
+
 import org.springframework.http.HttpMethod;
 
 @Configuration
@@ -30,31 +33,23 @@ public class SecurityConfig {
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 	}
 
-	 @Bean
-	    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	        http
-	            .csrf(AbstractHttpConfigurer::disable)
-	            .authorizeHttpRequests(authz -> authz
-	                .requestMatchers(
-	                    "/events/get-all-events",
-	                    "/city/**",
-	                    "/venue/getAll",
-	                    "/events/{id}",
-	                    "/events/filter",
-	                    "/api/users/validate/username",
-	                    "/auth/**",
-	                    "/api/auth/**",
-	                    "/swagger-ui/**",
-	                    "/v3/api-docs/**"
-	                ).permitAll()
-	                .anyRequest().authenticated()
-	            )
-	            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-	            .userDetailsService(userDetailsService)
-	            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(authz -> authz
+				// Permitting all GET requests and filtering movies
+				.requestMatchers("/api/events/get-all-events", "/api/city/**", "/venue/getAll", "/api/events/{id}",
+						"/api/events/filter", "/auth/**", "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
+				.permitAll().anyRequest().authenticated())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enabling
+																					// CORS
+				.userDetailsService(userDetailsService) // Custom user details service
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Adding JWT
+																										// filter before
+																										// authentication
+																										// filter
 
-	        return http.build();
-	    }
+		return http.build();
+	}
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
@@ -77,4 +72,19 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
+	
+	
+//	public static void main(String[] args) throws Exception {
+//		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
+//	    String password = "Saini@123";
+////		abhi01
+////	    +59BEkpQixjE6nd1UzFDUA==
+//
+//	    String encrypted = AESUtil.encrypt(password, key);
+//	    String decrypted = AESUtil.decrypt(encrypted, key);
+//
+//	    System.out.println("Encrypted: " + encrypted);
+//	    System.out.println("Decrypted: " + decrypted);
+//
+//	}
 }

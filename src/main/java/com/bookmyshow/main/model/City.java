@@ -1,10 +1,14 @@
 package com.bookmyshow.main.model;
 
+import java.util.List;
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,7 +26,7 @@ public class City {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
+    private Long cityId; 
 
     @NotBlank(message = "City name is required")
     private String name;
@@ -33,8 +37,10 @@ public class City {
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
     
-   
-
+//    @ManyToMany(mappedBy = "city")
+//	private List<Event> events;
+    @ManyToMany(mappedBy = "city")
+    private List<Event> events;
 
     
 }

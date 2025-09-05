@@ -11,19 +11,18 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-@Data
 @Entity
-@Table(name = "languages")
-public class Languages {
+@Table(name = "date_filter")
+@Data
+public class DateFilter {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long languageId;
+	private Long dateFilterId;
 
 	@Column(nullable = false, unique = true)
-	private String languageName;
+	private String dateFilterName;
 	
-	@ManyToMany(mappedBy = "languages")
+	@ManyToMany(mappedBy = "dateFilter")
 	private List<Event> events;
-
 
 }

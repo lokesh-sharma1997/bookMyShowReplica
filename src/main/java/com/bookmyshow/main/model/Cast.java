@@ -2,20 +2,21 @@ package com.bookmyshow.main.model;
 
 
 
+import java.util.List;
+
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
 
 @Entity
-@Table(name = "cast")
+@Table(name = "event_cast")
 @Data
-@Embeddable
 public class Cast {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +27,8 @@ public class Cast {
     
     @Column(columnDefinition = "TEXT")
     private String castImg;
+    
+    @ManyToMany(mappedBy = "cast")
+	private List<Event> events;
 }
 
