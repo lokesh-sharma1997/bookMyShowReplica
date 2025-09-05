@@ -35,8 +35,8 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(authz -> authz
 				// Permitting all GET requests and filtering movies
-				.requestMatchers("/events/get-all-events", "/city/**", "/venue/getAll", "/events/{id}",
-						"/events/filter", "/auth/**", "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
+				.requestMatchers("/api/events/get-all-events", "/api/city/**", "/venue/getAll", "/api/events/{id}",
+						"/api/events/filter", "/auth/**", "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
 				.permitAll().anyRequest().authenticated())
 				.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enabling
 																					// CORS
