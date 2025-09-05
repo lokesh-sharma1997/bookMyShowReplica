@@ -12,7 +12,7 @@ public interface UserService {
 
 	List<UserDTO> getByRole(String roleName);
 
-	public List<UserDTO> searchUser(String name, String username, String phone, String email);
+	public List<UserDTO> searchUser(String value);
 
 	List<UserDTO> getAllUsers();
 
