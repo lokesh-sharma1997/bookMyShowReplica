@@ -1,10 +1,9 @@
 package com.bookmyshow.main.model;
 
-
-
 import java.util.List;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,22 +12,20 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-
 @Entity
-@Table(name = "event_cast")
+@Table(name = "crew")
 @Data
-public class Cast {
+public class Crew {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long castId;
+    private Long crewId;
     
     @Column(nullable = false, unique = true)
-    private String actorName;
+    private String memberName;
     
     @Column(columnDefinition = "TEXT")
-    private String castImg;
+    private String crewImg;
     
-    @ManyToMany(mappedBy = "cast")
+    @ManyToMany(mappedBy = "crew")
 	private List<Event> events;
 }
-

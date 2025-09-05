@@ -7,12 +7,12 @@ import lombok.Data;
 
 @Data
 public class EventResponseDto {
-    private long eventId;       // custom / imdb id
-    private String title;         // Event name
-    private String likes;         // likes as string (from DB)
-    private String poster;        // image url
-    private List<String> genre;   // list of genres
-    private String imdbVotes;     // optional / dummy
-    private String imdbRating;    // rating as string
-    private Boolean releasedFlag; // currentlyPlaying flag
+	private Long eventId;       
+	private String name;         
+	private Double likes;        
+	private String imageurl;        
+	private List<Long> genres; 
+	 private Double votes;    
+	 private Double imdbRating;  
+    private Boolean releasedFlag; 
 }
