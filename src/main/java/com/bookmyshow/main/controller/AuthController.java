@@ -3,9 +3,11 @@ package com.bookmyshow.main.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookmyshow.main.dto.LoginRequest;
@@ -36,5 +38,19 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<String>> register(@RequestBody RegisterRequest req) {
 		String message = authService.register(req);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(201, message, true, null));
+	}
+
+	@GetMapping("/validate/username")
+	@Operation(summary = "${user.validateUsername}")
+	public ResponseEntity<ApiResponse<Boolean>> validateUsername(@RequestParam String username) {
+		boolean exists = authService.userExistsByUsername(username);
+
+		ApiResponse<Boolean> response = new ApiResponse<>();
+		response.setStatusCode(200);
+		response.setSuccess(true);
+		response.setMessage(exists ? "Username already exists" : "Username available");
+		response.setData(exists);
+
+		return ResponseEntity.ok(response);
 	}
 }

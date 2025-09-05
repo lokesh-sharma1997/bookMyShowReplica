@@ -21,7 +21,7 @@ public class BookmyshowBackendApplication {
 		SpringApplication.run(BookmyshowBackendApplication.class, args);
 		
 		System.out.println("===> BookMyShow Project Started..... <===");
-	
+		
 	}
 
 	@Bean

@@ -44,7 +44,7 @@ public class UserController {
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
-	@GetMapping(value = "/get-all-users", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "${user.getAllUsers}")
 	public ResponseEntity<ApiResponse<UsersResponse>> getAllUsers() {
 		List<UserDTO> users = userService.getAllUsers();
@@ -68,26 +68,19 @@ public class UserController {
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	@GetMapping(value = "/search/name/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getUserByName}")
-	public ResponseEntity<ApiResponse<UsersResponse>> getByName(@PathVariable String name) {
-		List<UserDTO> users = userService.getByName(name); // make sure this returns List<UserDTO>
+	@GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ApiResponse<UsersResponse>> globalSearchUser(@RequestParam(required = false) String value) {
 
-		if (users.isEmpty()) {
-			throw new UserNotFoundException("No users found with name: " + name);
+		if (value == null || value.trim().isEmpty()) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse<>(400, "Search keyword must be provided", false, null));
 		}
 
+		List<UserDTO> users = userService.searchUser(value.trim());
 		UsersResponse usersResponse = new UsersResponse(users);
-		return ResponseEntity.ok(new ApiResponse<>(200, "Users found", true, usersResponse));
-	}
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	@GetMapping(value = "/search/username/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getUserByUsername}")
-	public ResponseEntity<ApiResponse<UserResponse>> getByUsername(@PathVariable String username) {
-		UserDTO user = userService.getByUsername(username)
-				.orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
-		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
+		return ResponseEntity
+				.ok(new ApiResponse<>(200, users.isEmpty() ? "No user found" : "Users found", true, usersResponse));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
@@ -105,15 +98,6 @@ public class UserController {
 				.ok(new ApiResponse<>(200, "Users found with role: " + roleName, true, new UsersResponse(users)));
 	}
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-	@GetMapping(value = "/search/phone/{phone}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getUserByPhone}")
-	public ResponseEntity<ApiResponse<UserResponse>> getByPhone(@PathVariable String phone) {
-		UserDTO user = userService.getByPhoneNumber(phone)
-				.orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phone));
-		return ResponseEntity.ok(new ApiResponse<>(200, "User found", true, new UserResponse(user)));
-	}
-	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{userId}/role")
 	@Operation(summary = "${user.updateUserRole}")
 	public ResponseEntity<ApiResponse<UserDTO>> updateUserRole(@PathVariable int userId,
@@ -133,17 +117,4 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/validate/username")
-	@Operation(summary = "${user.validateUsername}")
-	public ResponseEntity<ApiResponse<Boolean>> validateUsername(@RequestParam String username) {
-		boolean exists = userService.userExistsByUsername(username);
-
-		ApiResponse<Boolean> response = new ApiResponse<>();
-		response.setStatusCode(200);
-		response.setSuccess(true);
-		response.setMessage(exists ? "Username already exists" : "Username available");
-		response.setData(exists);
-
-		return ResponseEntity.ok(response);
-	}
 }

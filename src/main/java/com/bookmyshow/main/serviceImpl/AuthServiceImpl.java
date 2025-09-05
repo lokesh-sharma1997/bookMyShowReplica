@@ -32,12 +32,13 @@ public class AuthServiceImpl implements AuthService {
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
-	@Value("${aesSecretKey}")
+	@Value("${app.jwt.secret}")
 	String secretKey;
+
 	@Override
 	public String login(LoginRequest req) {
 		try {
-			
+
 			String decryptedPassword = AESUtil.decrypt(req.getPassword(), secretKey);
 			// Authenticate credentials
 			authenticationManager
@@ -62,15 +63,16 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public String register(RegisterRequest req) {
+	public String register(RegisterRequest req){
 		if (userRepository.existsByUsername(req.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
 		}
-
+ try {
+	 String decryptedPassword=AESUtil.decrypt(req.getPassword(), secretKey);
 		UserMaster user = new UserMaster();
 		user.setName(req.getName());
 		user.setUsername(req.getUsername());
-		user.setPassword(passwordEncoder.encode(req.getPassword()));
+		user.setPassword(passwordEncoder.encode(decryptedPassword));
 		user.setEmail(req.getEmail());
 		user.setPhoneNumber(req.getPhoneNumber());
 
@@ -83,4 +85,14 @@ public class AuthServiceImpl implements AuthService {
 
 		return "User registered successfully";
 	}
+ catch(Exception e) {
+	 throw new RuntimeException("Password decryption failing during registration"+e.getMessage(),e);
+       }
+	}
+
+	@Override
+	public boolean userExistsByUsername(String username) {
+		return userRepository.existsByUsername(username);
+	}
+	 
 }
