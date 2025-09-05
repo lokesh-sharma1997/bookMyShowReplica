@@ -89,4 +89,10 @@ public class AuthServiceImpl implements AuthService {
 	 throw new RuntimeException("Password decryption failing during registration"+e.getMessage(),e);
        }
 	}
+
+	@Override
+	public boolean userExistsByUsername(String username) {
+		return userRepository.existsByUsername(username);
+	}
+	 
 }

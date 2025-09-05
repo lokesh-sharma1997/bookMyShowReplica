@@ -69,22 +69,19 @@ public class UserController {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ApiResponse<UsersResponse>> globalSearchUser(
-	        @RequestParam(required = false) String value) {
+	public ResponseEntity<ApiResponse<UsersResponse>> globalSearchUser(@RequestParam(required = false) String value) {
 
-	    if (value == null || value.trim().isEmpty()) {
-	        return ResponseEntity.badRequest().body(
-	            new ApiResponse<>(400, "Search keyword must be provided", false, null));
-	    }
+		if (value == null || value.trim().isEmpty()) {
+			return ResponseEntity.badRequest()
+					.body(new ApiResponse<>(400, "Search keyword must be provided", false, null));
+		}
 
-	    List<UserDTO> users = userService.searchUser(value.trim());
-	    UsersResponse usersResponse = new UsersResponse(users);
+		List<UserDTO> users = userService.searchUser(value.trim());
+		UsersResponse usersResponse = new UsersResponse(users);
 
-	    return ResponseEntity.ok(
-	        new ApiResponse<>(200,
-	            users.isEmpty() ? "No user found" : "Users found", true, usersResponse));
+		return ResponseEntity
+				.ok(new ApiResponse<>(200, users.isEmpty() ? "No user found" : "Users found", true, usersResponse));
 	}
-
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping(value = "/role/{roleName}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -120,17 +117,4 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/validate/username")
-	@Operation(summary = "${user.validateUsername}")
-	public ResponseEntity<ApiResponse<Boolean>> validateUsername(@RequestParam String username) {
-		boolean exists = userService.userExistsByUsername(username);
-
-		ApiResponse<Boolean> response = new ApiResponse<>();
-		response.setStatusCode(200);
-		response.setSuccess(true);
-		response.setMessage(exists ? "Username already exists" : "Username available");
-		response.setData(exists);
-
-		return ResponseEntity.ok(response);
-	}
 }
