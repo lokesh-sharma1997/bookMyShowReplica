@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserDTO> getAllUsers() {
-		return userRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+		return userRepository.findAll().stream().filter(user->!user.getDeleteFlag()).map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	@Override
@@ -130,9 +130,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserDTO> searchUser(String name, String username, String phone, String email) {
-		return userRepository
-				.findByNameIgnoreCaseOrUsernameIgnoreCaseOrPhoneNumberOrEmailIgnoreCase(name, username, phone, email)
-				.stream().map(this::convertToDTO).collect(Collectors.toList());
+public List<UserDTO> searchUser(String value) {
+	    return userRepository.globalSearch(value)
+	            .stream()
+	            .map(this::convertToDTO)
+	            .collect(Collectors.toList());
 	}
+
 }

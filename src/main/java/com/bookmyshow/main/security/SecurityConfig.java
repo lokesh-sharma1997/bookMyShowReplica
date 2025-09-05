@@ -70,10 +70,10 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
-	
+//	String password = "kashish01"; //8JoAiIFelx1XrGgRk0NolQ==	
 //	public static void main(String[] args) throws Exception {
 //		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
-//	    String password = "kashish@2004";
+////	    String password = "kashish@2004";
 //	  //  Rxkkl5rEjlXnRmij/MRUjw==
 //	    String encrypted = AESUtil.encrypt(password, key);
 //	    String decrypted = AESUtil.decrypt(encrypted, key);
