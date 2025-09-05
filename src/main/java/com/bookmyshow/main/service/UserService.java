@@ -20,5 +20,4 @@ public interface UserService {
 
 	void updateUserRole(int userId, String roleName);
 
-	boolean userExistsByUsername(String username);
 }

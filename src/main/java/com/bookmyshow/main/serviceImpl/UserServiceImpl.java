@@ -93,22 +93,22 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserDTO> getAllUsers() {
-		return userRepository.findAll().stream().filter(user->!user.getDeleteFlag()).map(this::convertToDTO).collect(Collectors.toList());
+		return userRepository.findAll().stream().filter(user -> !user.getDeleteFlag()).map(this::convertToDTO)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public boolean deleteById(int userId) {
-	    return userRepository.findById(userId).map(user -> {
-	        if (Boolean.TRUE.equals(user.getDeleteFlag())) {
-	            throw new RuntimeException("User already deleted with ID: " + userId);
-	        }
+		return userRepository.findById(userId).map(user -> {
+			if (Boolean.TRUE.equals(user.getDeleteFlag())) {
+				throw new RuntimeException("User already deleted with ID: " + userId);
+			}
 
-	        user.setDeleteFlag(true);  
-	        userRepository.save(user);
-	        return true;
-	    }).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+			user.setDeleteFlag(true);
+			userRepository.save(user);
+			return true;
+		}).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 	}
-
 
 	@Override
 	public void updateUserRole(int userId, String roleName) {
@@ -125,16 +125,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean userExistsByUsername(String username) {
-		return userRepository.existsByUsername(username);
-	}
-
-	@Override
-public List<UserDTO> searchUser(String value) {
-	    return userRepository.globalSearch(value)
-	            .stream()
-	            .map(this::convertToDTO)
-	            .collect(Collectors.toList());
+	public List<UserDTO> searchUser(String value) {
+		return userRepository.globalSearch(value).stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 }
