@@ -39,6 +39,12 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
 		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error: " + ex.getMessage(), false);
 	}
+	
+	 // Event custom exception
+    @ExceptionHandler(EventCustomException.class)
+    public ResponseEntity<ApiResponse<Object>> handleEventCustomException(EventCustomException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), false);
+    }
 
 	// 🔹 Common builder method
 	private ResponseEntity<ApiResponse<Object>> buildResponse(HttpStatus status, String message, boolean success) {

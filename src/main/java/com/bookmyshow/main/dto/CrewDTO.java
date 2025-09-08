@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class CrewDTO {
-    private Long crewId;
-    private String memberName;
-    private String crewImg;
+	private Long crewId;
+	private String memberName;
+	private String crewImg;
 }

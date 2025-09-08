@@ -1,7 +1,5 @@
 package com.bookmyshow.main.model;
 
-
-
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -13,22 +11,17 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-
 @Entity
-@Table(name = "event_cast")
+@Table(name = "price")
 @Data
-public class Cast {
+public class Price {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long castId;
+    private Long priceId;
     
     @Column(nullable = false, unique = true)
-    private String actorName;
+    private String priceRange;
     
-    @Column(columnDefinition = "TEXT")
-    private String castImg;
-    
-    @ManyToMany(mappedBy = "cast")
+    @ManyToMany(mappedBy = "price")
 	private List<Event> events;
 }
-

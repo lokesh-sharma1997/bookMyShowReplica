@@ -1,9 +1,10 @@
 package com.bookmyshow.main.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.model.UserMaster;
@@ -11,18 +12,21 @@ import com.bookmyshow.main.model.UserMaster;
 public interface UserRepository extends JpaRepository<UserMaster, Integer> {
 	UserMaster findByUserId(int userId);
 
-	List<UserMaster> findByName(String name);
-
 	UserMaster findByUsername(String username);
 
-	Optional<UserMaster> findByEmailIgnoreCase(String email);
-
 	List<UserMaster> findByRole(Role role);
-
-	UserMaster findByPhoneNumber(String phoneNumber);
 
 	boolean existsByUsername(String username);
 
 	boolean deleteByUserId(int id);
+	
+	@Query("SELECT user FROM UserMaster user WHERE " +
+		       "LOWER(user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+		       "LOWER(user.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+		       "LOWER(user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+		       "user.phoneNumber LIKE CONCAT('%', :keyword, '%')")
+		List<UserMaster> globalSearch(@Param("keyword") String value);
+
+
 
 }
