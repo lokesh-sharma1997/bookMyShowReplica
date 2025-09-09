@@ -39,12 +39,9 @@ public class VenueServiceImpl implements VenueService {
 
     @Override
     public VenueDTO createVenue(VenueDTO dto) {
-        // Convert DTO to entity
         Venue entity = dtoToEntity(dto);
 
-        // Check if the venue is for movies
         if ("movies".equalsIgnoreCase(entity.getVenueFor())) {
-            // Handle screens and layouts for movie venues
             if (entity.getScreens() == null) {
                 entity.setScreens(new ArrayList<>());
             }
