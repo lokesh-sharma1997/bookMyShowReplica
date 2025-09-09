@@ -446,7 +446,7 @@ public class EventServiceImpl implements EventService {
 	        throws IOException {
 
 	    Event event = eventRepository.findById(id)
-	            .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
+	            .orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
 
 	    if (poster != null && !poster.isEmpty()) {
 	        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
@@ -609,12 +609,16 @@ public class EventServiceImpl implements EventService {
 
 
 	@Override
-	public void deleteEvent(Long id) {
-		Event event = eventRepository.findById(id).orElseThrow(() -> new EventCustomException
-        		("Event not found of this id: " + id));
-		event.setDeleted(true);
-		eventRepository.save(event);
+	public boolean deleteEvent(Long id) {
+	    Event event = eventRepository.findById(id)
+	            .orElseThrow(() -> new EventCustomException("Event not found with this id: " + id));
+
+	    event.setDeleted(true);
+	    eventRepository.save(event);
+
+	    return true; // Successfully marked as deleted
 	}
+
 
 
 	@Override
