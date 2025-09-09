@@ -18,7 +18,7 @@ public class Amenity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String amenityname; 
+    private String amenity_name; 
 
     @ManyToMany(mappedBy = "amenities")
     private List<Venue> venues; 

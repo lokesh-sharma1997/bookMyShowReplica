@@ -39,7 +39,7 @@ public class Venue {
     @ManyToMany
     private List<SupportedCategory> supportedCategories; 
 
-    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "venue")
     private List<Screen> screens; // Screens (only for "movies")
 
     
