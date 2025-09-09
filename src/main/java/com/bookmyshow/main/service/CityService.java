@@ -3,14 +3,12 @@ package com.bookmyshow.main.service;
 
 import java.util.List;
 
-import com.bookmyshow.main.dto.CityDto;
+import com.bookmyshow.main.dto.CityDTO;
 
 public interface CityService {
 
-    List<CityDto> getAllCities();
+    List<CityDTO> getAllCities();
 
-    List<CityDto> getPopularCities();
-    
-    
+
 }
 

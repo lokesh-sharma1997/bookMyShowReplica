@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 @Component
 public class JwtService {

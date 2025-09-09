@@ -6,8 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -23,25 +23,26 @@ public class Venue {
     @NotBlank(message = "Venue name is required")
     private String venueName;
 
-    @Embedded
-    private Address address;
 
     private int venueCapacity;
 
     private String venueFor;  
 
     private String venueType;
+    
+    @ManyToOne
+    private Address address; 
 
-    @ElementCollection
-    @CollectionTable(name = "venue_supported_categories", joinColumns = @JoinColumn(name = "venue_id"))
-    @Column(name = "category")
-    private Set<String> supportedCategories;
+    @ManyToMany
+    private List<Amenity> amenities; 
 
-    @ElementCollection
-    @CollectionTable(name = "venue_additional_fields", joinColumns = @JoinColumn(name = "venue_id"))
-    @MapKeyColumn(name = "field_key")
-    @Column(name = "field_value")
-    private Map<String, String> additionalFields;
+    @ManyToMany
+    private List<SupportedCategory> supportedCategories; 
+
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL)
+    private List<Screen> screens; // Screens (only for "movies")
+
+    
 
     private Boolean deleted = false;
 }

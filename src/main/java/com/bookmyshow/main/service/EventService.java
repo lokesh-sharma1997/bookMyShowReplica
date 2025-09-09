@@ -5,29 +5,63 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.bookmyshow.main.dto.EventDto;
+import com.bookmyshow.main.dto.CategoryDTO;
+import com.bookmyshow.main.dto.DateFilterDTO;
+import com.bookmyshow.main.dto.EventDTO;
 import com.bookmyshow.main.dto.EventResponseDto;
+import com.bookmyshow.main.dto.FormatDTO;
+import com.bookmyshow.main.dto.GenresDTO;
+import com.bookmyshow.main.dto.LanguagesDTO;
+import com.bookmyshow.main.dto.MoreFilterDTO;
+import com.bookmyshow.main.dto.PriceDTO;
+import com.bookmyshow.main.dto.ReleaseMonthDTO;
+import com.bookmyshow.main.dto.TagDTO;
 
 public interface EventService {
-	EventDto createEvent(EventDto movieDto, MultipartFile poster,List<MultipartFile> castImages) throws IOException;
-	EventDto getEventById(Long id,String contentType);
-	EventDto getEventByName(String name,String contentType);
-//    List<EventDto> getAllEventByType(String contentType);
-    EventDto updateEvent(Long id, EventDto movieDto, MultipartFile poster, List<MultipartFile> castImages) throws IOException;
+	EventDTO createEvent(EventDTO movieDto, 
+			MultipartFile poster, 
+			List<MultipartFile> castImages,
+			List<MultipartFile> crewImages
+			) throws IOException;
 
-    void deleteEvent(Long id);
-    List<EventDto> filterEvents(  List<String> languages,
-            List<String> genres,
-            List<String> formats,
-            String releaseMonth);
-    List<String> getAllLanguages(String contentType);
-    List<String> getAllGenres(String contentType);
-    List<String> getAllFormats(String contentType);
-    List<EventResponseDto> getAllEventByType(String contentType);
+	EventDTO getEventById(Long id);
+
 	
-    List<EventResponseDto> getPopularEvents(String contentType);
-    
-//	List<EventResponseDto> getByEventCategory(String categoryType);
+	List<String> searchEventNames(String name, List<String> eventTypes);
 
-    
+	EventDTO updateEvent(Long id, EventDTO movieDto, MultipartFile poster, List<MultipartFile> castImages,
+			List<MultipartFile> crewImages)
+			throws IOException;
+
+	void deleteEvent(Long id);
+
+	List<EventResponseDto> filterEvents(String type,
+	        List<Integer> languages,
+	        List<Integer> genres,
+	        List<Integer> formats,
+	        List<Integer> tags,
+	        List<Integer> categories,
+	        List<Integer> price,
+	        List<Integer> moreFilters,
+	        List<Integer> releaseMonths,
+	        List<Integer> dateFilters
+	        );
+
+	List<LanguagesDTO> getAllLanguages();
+
+	List<GenresDTO> getAllGenres();
+
+	 List<FormatDTO> getAllFormats();
+	 List<TagDTO> getAllTags();
+	 List<ReleaseMonthDTO> getAllReleaseMonths();
+	 List<DateFilterDTO> getAllDateFilters();
+	 List<CategoryDTO> getAllCategories();
+	 List<PriceDTO> getAllPrices();
+	 List<MoreFilterDTO> getAllMoreFilters();
+
+
+	List<EventResponseDto> getPopularEvents(String eventType);
+
+
+
 }

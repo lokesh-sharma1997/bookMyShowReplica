@@ -15,6 +15,8 @@ import com.bookmyshow.main.service.AuthService;
 import com.bookmyshow.main.util.AESUtil;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -30,12 +32,14 @@ public class AuthServiceImpl implements AuthService {
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
+	@Value("${app.jwt.secret}")
+	String secretKey;
 
 	@Override
 	public String login(LoginRequest req) {
 		try {
-			String aesSecretKey = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
-			String decryptedPassword = AESUtil.decrypt(req.getPassword(), aesSecretKey);
+
+			String decryptedPassword = AESUtil.decrypt(req.getPassword(), secretKey);
 			// Authenticate credentials
 			authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(req.getUsername(), decryptedPassword));
@@ -59,15 +63,16 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public String register(RegisterRequest req) {
+	public String register(RegisterRequest req){
 		if (userRepository.existsByUsername(req.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
 		}
-
+ try {
+	 String decryptedPassword=AESUtil.decrypt(req.getPassword(), secretKey);
 		UserMaster user = new UserMaster();
 		user.setName(req.getName());
 		user.setUsername(req.getUsername());
-		user.setPassword(passwordEncoder.encode(req.getPassword()));
+		user.setPassword(passwordEncoder.encode(decryptedPassword));
 		user.setEmail(req.getEmail());
 		user.setPhoneNumber(req.getPhoneNumber());
 
@@ -80,4 +85,14 @@ public class AuthServiceImpl implements AuthService {
 
 		return "User registered successfully";
 	}
+ catch(Exception e) {
+	 throw new RuntimeException("Password decryption failing during registration"+e.getMessage(),e);
+       }
+	}
+
+	@Override
+	public boolean userExistsByUsername(String username) {
+		return userRepository.existsByUsername(username);
+	}
+	 
 }
