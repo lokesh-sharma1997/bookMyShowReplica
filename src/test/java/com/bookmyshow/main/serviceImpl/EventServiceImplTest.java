@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,14 +26,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bookmyshow.main.dto.CategoryDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
+import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
 import com.bookmyshow.main.dto.LanguagesDTO;
@@ -62,6 +68,7 @@ import com.bookmyshow.main.repository.LanguagesRepository;
 import com.bookmyshow.main.repository.MoreFiltersRepository;
 import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
+import com.bookmyshow.main.specification.EventSpecification;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceImplTest {
@@ -176,6 +183,7 @@ class EventServiceImplTest {
         when(dateFilterRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
         when(categoriesRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
         when(moreFiltersRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
+        lenient().when(castRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
 
         when(cityRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
         when(eventRepository.save(any(Event.class))).thenReturn(event);
@@ -341,8 +349,131 @@ class EventServiceImplTest {
         assertEquals(1, result.size());
         verify(priceRepository).findAll();
     }
+    @Test
+    void testfilter() {
+        String type = "Movie";
+        List<Integer> languages = List.of(1, 2);
+        List<Integer> genres = List.of(1, 2);
+        List<Integer> formats = List.of(1, 2);
+        List<Integer> tags = List.of(1, 2);
+        List<Integer> categories = List.of(1, 2);
+        List<Integer> price = List.of(1, 2);
+        List<Integer> moreFilters = List.of(1, 2);
+        List<Integer> releaseMonths = List.of(1, 2);
+        List<Integer> dateFilters = List.of(1, 2);
+
+        Event event1 = new Event();
+        event1.setDeleted(false); 
+        Event event2 = new Event();
+        event2.setDeleted(true);  
+
+        List<Event> events = List.of(event1, event2);
+        Specification<Event> mockSpec = Mockito.mock(Specification.class);
+
+        try (MockedStatic<EventSpecification> mockedStatic = Mockito.mockStatic(EventSpecification.class)) {
+            mockedStatic.when(() -> EventSpecification.filterEvents(
+                type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters
+            )).thenReturn(mockSpec);
+
+            when(eventRepository.findAll(mockSpec)).thenReturn(events);
+
+           
+            EventResponseDto dto = new EventResponseDto();
+            EventServiceImpl spyService = Mockito.spy(eventService);
+         
+
+            List<EventResponseDto> result = spyService.filterEvents(
+                type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters);
+
+            assertEquals(1, result.size());
+        
+
+            
+            verify(eventRepository).findAll(mockSpec);
+        }
+    }
+    @Test
+    void testSearchEventNames_WithEventTypes_ReturnsMatchingEvents() {
+        String name = "Tech";
+        List<String> eventTypes = List.of("Conference", "Webinar");
+
+        List<Event> mockEvents = List.of(
+            new Event(),
+            new Event()
+        );
+
+        when(eventRepository.searchByNameAndEventTypes(eq(name), anyList()))
+            .thenReturn(mockEvents);
+
+        List<String> result = eventService.searchEventNames(name, eventTypes);
+
+       
+    }
 
     @Test
+    void testSearchEventNames_WithoutEventTypes_EventFound() {
+        String name = "Hackathon";
+        Event event = new Event();
+
+        when(eventRepository.findByName(name)).thenReturn(Optional.of(event));
+
+        List<String> result = eventService.searchEventNames(name, null);
+
+        
+    }
+
+    @Test
+    void testSearchEventNames_WithoutEventTypes_EventNotFound_ThrowsException() {
+        String name = "Nonexistent";
+
+        when(eventRepository.findByName(name)).thenReturn(Optional.empty());
+
+        assertThrows(EventCustomException.class, () -> {
+            eventService.searchEventNames(name, null);
+        });
+    }
+    
+    @Test
+    void testGetPopularEvents_WithEventType_ReturnsFilteredEvents() {
+        String eventType = "Movie";
+
+        List<Event> mockEvents = List.of(
+          
+        );
+
+        when(eventRepository.findTop10ByEventTypeOrderByReleasingOnDesc(eventType))
+            .thenReturn(mockEvents);
+
+        List<EventResponseDto> result = eventService.getPopularEvents(eventType);
+
+       
+    }
+    @Test
+    void testGetPopularEvents_WithoutEventType_ReturnsFilteredEvents() {
+        List<Event> mockEvents = List.of(
+            
+        );
+
+        when(eventRepository.findTop10ByOrderByReleasingOnDesc())
+            .thenReturn(mockEvents);
+
+        List<EventResponseDto> result = eventService.getPopularEvents(null);
+
+        
+    }
+    @Test
+    void testgetEventById()
+    {
+    	Long eventidLong=1L;
+    	Event event = new Event();
+    	event.setEventId(eventidLong);
+    	  event.setDeleted(false);
+    	when(eventRepository.findById(eventidLong)).thenReturn(Optional.of(event));
+    	
+
+    	eventService.deleteEvent(eventidLong);
+    	verify(eventRepository).save(event);
+    }
     void testUpdateEvent() throws IOException {
         Long eventId = 1L;
 
