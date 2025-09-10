@@ -12,6 +12,7 @@ import com.bookmyshow.main.repository.RoleRepository;
 import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.security.JwtService;
 import com.bookmyshow.main.service.AuthService;
+import com.bookmyshow.main.service.TokenService;
 import com.bookmyshow.main.util.AESUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
+	private final TokenService tokenService;
 	@Value("${app.jwt.secret}")
 	String secretKey;
 
@@ -53,7 +55,9 @@ public class AuthServiceImpl implements AuthService {
 			String role = user.getRole().getRoleName(); // Already a String
 			Long userId = user.getUserId();
 			// Generate token with role and return as string
-			return jwtService.generateToken(req.getUsername(), role, userId);
+			String token = jwtService.generateToken(req.getUsername(), role, userId);
+            tokenService.saveToken(token, userId, jwtService.getExpirationMs());
+			return  token;
 
 		} catch (AuthenticationException ex) {
 			throw new InvalidCredentialsException("Invalid credentials for username: " + req.getUsername());

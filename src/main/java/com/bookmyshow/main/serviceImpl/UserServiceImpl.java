@@ -111,12 +111,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateUserRole(int userId, String roleName) {
+	public void updateUserRole(int userId ) {
 		UserMaster user = userRepository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
-		Role role = roleRepository.findByRoleName(roleName.toUpperCase())
-				.orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
+		Role role = roleRepository.findById(2)
+				.orElseThrow(() -> new RoleNotFoundException("Role not found: Admin"));
 
 		user.setRole(role);
 		user.setUpdatedOn(LocalDateTime.now());

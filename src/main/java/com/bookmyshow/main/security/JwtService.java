@@ -23,6 +23,10 @@ public class JwtService {
 		return Keys.hmacShaKeyFor(secret.getBytes());
 	}
 
+	public long getExpirationMs() {
+		return expirationMs;
+	}
+
 	public String generateToken(String username, String role, Long userId) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("role", role);

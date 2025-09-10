@@ -21,7 +21,11 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<Object>> handleRoleNotFound(RoleNotFoundException ex) {
 		return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), false);
 	}
-
+	//State not found
+	@ExceptionHandler(StateNotFoundException.class)
+	public ResponseEntity<ApiResponse<Object>> handleStateNotFound(StateNotFoundException ex) {
+		return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), false);
+	}
 	// Invalid credentials
 	@ExceptionHandler(InvalidCredentialsException.class)
 	public ResponseEntity<ApiResponse<Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
