@@ -32,6 +32,7 @@ import com.bookmyshow.main.dto.MoreFilterDTO;
 import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.TagDTO;
+import com.bookmyshow.main.exception.EventCustomException;
 import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.service.EventService;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -64,12 +65,20 @@ public class EventController {
     	        @RequestPart(value = "castImages", required = false) List<MultipartFile> castImages,
     	        @RequestPart(value = "crewImages", required = false) List<MultipartFile> crewImages
     	) throws IOException {
+    	
+    	if (poster == null || poster.isEmpty()) {
+            throw new EventCustomException("Poster image is required for creating an event");
+        }
 
     	 
     	    ObjectMapper objectMapper = new ObjectMapper()
     	            .registerModule(new JavaTimeModule()) 
     	            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     	    EventDTO eventDto = objectMapper.readValue(eventJson, EventDTO.class);
+    	    
+    	    if (eventDto.getName() == null || eventDto.getName().isBlank()) {
+                throw new EventCustomException("Event name must not be empty");
+            }
 
     	   
     	    eventService.createEvent(eventDto, poster, castImages,crewImages);
@@ -96,6 +105,10 @@ public class EventController {
  	            true,
  	           eventService.getEventById(id)
  	    );
+    	 EventDTO event = eventService.getEventById(id);
+    	 if (event == null) {
+             throw new EventCustomException("Event not found with id: " + id);
+         }
     	  return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -137,6 +150,9 @@ public class EventController {
     ) throws IOException {
        
     	EventDTO eventDto = objectMapper.readValue(eventJson, EventDTO.class);
+    	if (eventDto.getName() == null || eventDto.getName().isBlank()) {
+            throw new EventCustomException("Event name must not be empty while updating");
+        }
     	 eventService.updateEvent(id,eventDto, poster,castImages,crewImages);
     	 ApiResponse<Void> response = new ApiResponse<>(
    	            HttpStatus.CREATED.value(),
@@ -166,7 +182,7 @@ public class EventController {
     @Operation(summary = "Delete a event")
     @PatchMapping("/delete/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id) {
-    	eventService.deleteEvent(id);
+    	boolean deleted = eventService.deleteEvent(id);
 
         
         ApiResponse<Void> response = new ApiResponse<>(
