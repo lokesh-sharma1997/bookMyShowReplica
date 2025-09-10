@@ -1,19 +1,16 @@
 package com.bookmyshow.main.service;
 
+import com.bookmyshow.main.dto.VenueDTO;
 
 import java.util.List;
 
-import com.bookmyshow.main.dto.VenueDto;
-
 public interface VenueService {
 
-	VenueDto createVenue(VenueDto dto);
+    VenueDTO createVenue(VenueDTO dto);
 
-    List<VenueDto> getAllVenues();
+    List<VenueDTO> getAllVenues();
 
-    List<VenueDto> getVenuesByName(String name);
+    List<VenueDTO> getVenuesByCity(String city);
 
-   
-
-	boolean softDeleteVenue(Long id);
+    boolean softDeleteVenue(Long id);
 }
