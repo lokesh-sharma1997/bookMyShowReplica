@@ -417,17 +417,30 @@ public class EventServiceImpl implements EventService {
 	public List<CategoryDTO> getAllCategories() {
 	    List<Categories> categories = categoriesRepository.findAll();
 	    return categories.stream()
-	                     .map(cat -> mapper.map(cat, CategoryDTO.class))
-	                     .collect(Collectors.toList());
+	            .map(cat -> {
+	                CategoryDTO dto = new CategoryDTO();
+	                dto.setCategoryId(cat.getCategoryId());
+	                dto.setCategoryName(cat.getCategoriesName());
+	                return dto;
+	            })
+	            .collect(Collectors.toList());
+
 	}
 	
 	@Override
 	public List<MoreFilterDTO> getAllMoreFilters() {
 	    List<MoreFilters> filters = moreFiltersRepository.findAll();
 	    return filters.stream()
-	                  .map(f -> mapper.map(f, MoreFilterDTO.class))
-	                  .collect(Collectors.toList());
+	              .map(f -> {
+	                  MoreFilterDTO dto = new MoreFilterDTO();
+	                  dto.setMoreFilterId(f.getFilterId());
+	                  dto.setMoreFilterName(f.getName());
+	                  return dto;
+	              })
+	              .collect(Collectors.toList());
+
 	}
+	
 
 	@Override
 	public List<PriceDTO> getAllPrices() {
