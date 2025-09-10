@@ -30,13 +30,22 @@ public class Venue {
 
     private String venueType;
     
-    @ManyToOne
-    private Address address; 
+//    @ManyToOne
+//    private Address address; 
+
+    @ManyToOne(cascade = CascadeType.PERSIST) 
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
 
     @ManyToMany
     private List<Amenity> amenities; 
 
     @ManyToMany
+    @JoinTable(
+        name = "supported_category",
+        joinColumns = @JoinColumn(name = "venue_id"),
+        inverseJoinColumns = @JoinColumn(name = "supported_category_id")
+    )
     private List<SupportedCategory> supportedCategories; 
 
     @OneToMany(mappedBy = "venue")

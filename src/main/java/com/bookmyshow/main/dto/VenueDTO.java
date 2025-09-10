@@ -13,8 +13,11 @@ public class VenueDTO {
     private int venueCapacity;
     private String venueFor;
     private String venueType;
+    
+    
     private AddressDTO address;  
     private List<AmenityDTO> amenities; 
+//    private List<Integer> amenities;
     private List<SupportedCategoryDTO> supportedCategories;  
     private List<ScreenDTO> screens;  
     private Boolean deleted;  

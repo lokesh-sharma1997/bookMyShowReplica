@@ -14,9 +14,14 @@ import com.bookmyshow.main.dto.AddressDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
 import com.bookmyshow.main.dto.SupportedCategoryDTO;
 import com.bookmyshow.main.dto.VenueDTO;
+import com.bookmyshow.main.model.Address;
+import com.bookmyshow.main.model.Amenity;
+import com.bookmyshow.main.model.Languages;
 import com.bookmyshow.main.model.Layout; 
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Venue;
+import com.bookmyshow.main.repository.AddressRepository;
+import com.bookmyshow.main.repository.AmenityRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
 
@@ -25,12 +30,29 @@ public class VenueServiceImpl implements VenueService {
 
     @Autowired
     private VenueRepository venueRepository;
-
+//    @Autowired
+//    private AmenityRepository ani;
+//
+//    @Autowired
+//    private AddressRepository  addressRepository;
+    
     @Autowired
     private ModelMapper modelMapper;
 
+//    private VenueDTO entityToDto(Venue entity) {
+//        return modelMapper.map(entity, VenueDTO.class);
+//    }
+    
     private VenueDTO entityToDto(Venue entity) {
-        return modelMapper.map(entity, VenueDTO.class);
+        VenueDTO dto = modelMapper.map(entity, VenueDTO.class);
+//        if (entity.getAmenities() != null) {
+//            List<Integer> amenityIds = entity.getAmenities()
+//                                            .stream()
+//                                            .map(a -> a.getId().intValue()) 
+//                                            .collect(Collectors.toList());
+//            dto.setAmenities(amenityIds);
+//        }
+        return dto;   
     }
 
     private Venue dtoToEntity(VenueDTO dto) {
@@ -40,6 +62,17 @@ public class VenueServiceImpl implements VenueService {
     @Override
     public VenueDTO createVenue(VenueDTO dto) {
         Venue entity = dtoToEntity(dto);
+//        if (dto.getAmenities() != null) {
+//            List<Long> amenityIds = dto.getAmenities().stream()
+//                                      .map(Integer::longValue) 
+//                                      .toList(); 
+//            
+//            List<Amenity> animt = ani.findAllById(amenityIds);
+//            entity.setAmenities(animt);
+//        }
+       
+       
+
 
         if ("movies".equalsIgnoreCase(entity.getVenueFor())) {
             if (entity.getScreens() == null) {
@@ -126,9 +159,7 @@ public class VenueServiceImpl implements VenueService {
         Optional<Venue> optionalVenue = venueRepository.findById(id);
         if (optionalVenue.isPresent()) {
             Venue venue = optionalVenue.get();
-            if (Boolean.TRUE.equals(venue.getDeleted())) {
-                return false;
-            }
+            
             venue.setDeleted(true);
             venueRepository.save(venue);
             return true;
