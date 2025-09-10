@@ -40,12 +40,12 @@ public class RoleServiceImpl implements RoleService {
 		return roleRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
  
-	/*
-	 * @Override public RoleDTO createRole(RoleDTO roleDTO) { Role role =
-	 * convertToEntity(roleDTO); Role savedRole = roleRepository.save(role); return
-	 * convertToDTO(savedRole); }
-	 *
-	 * @Override public boolean deleteRole(int roleId) { if
+	
+	  @Override public RoleDTO createRole(RoleDTO roleDTO) { Role role =
+	  convertToEntity(roleDTO); Role savedRole = roleRepository.save(role); return
+	  convertToDTO(savedRole); }
+	 
+	 /* @Override public boolean deleteRole(int roleId) { if
 	 * (roleRepository.existsById(roleId)) { roleRepository.deleteById(roleId);
 	 * return true; } return false; }
 	 */

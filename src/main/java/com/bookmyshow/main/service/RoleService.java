@@ -14,7 +14,7 @@ public interface RoleService {
  
     List<RoleDTO> getAllRoles();
  
-  //  RoleDTO createRole(RoleDTO roleDTO);
+    RoleDTO createRole(RoleDTO roleDTO);
 
   //  boolean deleteRole(int roleId);
 
