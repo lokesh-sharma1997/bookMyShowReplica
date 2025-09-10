@@ -417,17 +417,30 @@ public class EventServiceImpl implements EventService {
 	public List<CategoryDTO> getAllCategories() {
 	    List<Categories> categories = categoriesRepository.findAll();
 	    return categories.stream()
-	                     .map(cat -> mapper.map(cat, CategoryDTO.class))
-	                     .collect(Collectors.toList());
+	            .map(cat -> {
+	                CategoryDTO dto = new CategoryDTO();
+	                dto.setCategoryId(cat.getCategoryId());
+	                dto.setCategoryName(cat.getCategoriesName());
+	                return dto;
+	            })
+	            .collect(Collectors.toList());
+
 	}
 	
 	@Override
 	public List<MoreFilterDTO> getAllMoreFilters() {
 	    List<MoreFilters> filters = moreFiltersRepository.findAll();
 	    return filters.stream()
-	                  .map(f -> mapper.map(f, MoreFilterDTO.class))
-	                  .collect(Collectors.toList());
+	              .map(f -> {
+	                  MoreFilterDTO dto = new MoreFilterDTO();
+	                  dto.setMoreFilterId(f.getFilterId());
+	                  dto.setMoreFilterName(f.getName());
+	                  return dto;
+	              })
+	              .collect(Collectors.toList());
+
 	}
+	
 
 	@Override
 	public List<PriceDTO> getAllPrices() {
@@ -446,7 +459,7 @@ public class EventServiceImpl implements EventService {
 	        throws IOException {
 
 	    Event event = eventRepository.findById(id)
-	            .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
+	            .orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
 
 	    if (poster != null && !poster.isEmpty()) {
 	        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
@@ -609,12 +622,16 @@ public class EventServiceImpl implements EventService {
 
 
 	@Override
-	public void deleteEvent(Long id) {
-		Event event = eventRepository.findById(id).orElseThrow(() -> new EventCustomException
-        		("Event not found of this id: " + id));
-		event.setDeleted(true);
-		eventRepository.save(event);
+	public boolean deleteEvent(Long id) {
+	    Event event = eventRepository.findById(id)
+	            .orElseThrow(() -> new EventCustomException("Event not found with this id: " + id));
+
+	    event.setDeleted(true);
+	    eventRepository.save(event);
+
+	    return true; // Successfully marked as deleted
 	}
+
 
 
 	@Override
