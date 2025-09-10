@@ -15,6 +15,7 @@ import com.bookmyshow.main.dto.RegisterRequest;
 import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.response.TokenResponse;
 import com.bookmyshow.main.service.AuthService;
+import com.bookmyshow.main.service.TokenService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
+	private final TokenService tokenService;
 	private final AuthService authService;
+	
 
 	@PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "${auth.login}")
@@ -47,10 +49,36 @@ public class AuthController {
 
 		ApiResponse<Boolean> response = new ApiResponse<>();
 		response.setStatusCode(200);
-		response.setSuccess(true);
+		response.setSuccess(exists ? true:false);
 		response.setMessage(exists ? "Username already exists" : "Username available");
 		response.setData(exists);
 
 		return ResponseEntity.ok(response);
+	}
+	@GetMapping("/validate/token")
+	@Operation(summary = "Validate token by userId only")
+	public ResponseEntity<ApiResponse<Boolean>> validateToken(@RequestParam Long userId) {
+	    boolean valid = tokenService.isTokenValid(userId);
+
+	    ApiResponse<Boolean> response = new ApiResponse<>();
+	    response.setStatusCode(valid ? 200 : 401);
+	    response.setSuccess(valid);
+	    response.setMessage(valid ? "Token is valid for user" : "No valid tokens found for user");
+	    response.setData(valid);
+
+	    return ResponseEntity.status(valid ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(response);
+	}
+	@PostMapping("/logout")
+	@Operation(summary = "Logout user by deleting all tokens using userId")
+	public ResponseEntity<ApiResponse<Void>> logout(@RequestParam Long userId) {
+	    tokenService.deleteTokenFromRedis(userId);
+
+	    ApiResponse<Void> response = new ApiResponse<>();
+	    response.setStatusCode(200);
+	    response.setSuccess(true);
+	    response.setMessage("Logout successful, all tokens removed for userId = " + userId);
+	    response.setData(null);
+
+	    return ResponseEntity.ok(response);
 	}
 }

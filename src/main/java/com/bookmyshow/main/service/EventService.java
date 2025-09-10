@@ -33,7 +33,7 @@ public interface EventService {
 			List<MultipartFile> crewImages)
 			throws IOException;
 
-	void deleteEvent(Long id);
+	boolean deleteEvent(Long id);
 
 	List<EventResponseDto> filterEvents(String type,
 	        List<Integer> languages,
