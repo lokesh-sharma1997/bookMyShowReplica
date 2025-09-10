@@ -36,6 +36,9 @@ public class AuthServiceImpl implements AuthService {
 	private final TokenService tokenService;
 	@Value("${app.jwt.secret}")
 	String secretKey;
+	
+	@Value("${app.jwt.expiration-ms}")
+	private long ttl;
 
 	@Override
 	public String login(LoginRequest req) {
@@ -56,8 +59,9 @@ public class AuthServiceImpl implements AuthService {
 			Long userId = user.getUserId();
 			// Generate token with role and return as string
 			String token = jwtService.generateToken(req.getUsername(), role, userId);
-            tokenService.saveToken(token, userId, jwtService.getExpirationMs());
-			return  token;
+//            tokenService.saveToken(token, userId, jwtService.getExpirationMs());
+			tokenService.saveToken(token, userId,ttl);
+			return token;
 
 		} catch (AuthenticationException ex) {
 			throw new InvalidCredentialsException("Invalid credentials for username: " + req.getUsername());
@@ -67,36 +71,35 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public String register(RegisterRequest req){
+	public String register(RegisterRequest req) {
 		if (userRepository.existsByUsername(req.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
 		}
- try {
-	 String decryptedPassword=AESUtil.decrypt(req.getPassword(), secretKey);
-		UserMaster user = new UserMaster();
-		user.setName(req.getName());
-		user.setUsername(req.getUsername());
-		user.setPassword(passwordEncoder.encode(decryptedPassword));
-		user.setEmail(req.getEmail());
-		user.setPhoneNumber(req.getPhoneNumber());
+		try {
+			String decryptedPassword = AESUtil.decrypt(req.getPassword(), secretKey);
+			UserMaster user = new UserMaster();
+			user.setName(req.getName());
+			user.setUsername(req.getUsername());
+			user.setPassword(passwordEncoder.encode(decryptedPassword));
+			user.setEmail(req.getEmail());
+			user.setPhoneNumber(req.getPhoneNumber());
 
-		// Fetch and assign role
-		Role role = roleRepository.findByRoleName("USER")
-				.orElseThrow(() -> new RoleNotFoundException("Default role USER not found"));
-		user.setRole(role);
+			// Fetch and assign role
+			Role role = roleRepository.findByRoleName("USER")
+					.orElseThrow(() -> new RoleNotFoundException("Default role USER not found"));
+			user.setRole(role);
 
-		userRepository.save(user);
+			userRepository.save(user);
 
-		return "User registered successfully";
-	}
- catch(Exception e) {
-	 throw new RuntimeException("Password decryption failing during registration"+e.getMessage(),e);
-       }
+			return "User registered successfully";
+		} catch (Exception e) {
+			throw new RuntimeException("Password decryption failing during registration" + e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public boolean userExistsByUsername(String username) {
 		return userRepository.existsByUsername(username);
 	}
-	 
+
 }

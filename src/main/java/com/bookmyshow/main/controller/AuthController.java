@@ -14,7 +14,6 @@ import com.bookmyshow.main.dto.LoginRequest;
 import com.bookmyshow.main.dto.RegisterRequest;
 import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.response.TokenResponse;
-import com.bookmyshow.main.security.JwtService;
 import com.bookmyshow.main.service.AuthService;
 import com.bookmyshow.main.service.TokenService;
 
@@ -27,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 	private final TokenService tokenService;
 	private final AuthService authService;
-	private final JwtService jwtService;
+	
 
 	@PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "${auth.login}")
@@ -72,7 +71,7 @@ public class AuthController {
 	@PostMapping("/logout")
 	@Operation(summary = "Logout user by deleting all tokens using userId")
 	public ResponseEntity<ApiResponse<Void>> logout(@RequestParam Long userId) {
-	    tokenService.deleteToken(userId);
+	    tokenService.deleteTokenFromRedis(userId);
 
 	    ApiResponse<Void> response = new ApiResponse<>();
 	    response.setStatusCode(200);

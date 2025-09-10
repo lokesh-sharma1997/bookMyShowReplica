@@ -30,8 +30,6 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private RoleRepository roleRepository;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	// Convert Entity -> DTO
 	private UserDTO convertToDTO(UserMaster user) {
@@ -47,29 +45,6 @@ public class UserServiceImpl implements UserService {
 		dto.setUpdatedOn(user.getUpdatedOn());
 		dto.setDeleteFlag(user.getDeleteFlag());
 		return dto;
-	}
-
-	// Convert DTO -> Entity
-	private UserMaster convertToEntity(UserDTO dto) {
-		UserMaster user = new UserMaster();
-		user.setUserId(dto.getUserId());
-		user.setName(dto.getName());
-		user.setUsername(dto.getUsername());
-		user.setPassword(dto.getPassword());
-		user.setEmail(dto.getEmail());
-		user.setPhoneNumber(dto.getPhoneNumber());
-
-		if (dto.getRoleName() != null) {
-			Role role = roleRepository.findByRoleName(dto.getRoleName().toUpperCase())
-					.orElseThrow(() -> new RoleNotFoundException("Invalid role: " + dto.getRoleName()));
-			user.setRole(role);
-		}
-
-		user.setCreatedOn(dto.getCreatedOn());
-		user.setUpdatedOn(dto.getUpdatedOn());
-		user.setDeleteFlag(dto.getDeleteFlag() != null ? dto.getDeleteFlag() : false);
-
-		return user;
 	}
 
 	@Override

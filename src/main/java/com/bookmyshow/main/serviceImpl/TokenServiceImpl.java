@@ -1,49 +1,50 @@
 package com.bookmyshow.main.serviceImpl;
 
+import java.time.Duration;
 import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.bookmyshow.main.security.JwtService;
 import com.bookmyshow.main.service.TokenService;
 
-import io.lettuce.core.RedisException;
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
-public class TokenServiceImpl implements TokenService{
+//@AllArgsConstructor
+public class TokenServiceImpl implements TokenService {
 	private final RedisTemplate<String, Object> redisTemplate;
-	@Override
-	public void saveToken(String token, Long userId, long durationSeconds) {
-//		long duration = durationSeconds / 1000;
-//		String redisKey = "token:user:" + userId + ":" + token;
-		try {
-		redisTemplate.opsForValue().setIfPresent(userId.toString(),  token);
-		System.out.println("Saved token for user " + userId + ": " + userId.toString());
-		}catch(RuntimeException e) {
-			
-			System.err.println(e.getMessage());
-			
-		}
 
-		
+	@Override
+	public void saveToken(String token, Long userId ,long durationSeconds) {
+		try {
+
+			redisTemplate.opsForValue().set(userId.toString(), token,Duration.ofMillis(durationSeconds));
+			System.out.println("Saved OID {} with name {} to Redis" + userId.toString());
+		} catch (Exception e) {
+			System.out.println("Failed to save OID {} to Redis: {}" + e.getMessage());
+			throw new RuntimeException("Failed to save OID", e);
+		}
 	}
 
 	@Override
 	public boolean isTokenValid(Long userId) {
-		 Set<String> keys = redisTemplate.keys("token:user:" + userId + ":*");
-		    return keys != null && !keys.isEmpty();
+		Set<String> keys = redisTemplate.keys("token:user:" + userId + ":*");
+		return keys != null && !keys.isEmpty();
 	}
 
 	@Override
-	public void deleteToken(Long userId) {
-		Set<String> keys = redisTemplate.keys("token:user:" + userId + ":*");
-	    if (keys != null && !keys.isEmpty()) {
-	        redisTemplate.delete(keys);
-	        System.out.println("Deleted all tokens for user " + userId);
-	    } else {
-	        System.out.println("No tokens found for user " + userId);
-	    }
-		
+	public void deleteTokenFromRedis(Long key) {
+		try {
+			redisTemplate.delete(key.toString());
+			System.out.println("Deleted key {} from Redis" + key);
+		} catch (Exception e) {
+			System.out.println("Failed to delete key {} from Redis: {}" + e.getMessage());
+			throw new RuntimeException("Failed to delete key", e);
+		}
 	}
 
 }

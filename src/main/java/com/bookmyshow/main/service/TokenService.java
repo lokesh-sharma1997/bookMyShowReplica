@@ -6,5 +6,7 @@ public interface TokenService {
 
 	boolean isTokenValid(Long userId);
 
-	void deleteToken(Long userId);
+	void deleteTokenFromRedis(Long userId);
+	
+//	void saveOidName(String token, Long userId);
 }
