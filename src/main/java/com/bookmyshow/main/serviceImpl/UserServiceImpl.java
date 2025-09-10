@@ -30,8 +30,6 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private RoleRepository roleRepository;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	// Convert Entity -> DTO
 	private UserDTO convertToDTO(UserMaster user) {
@@ -47,29 +45,6 @@ public class UserServiceImpl implements UserService {
 		dto.setUpdatedOn(user.getUpdatedOn());
 		dto.setDeleteFlag(user.getDeleteFlag());
 		return dto;
-	}
-
-	// Convert DTO -> Entity
-	private UserMaster convertToEntity(UserDTO dto) {
-		UserMaster user = new UserMaster();
-		user.setUserId(dto.getUserId());
-		user.setName(dto.getName());
-		user.setUsername(dto.getUsername());
-		user.setPassword(dto.getPassword());
-		user.setEmail(dto.getEmail());
-		user.setPhoneNumber(dto.getPhoneNumber());
-
-		if (dto.getRoleName() != null) {
-			Role role = roleRepository.findByRoleName(dto.getRoleName().toUpperCase())
-					.orElseThrow(() -> new RoleNotFoundException("Invalid role: " + dto.getRoleName()));
-			user.setRole(role);
-		}
-
-		user.setCreatedOn(dto.getCreatedOn());
-		user.setUpdatedOn(dto.getUpdatedOn());
-		user.setDeleteFlag(dto.getDeleteFlag() != null ? dto.getDeleteFlag() : false);
-
-		return user;
 	}
 
 	@Override
@@ -111,12 +86,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateUserRole(int userId, String roleName) {
+	public void updateUserRole(int userId ) {
 		UserMaster user = userRepository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
-		Role role = roleRepository.findByRoleName(roleName.toUpperCase())
-				.orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
+		Role role = roleRepository.findById(2)
+				.orElseThrow(() -> new RoleNotFoundException("Role not found: Admin"));
 
 		user.setRole(role);
 		user.setUpdatedOn(LocalDateTime.now());

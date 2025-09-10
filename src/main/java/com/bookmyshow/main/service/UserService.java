@@ -18,6 +18,6 @@ public interface UserService {
 
 	boolean deleteById(int userId);
 
-	void updateUserRole(int userId, String roleName);
+	void updateUserRole(int userId);
 
 }

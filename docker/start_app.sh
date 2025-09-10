@@ -14,7 +14,10 @@ echo "DB_PORT:                $DB_PORT"
 echo "DB_NAME:                $DB_NAME"
 echo "DB_USER:                $DB_USER"
 echo "DB_PASS:                $DB_PASS"
-echo "SECRET:                $SECRET"
+echo "SECRET:                 $SECRET"
+echo "REDIS_HOST:             $REDIS_HOST"
+echo "REDIS_PORT:             $REDIS_PORT"
+echo "TTL:                    $TTL"
 
 echo "Done"
 
@@ -28,6 +31,8 @@ sed -i "s;##DB_PASS##;$DB_PASS;"                  $config_file
 sed -i "s;##BOOKMYSHOW##;$BOOKMYSHOW;"              $config_file
 sed -i "s;##BOOKMYSHOWSERVICE##;$BOOKMYSHOWSERVICE;" $config_file
 sed -i "s;##SECRET##;$SECRET;"                      $config_file
+sed -i "s;##REDIS_HOST##;$REDIS_HOST;"              $config_file
+sed -i "s;##REDIS_PORT##;$REDIS_PORT;"              $config_file
 
 echo "Using java options config: $JAVA_OPTS"
 

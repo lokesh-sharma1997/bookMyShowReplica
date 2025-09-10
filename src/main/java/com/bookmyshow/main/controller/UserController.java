@@ -100,10 +100,9 @@ public class UserController {
 
 	@PutMapping("/{userId}/role")
 	@Operation(summary = "${user.updateUserRole}")
-	public ResponseEntity<ApiResponse<UserDTO>> updateUserRole(@PathVariable int userId,
-			@RequestParam String roleName) {
+	public ResponseEntity<ApiResponse<UserDTO>> updateUserRole(@PathVariable int userId) {
 
-		userService.updateUserRole(userId, roleName);
+		userService.updateUserRole(userId);
 
 		// Fetch updated user and convert to DTO
 		UserDTO updatedUser = userService.getByUserId(userId)
@@ -111,7 +110,7 @@ public class UserController {
 
 		ApiResponse<UserDTO> response = new ApiResponse<>();
 		response.setSuccess(true);
-		response.setMessage("User role updated to " + roleName.toUpperCase());
+		response.setMessage("User role updated to Admin");
 		response.setData(updatedUser);
 
 		return ResponseEntity.ok(response);
