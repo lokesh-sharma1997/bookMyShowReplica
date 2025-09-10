@@ -34,73 +34,55 @@ public class EventSpecification {
 
 	     
 	        if (languages != null && !languages.isEmpty()) {
-	            for (Integer languageId : languages) {
-	                Join<Event, Languages> join = root.join("languages", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("languageId"), languageId));
-	            }
+	        	Join<Event, ?> languageJoin = root.join("languages");
+	            predicates.add(languageJoin.get("languageId").in(languages));
 	        }
 
 	       
 	        if (genres != null && !genres.isEmpty()) {
-	            for (Integer genreId : genres) {
-	                Join<Event, Genres> join = root.join("genres", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("genreId"), genreId));
-	            }
+	        	Join<Event, ?> genreJoin = root.join("genres");
+	            predicates.add(genreJoin.get("genreId").in(genres));
 	        }
 
 	        if (formats != null && !formats.isEmpty()) {
-	            for (Integer formatId : formats) {
-	                Join<Event, Format> join = root.join("format", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("formatId"), formatId));
-	            }
+	        	Join<Event, ?> formatJoin = root.join("format");
+	            predicates.add(formatJoin.get("formatId").in(formats));
 	        }
 
 	       
 	        if (tags != null && !tags.isEmpty()) {
-	            for (Integer tagId : tags) {
-	                Join<Event, Tag> join = root.join("tag", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("tagId"), tagId));
-	            }
+	        	Join<Event, ?> tagJoin = root.join("tag");
+	            predicates.add(tagJoin.get("tagId").in(tags));
 	        }
 
 	    
 	        if (categories != null && !categories.isEmpty()) {
-	            for (Integer categoryId : categories) {
-	                Join<Event, Categories> join = root.join("categories", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("categoryId"), categoryId));
-	            }
+	        	Join<Event, ?> categoryJoin = root.join("categories");
+	            predicates.add(categoryJoin.get("categoryId").in(categories));
 	        }
 
 	  
 	        if (price != null && !price.isEmpty()) {
-	            for (Integer priceId : price) {
-	                Join<Event, Price> join = root.join("price", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("priceId"), priceId));
-	            }
+	        	Join<Event, ?> priceJoin = root.join("price");
+	            predicates.add(priceJoin.get("priceId").in(price));
 	        }
 
 	     
 	        if (moreFilters != null && !moreFilters.isEmpty()) {
-	            for (Integer filterId : moreFilters) {
-	                Join<Event, MoreFilters> join = root.join("moreFilters", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("filterId"), filterId));
-	            }
+	        	   Join<Event, ?> moreFilterJoin = root.join("moreFilters");
+		            predicates.add(moreFilterJoin.get("filterId").in(moreFilters));
 	        }
 
 	       
 	        if (releaseMonths != null && !releaseMonths.isEmpty()) {
-	            for (Integer monthId : releaseMonths) {
-	                Join<Event, ReleaseMonth> join = root.join("releaseMonth", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("releaseMonthId"), monthId));
-	            }
+	        	Join<Event, ?> releaseMonthJoin = root.join("releaseMonth");
+	            predicates.add(releaseMonthJoin.get("releaseMonthId").in(releaseMonths));
 	        }
 
 	       
 	        if (dateFilters != null && !dateFilters.isEmpty()) {
-	            for (Integer dateId : dateFilters) {
-	                Join<Event, DateFilter> join = root.join("dateFilter", JoinType.INNER);
-	                predicates.add(builder.equal(join.get("dateFilterId"), dateId));
-	            }
+	        	Join<Event, ?> dateFilterJoin = root.join("dateFilter");
+	            predicates.add(dateFilterJoin.get("dateFilterId").in(dateFilters));
 	        }
 
 	        return builder.and(predicates.toArray(new Predicate[0]));
