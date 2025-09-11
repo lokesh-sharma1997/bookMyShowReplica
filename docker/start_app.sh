@@ -33,7 +33,7 @@ sed -i "s;##BOOKMYSHOWSERVICE##;$BOOKMYSHOWSERVICE;" $config_file
 sed -i "s;##SECRET##;$SECRET;"                      $config_file
 sed -i "s;##REDIS_HOST##;$REDIS_HOST;"              $config_file
 sed -i "s;##REDIS_PORT##;$REDIS_PORT;"              $config_file
-
+sed -i "s;##TTL##;$TTL;"              $config_file
 echo "Using java options config: $JAVA_OPTS"
 
 java ${JAVA_OPTS} -jar  -Dspring.config.location=/app/bookMyShow/application.properties  /app/bookMyShow/bookmyshow-backend-1.0.jar 2>&1 | tee -a /app/bookMyShow/server.log
