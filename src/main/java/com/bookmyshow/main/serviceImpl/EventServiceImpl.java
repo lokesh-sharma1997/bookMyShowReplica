@@ -23,7 +23,9 @@ import com.bookmyshow.main.dto.CrewDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
 
+
 import com.bookmyshow.main.dto.EventResponseDto;
+import com.bookmyshow.main.dto.EventResponseDtoCard;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
 import com.bookmyshow.main.dto.LanguagesDTO;
@@ -349,12 +351,12 @@ public class EventServiceImpl implements EventService {
 
 
 	@Override
-	public EventDTO getEventById(Long id) {
+	public EventResponseDto getEventById(Long id) {
 
 		return eventRepository.findById(id)
 				.filter(movie -> !movie.getDeleted() 
 						)
-				.map(this::toDto).orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
+				.map(this::toEventdto).orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
 	}
 
 	
@@ -605,11 +607,10 @@ public class EventServiceImpl implements EventService {
 
 	        events = eventRepository.searchByNameAndEventTypes(name, lowerEventTypes);
 	    } else {
-	        Event event = eventRepository.findByName(name).orElse(null);
-	        if (event == null) {
+	        events = eventRepository.searchByNameOnly(name);
+	        if (events == null || events.isEmpty()) {
 	            throw new EventCustomException("No event found");
 	        }
-	        events = List.of(event);
 	    }
 
 	 
@@ -635,7 +636,7 @@ public class EventServiceImpl implements EventService {
 
 
 	@Override
-	public List<EventResponseDto> filterEvents(
+	public List<EventResponseDtoCard> filterEvents(
 	    String type,
 	    List<Integer> languages,
 	    List<Integer> genres,
@@ -674,7 +675,7 @@ public class EventServiceImpl implements EventService {
 	
 	
 	@Override
-	public List<EventResponseDto> getPopularEvents(String eventType) {
+	public List<EventResponseDtoCard> getPopularEvents(String eventType) {
 	    List<Event> events;
 
 	    if (eventType != null && !eventType.isEmpty()) {
@@ -691,8 +692,8 @@ public class EventServiceImpl implements EventService {
 
 
 
-	private EventResponseDto mapToResponseDto(Event event) {
-	    EventResponseDto dto = new EventResponseDto();
+	private EventResponseDtoCard mapToResponseDto(Event event) {
+		EventResponseDtoCard dto = new EventResponseDtoCard();
 
 	    dto.setEventId(event.getEventId());
 	    dto.setName(event.getName());
@@ -702,11 +703,11 @@ public class EventServiceImpl implements EventService {
 	  
 	    if (event.getGenres() != null && !event.getGenres().isEmpty()) {
 	       
-	        List<Long> genreIds = event.getGenres()
+	        List<String> genre = event.getGenres()
 	                                   .stream()
-	                                   .map(g -> g.getGenreId())
+	                                   .map(g -> g.getGenresName())
 	                                   .toList();
-	        dto.setGenres(genreIds);
+	        dto.setGenres(genre);
 	    } else {
 	        dto.setGenres(List.of()); 
 	    }
@@ -717,6 +718,92 @@ public class EventServiceImpl implements EventService {
 
 	    return dto;
 	}
+
+	public  EventResponseDto toEventdto(Event event) {
+		EventResponseDto dto = new EventResponseDto();
+	    
+	    dto.setEventId(event.getEventId());
+	    dto.setName(event.getName());
+	    dto.setDescription(event.getDescription());
+	    dto.setRunTime(event.getRunTime());
+	    dto.setStartDate(event.getStartDate());
+	    dto.setEndDate(event.getEndDate());
+	    dto.setEventType(event.getEventType());
+	    dto.setImageurl(event.getImageurl());
+	    dto.setImdbRating(event.getImdbRating());
+	    dto.setLikes(event.getLikes());
+	    dto.setVotes(event.getVotes());
+	    dto.setCurrentlyPlaying(event.getCurrentlyPlaying());
+	    dto.setDeleted(event.getDeleted());
+	    dto.setAgeLimit(event.getAgeLimit() != null ? event.getAgeLimit() : 0);
+	    dto.setReleasingOn(event.getReleasingOn());
+
+	    dto.setLanguages(event.getLanguages() != null ? event.getLanguages().stream()
+	        .map(Languages::getLanguageName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setGenres(event.getGenres() != null ? event.getGenres().stream()
+	        .map(Genres::getGenresName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setFormat(event.getFormat() != null ? event.getFormat().stream()
+	        .map(Format::getFormatName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setTag(event.getTag() != null ? event.getTag().stream()
+	        .map(Tag::getTagName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setReleaseMonth(event.getReleaseMonth() != null ? event.getReleaseMonth().stream()
+	        .map(ReleaseMonth::getReleaseMonthName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setDateFilter(event.getDateFilter() != null ? event.getDateFilter().stream()
+	        .map(DateFilter::getDateFilterName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setCategories(event.getCategories() != null ? event.getCategories().stream()
+	        .map(Categories::getCategoriesName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setMoreFilters(event.getMoreFilters() != null ? event.getMoreFilters().stream()
+	        .map(MoreFilters::getName)
+	        .toList() : new ArrayList<>());
+
+	    dto.setPrice(event.getPrice() != null ? event.getPrice().stream()
+	        .map(Price::getPriceRange)
+	        .toList() : new ArrayList<>());
+
+	    if (event.getCast() != null) {
+	        dto.setCast(event.getCast()
+	            .stream()
+	            .map(cast -> {
+	                CastDTO castDto = new CastDTO();
+	                castDto.setActorName(cast.getActorName());
+	                castDto.setCastImg(cast.getCastImg());
+	                return castDto;
+	            })
+	            .toList());
+	    }
+	    if (event.getCrew() != null) {
+	        dto.setCrew(event.getCrew()
+	            .stream()
+	            .map(crew -> {
+	                CrewDTO crewDto = new CrewDTO();
+	                crewDto.setMemberName(crew.getMemberName());
+	                crewDto.setCrewImg(crew.getCrewImg());
+	                return crewDto;
+	            })
+	            .toList());
+	    }
+
+	    dto.setCity(event.getCity() != null ? event.getCity().stream()
+	        .map(City::getName)
+	        .toList() : new ArrayList<>());
+
+	    return dto;
+	}
+
 
 
 
