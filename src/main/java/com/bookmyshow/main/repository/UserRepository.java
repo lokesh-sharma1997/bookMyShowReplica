@@ -24,7 +24,7 @@ public interface UserRepository extends JpaRepository<UserMaster, Integer> {
 		       "LOWER(user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
 		       "LOWER(user.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
 		       "LOWER(user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-		       "user.phoneNumber LIKE CONCAT('%', :keyword, '%')")
+		       "user.phoneNumber LIKE CONCAT('%', :keyword, '%') AND user.delete_flag=false")
 		List<UserMaster> globalSearch(@Param("keyword") String value);
 
 

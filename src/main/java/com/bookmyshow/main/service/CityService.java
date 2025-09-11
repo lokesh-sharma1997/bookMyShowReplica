@@ -10,5 +10,6 @@ public interface CityService {
     List<CityDTO> getAllCities();
 
     List<CityDTO> getPopularCities();
+
 }
 
