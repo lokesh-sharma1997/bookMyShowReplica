@@ -24,6 +24,7 @@ import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
 import com.bookmyshow.main.dto.EventFilterRequest;
 import com.bookmyshow.main.dto.EventResponseDto;
+import com.bookmyshow.main.dto.EventResponseDtoCard;
 import com.bookmyshow.main.dto.EventSearchRequestDto;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
@@ -98,15 +99,15 @@ public class EventController {
 
     @Operation(summary = "Get event by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<EventDTO>> getEventById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<EventResponseDto>> getEventById(@PathVariable Long id) {
                        
-    	 ApiResponse<EventDTO> response = new ApiResponse<>(
+    	 ApiResponse<EventResponseDto> response = new ApiResponse<>(
  	            HttpStatus.CREATED.value(),
  	            "Event created successfully",
  	            true,
  	           eventService.getEventById(id)
  	    );
-    	 EventDTO event = eventService.getEventById(id);
+    	 EventResponseDto event = eventService.getEventById(id);
     	 if (event == null) {
              throw new EventCustomException("Event not found with id: " + id);
          }
@@ -167,11 +168,11 @@ public class EventController {
     
     @Operation(summary = "${event.getPopularEvents}")
     @GetMapping("/get-popular-events")
-    public ResponseEntity<ApiResponse<List<EventResponseDto>>> getPopularEvents(
+    public ResponseEntity<ApiResponse<List<EventResponseDtoCard>>> getPopularEvents(
             @RequestParam(required = false) String eventType) {
-        List<EventResponseDto> popularEvents = eventService.getPopularEvents(eventType);
+        List<EventResponseDtoCard> popularEvents = eventService.getPopularEvents(eventType);
         
-        ApiResponse<List<EventResponseDto>> response = new ApiResponse<>(
+        ApiResponse<List<EventResponseDtoCard>> response = new ApiResponse<>(
    	            HttpStatus.CREATED.value(),
    	            "Popolar Events fetch  successfully",
    	            true,
@@ -198,8 +199,8 @@ public class EventController {
 
     @Operation(summary = "event filter")
     @PostMapping("/filter")
-    public ResponseEntity<ApiResponse<List<EventResponseDto>>> filterEvents(@RequestBody EventFilterRequest filterRequest) {
-        List<EventResponseDto> events = eventService.filterEvents(
+    public ResponseEntity<ApiResponse<List<EventResponseDtoCard>>> filterEvents(@RequestBody EventFilterRequest filterRequest) {
+        List<EventResponseDtoCard> events = eventService.filterEvents(
             filterRequest.getType(),
             filterRequest.getLanguages(),
             filterRequest.getGenres(),
@@ -213,7 +214,7 @@ public class EventController {
             
         );
 
-        ApiResponse<List<EventResponseDto>> response = new ApiResponse<>(
+        ApiResponse<List<EventResponseDtoCard>> response = new ApiResponse<>(
             HttpStatus.OK.value(),
             "Events filtered successfully",
             true,
