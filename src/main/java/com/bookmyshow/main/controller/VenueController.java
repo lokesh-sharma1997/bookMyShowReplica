@@ -1,58 +1,42 @@
 package com.bookmyshow.main.controller;
 
-import java.util.List;
-
+import com.bookmyshow.main.dto.VenueDTO;
+import com.bookmyshow.main.service.VenueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.bookmyshow.main.dto.VenueDto;
-import com.bookmyshow.main.service.VenueService;
+import java.util.List;
 
 @RestController
-@RequestMapping("/venue")
+@RequestMapping("/venues") 
 public class VenueController {
 
-	@Autowired
-	private VenueService venueService;
+    @Autowired
+    private VenueService venueService;
 
-	@PreAuthorize("hasRole('ADMIN')")
-	@PostMapping("/create-venue")
-	public ResponseEntity<VenueDto> createTheatre(@RequestBody VenueDto theatreDto){
-		VenueDto created = venueService.createVenue(theatreDto);
+    @PostMapping("/create")
+    public ResponseEntity<VenueDTO> createVenue(@RequestBody VenueDTO venueDto) {
+        VenueDTO created = venueService.createVenue(venueDto);
         return ResponseEntity.ok(created);
-	}
+    }
 
-	
-	@GetMapping("/getAll")
-	public ResponseEntity<List<VenueDto>> getAllVenues() {
-		return ResponseEntity.ok(venueService.getAllVenues());
-	}
+    @GetMapping("/getAll")
+    public ResponseEntity<List<VenueDTO>> getAllVenues() {
+        List<VenueDTO> venues = venueService.getAllVenues();
+        return ResponseEntity.ok(venues);
+    }
 
-	@PreAuthorize("hasAnyRole('ADMIN','USER')")
-	@GetMapping("/getByName")
-	public ResponseEntity<List<VenueDto>> getVenueByName(@RequestParam String name) {
-		List<VenueDto> theatres = venueService.getVenuesByName(name);
-		if (theatres.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-		return ResponseEntity.ok(theatres);
-	}
+    @GetMapping("/city/{city}")
+    public ResponseEntity<List<VenueDTO>> getVenuesByCity(@PathVariable String city) {
+        List<VenueDTO> venues = venueService.getVenuesByCity(city);
+        return ResponseEntity.ok(venues);
+    }
 
-	@PreAuthorize("hasRole('ADMIN')")
-	@PatchMapping("/delete/{id}")
-	public ResponseEntity<Void> softDeleteTheatre(@PathVariable Long id) {
-		if (venueService.softDeleteVenue(id)) {
-			return ResponseEntity.ok().build();
-		}
-		return ResponseEntity.notFound().build();
-	}
+    @PatchMapping("/delete/{id}")
+    public ResponseEntity<Void> softDeleteVenue(@PathVariable Long id) {
+        boolean deleted = venueService.softDeleteVenue(id);
+        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    }
+    
 }
