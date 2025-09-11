@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 	public List<UserDTO> getByRole(String roleName) {
 		Role role = roleRepository.findByRoleName(roleName.toUpperCase())
 				.orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
-		return userRepository.findByRole(role).stream().map(this::convertToDTO).collect(Collectors.toList());
+		return userRepository.findByRole(role).stream().filter(user -> !user.getDeleteFlag()).map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	@Override

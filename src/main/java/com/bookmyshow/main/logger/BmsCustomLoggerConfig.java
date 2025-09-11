@@ -13,6 +13,8 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
+
+import com.bookmyshow.main.dto.RegisterRequest;
  
 @Aspect
 @Component
@@ -29,8 +31,11 @@ public class BmsCustomLoggerConfig {
         methodName.append(methodSignature.getName());
         StringBuilder startMsg = new StringBuilder(methodName.toString());
         startMsg.append("(");
-        startMsg.append(Arrays.stream(proceedingJoinPoint.getArgs()).map(String::valueOf).collect(Collectors.joining(",")));
+        startMsg.append(Arrays.stream(proceedingJoinPoint.getArgs())
+                             .map(arg -> sanitizeSensitiveData(arg)) // Use sanitizeSensitiveData here
+                             .collect(Collectors.joining(",")));
         startMsg.append(") started");
+
         LOGGER.info(startMsg);
         final StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -42,5 +47,23 @@ public class BmsCustomLoggerConfig {
         endMsg.append(" ms");
         LOGGER.info(endMsg);
         return retVal;
+    }
+    private String sanitizeSensitiveData(Object arg) {
+        if (arg == null) {
+            return "null";
+        }
+        
+        // If it's a RegisterRequest object, mask the password field
+        if (arg instanceof RegisterRequest) {
+            RegisterRequest request = (RegisterRequest) arg;
+            return "RegisterRequest(name=" + request.getName() + 
+                   ", username=********, " +  
+                   "password=********, " +    
+                   "email=" + request.getEmail() + 
+                   ", phoneNumber=**********)";  
+        }
+        
+        // If it's any other object, just return its string representation
+        return String.valueOf(arg);
     }
 }
