@@ -28,6 +28,8 @@ public interface UserRepository extends JpaRepository<UserMaster, Integer> {
 		       "user.deleteFlag = false")
 		List<UserMaster> globalSearch(@Param("keyword") String value);
 
+	boolean existsByEmail(String email);
+
 
 
 

@@ -19,10 +19,10 @@ public class TokenServiceImpl implements TokenService {
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	@Override
-	public void saveToken(String token, Long userId ,long durationSeconds) {
+	public void saveToken(String token, Long userId, long durationSeconds) {
 		try {
 
-			redisTemplate.opsForValue().set(userId.toString(), token,Duration.ofMillis(durationSeconds));
+			redisTemplate.opsForValue().set(userId.toString(), token, Duration.ofMillis(durationSeconds));
 			System.out.println("Saved OID {} with name {} to Redis" + userId.toString());
 		} catch (Exception e) {
 			System.out.println("Failed to save token to Redis: " + e.getMessage());
@@ -32,8 +32,16 @@ public class TokenServiceImpl implements TokenService {
 
 	@Override
 	public boolean isTokenValid(Long userId) {
-		Set<String> keys = redisTemplate.keys("token:user:" + userId + ":*");
-		return keys != null && !keys.isEmpty();
+		try {
+			String redisKey = userId.toString();
+			Boolean exists = redisTemplate.hasKey(redisKey);
+
+			// Return true if the key exists, otherwise false
+			return exists != null && exists;
+		} catch (Exception e) {
+			System.out.println("Failed to validate token for userId: " + userId + " - " + e.getMessage());
+			return false;
+		}
 	}
 
 	@Override
