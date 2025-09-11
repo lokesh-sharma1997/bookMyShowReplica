@@ -25,7 +25,7 @@ public class TokenServiceImpl implements TokenService {
 			redisTemplate.opsForValue().set(userId.toString(), token,Duration.ofMillis(durationSeconds));
 			System.out.println("Saved OID {} with name {} to Redis" + userId.toString());
 		} catch (Exception e) {
-			System.out.println("Failed to save OID {} to Redis: {}" + e.getMessage());
+			System.out.println("Failed to save token to Redis: " + e.getMessage());
 			throw new RuntimeException("Failed to save OID", e);
 		}
 	}
