@@ -103,7 +103,7 @@ public class EventController {
                        
     	 ApiResponse<EventResponseDto> response = new ApiResponse<>(
  	            HttpStatus.CREATED.value(),
- 	            "Event created successfully",
+ 	            "Event fetched successfully",
  	            true,
  	           eventService.getEventById(id)
  	    );

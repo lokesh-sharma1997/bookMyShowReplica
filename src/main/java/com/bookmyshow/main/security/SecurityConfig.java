@@ -73,8 +73,9 @@ public class SecurityConfig {
 //	String password = "kashish01"; //8JoAiIFelx1XrGgRk0NolQ==	
 //	public static void main(String[] args) throws Exception {
 //		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
-////	    String password = "kashish@2004";
+//	    String password = "priyanshu@123";
 //	  //  Rxkkl5rEjlXnRmij/MRUjw==
+////	    Mo0THa5x+S2rsqoCduPHrg==
 //	    String encrypted = AESUtil.encrypt(password, key);
 //	    String decrypted = AESUtil.decrypt(encrypted, key);
 //

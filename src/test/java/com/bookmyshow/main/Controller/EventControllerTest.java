@@ -26,11 +26,15 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bookmyshow.main.controller.EventController;
 import com.bookmyshow.main.dto.CategoryDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
+import com.bookmyshow.main.dto.EventFilterRequest;
+import com.bookmyshow.main.dto.EventResponseDto;
+import com.bookmyshow.main.dto.EventResponseDtoCard;
 import com.bookmyshow.main.dto.EventSearchRequestDto;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
@@ -44,12 +48,18 @@ import com.bookmyshow.main.service.EventService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.eq;
 
 @ExtendWith(MockitoExtension.class)
 class EventControllerTest {
@@ -132,18 +142,115 @@ class EventControllerTest {
         .andExpect(jsonPath("$.data").doesNotExist()); 
     }
 
-//    @Test
-//    void testGetEventById() throws Exception {
-//        when(eventService.getEventById(1L)).thenReturn(eventDto);
-//
-//        mockMvc.perform(get("/api/events/1"))
-//            .andExpect(status().isCreated())  
-//            .andExpect(jsonPath("$.statusCode").value(201)) 
-//            .andExpect(jsonPath("$.message").value("Event created successfully"))
-//            .andExpect(jsonPath("$.success").value(true))
-//            .andExpect(jsonPath("$.data.name").value("Test Event"))
-//            .andExpect(jsonPath("$.data.eventId").value(1));
-//    }
+    @Test
+    void testGetEventById_Success() throws Exception {
+       
+        EventResponseDto mockEvent = new EventResponseDto();
+        mockEvent.setEventId(1L);
+        mockEvent.setName("Test Event");
+
+        when(eventService.getEventById(1L)).thenReturn(mockEvent);
+       
+        mockMvc.perform(get("/api/events/1"))
+            .andExpect(status().isCreated()) 
+            .andExpect(jsonPath("$.statusCode").value(201))
+            .andExpect(jsonPath("$.message").value("Event fetched successfully"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data.name").value("Test Event"))
+            .andExpect(jsonPath("$.data.eventId").value(1));
+    }
+    
+
+
+
+    @Test
+    void testFilterEvents() throws Exception {
+       
+        EventFilterRequest filterRequest = new EventFilterRequest();
+        filterRequest.setType("Movie");
+        filterRequest.setLanguages(Arrays.asList(1, 2));
+        filterRequest.setGenres(Arrays.asList(3, 4));
+        filterRequest.setFormats(Arrays.asList(5, 6));
+        filterRequest.setTags(Arrays.asList(7, 8));
+        filterRequest.setCategories(Arrays.asList(9, 10));
+        filterRequest.setPrice(Arrays.asList(100, 200));
+        filterRequest.setMorefilter(Arrays.asList(11, 12));
+        filterRequest.setReleaseMonths(Arrays.asList(1, 2));
+        filterRequest.setDateFilters(Arrays.asList(13, 14));
+
+        
+        EventResponseDtoCard event = new EventResponseDtoCard();
+        event.setEventId(1L);
+        event.setName("Sample Movie");
+
+        List<EventResponseDtoCard> mockResponse = Arrays.asList(event);
+
+       
+        when(eventService.filterEvents(
+                eq("Movie"),
+                eq(Arrays.asList(1, 2)),
+                eq(Arrays.asList(3, 4)),
+                eq(Arrays.asList(5, 6)),
+                eq(Arrays.asList(7, 8)),
+                eq(Arrays.asList(9, 10)),
+                eq(Arrays.asList(100, 200)),
+                eq(Arrays.asList(11, 12)),
+                eq(Arrays.asList(1, 2)),
+                eq(Arrays.asList(13, 14))
+        )).thenReturn(mockResponse);
+
+       
+        mockMvc.perform(post("/api/events/filter")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(filterRequest)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.statusCode").value(200))
+            .andExpect(jsonPath("$.message").value("Events filtered successfully"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data[0].eventId").value(1))
+            .andExpect(jsonPath("$.data[0].name").value("Sample Movie")); 
+    }
+
+    @Test
+    void testDeleteEvent() throws Exception {
+        Long eventId = 1L;
+
+        
+        when(eventService.deleteEvent(eventId)).thenReturn(true);
+
+        mockMvc.perform(patch("/api/events/delete/{id}", eventId))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.statusCode").value(201))
+            .andExpect(jsonPath("$.message").value("Event deleted successfully"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data").doesNotExist()); 
+    }
+    @Test
+    void testGetPopularEvents() throws Exception {
+        EventResponseDtoCard event1 = new EventResponseDtoCard();
+        event1.setEventId(1L);
+        event1.setName("Popular Event 1");
+
+        EventResponseDtoCard event2 = new EventResponseDtoCard();
+        event2.setEventId(2L);
+        event2.setName("Popular Event 2");
+
+        List<EventResponseDtoCard> popularEvents = Arrays.asList(event1, event2);
+
+        when(eventService.getPopularEvents("Movie")).thenReturn(popularEvents);
+
+        mockMvc.perform(get("/api/events/get-popular-events")
+                .param("eventType", "Movie"))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.statusCode").value(201))
+            .andExpect(jsonPath("$.message").value("Popolar Events fetch  successfully"))
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.data[0].eventId").value(1))
+            .andExpect(jsonPath("$.data[0].name").value("Popular Event 1"))
+            .andExpect(jsonPath("$.data[1].eventId").value(2))
+            .andExpect(jsonPath("$.data[1].name").value("Popular Event 2"));
+    }
+
 
     @Test
     void testSearchEventNames() throws Exception {
