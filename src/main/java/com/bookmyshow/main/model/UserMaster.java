@@ -36,8 +36,7 @@ public class UserMaster {
 	private String username;
 
 	@Column(nullable = false)
-	@Size(min = 8, message = "Password must be at least 8 characters long")
-	private String password; // Size(min = 8, message = "Password must be at least 8 characters long")
+	private String password;
 
 	@Column(unique = true, nullable = false)
 	private String email;

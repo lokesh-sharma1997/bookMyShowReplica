@@ -18,6 +18,9 @@ echo "SECRET:                 $SECRET"
 echo "REDIS_HOST:             $REDIS_HOST"
 echo "REDIS_PORT:             $REDIS_PORT"
 echo "TTL:                    $TTL"
+echo "REDIS_USERNAME:                    $REDIS_USERNAME"
+echo "REDIS_PASSWORD:                    $REDIS_PASSWORD"
+
 
 echo "Done"
 
@@ -34,6 +37,8 @@ sed -i "s;##SECRET##;$SECRET;"                      $config_file
 sed -i "s;##REDIS_HOST##;$REDIS_HOST;"              $config_file
 sed -i "s;##REDIS_PORT##;$REDIS_PORT;"              $config_file
 sed -i "s;##TTL##;$TTL;"              $config_file
+sed -i "s;##REDIS_USERNAME##;$REDIS_USERNAME;"              $config_file
+sed -i "s;##REDIS_PASSWORD##;$REDIS_PASSWORD;"              $config_file
 echo "Using java options config: $JAVA_OPTS"
 
 java ${JAVA_OPTS} -jar  -Dspring.config.location=/app/bookMyShow/application.properties  /app/bookMyShow/bookmyshow-backend-1.0.jar 2>&1 | tee -a /app/bookMyShow/server.log
