@@ -9,6 +9,7 @@ import com.bookmyshow.main.dto.CategoryDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
 import com.bookmyshow.main.dto.EventResponseDto;
+import com.bookmyshow.main.dto.EventResponseDtoCard;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
 import com.bookmyshow.main.dto.LanguagesDTO;
@@ -24,7 +25,7 @@ public interface EventService {
 			List<MultipartFile> crewImages
 			) throws IOException;
 
-	EventDTO getEventById(Long id);
+	EventResponseDto getEventById(Long id);
 
 	
 	List<String> searchEventNames(String name, List<String> eventTypes);
@@ -35,7 +36,7 @@ public interface EventService {
 
 	boolean deleteEvent(Long id);
 
-	List<EventResponseDto> filterEvents(String type,
+	List<EventResponseDtoCard> filterEvents(String type,
 	        List<Integer> languages,
 	        List<Integer> genres,
 	        List<Integer> formats,
@@ -60,7 +61,7 @@ public interface EventService {
 	 List<MoreFilterDTO> getAllMoreFilters();
 
 
-	List<EventResponseDto> getPopularEvents(String eventType);
+	List<EventResponseDtoCard> getPopularEvents(String eventType);
 
 
 
