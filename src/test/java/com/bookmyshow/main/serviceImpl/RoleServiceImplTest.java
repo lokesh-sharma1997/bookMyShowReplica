@@ -116,18 +116,18 @@ class RoleServiceImplTest {
     void testCreateRole_withRoleName_shouldConvertToUpperCase() {
         RoleDTO inputDto = new RoleDTO();
         inputDto.setRoleId(1);
-        inputDto.setRoleName("admin"); // ✅ Non-null name, will go inside the `if` block
+        inputDto.setRoleName("admin");
 
         Role savedEntity = new Role();
         savedEntity.setRoleId(1);
-        savedEntity.setRoleName("ADMIN"); // Simulate what DB would save
+        savedEntity.setRoleName("ADMIN");
 
         when(roleRepository.save(any(Role.class))).thenReturn(savedEntity);
 
         RoleDTO result = roleService.createRole(inputDto);
 
         assertNotNull(result);
-        assertEquals("ADMIN", result.getRoleName()); // ✅ Validates upper case
+        assertEquals("ADMIN", result.getRoleName());
         verify(roleRepository).save(any(Role.class));
     }
 

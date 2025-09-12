@@ -68,6 +68,7 @@ import com.bookmyshow.main.repository.LanguagesRepository;
 import com.bookmyshow.main.repository.MoreFiltersRepository;
 import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
+import com.bookmyshow.main.repository.TagRepository;
 import com.bookmyshow.main.specification.EventSpecification;
 
 @ExtendWith(MockitoExtension.class)
