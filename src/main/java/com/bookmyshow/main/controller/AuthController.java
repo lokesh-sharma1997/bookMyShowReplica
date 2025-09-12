@@ -78,7 +78,7 @@ public class AuthController {
 
 		ApiResponse<Boolean> response = new ApiResponse<>();
 		response.setStatusCode(200);
-		response.setSuccess(exists ? true:false);
+		response.setSuccess(exists ? false:true);
 		response.setMessage(exists ? "Username already exists" : "Username available");
 		response.setData(exists);
 
