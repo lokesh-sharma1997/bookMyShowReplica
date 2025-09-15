@@ -227,20 +227,20 @@ public class EventController {
     
     @Operation(summary = "Get All languages")
     @GetMapping("/languages")
-    public ResponseEntity<ApiResponse<List<LanguagesDTO>>> getLanguages() {
+    public ResponseEntity<ApiResponse<List<LanguagesDTO>>> getLanguages(@RequestParam String eventType) {
 
     	return ResponseEntity.ok(new ApiResponse<>( HttpStatus.OK.value(),
     			"Fetch all languages successfully", true,
-    			eventService.getAllLanguages()));
+    			eventService.getAllLanguages(eventType)));
     }
     
     @Operation(summary = "Get All Genres")
     @GetMapping("/genres")
-    public ResponseEntity<ApiResponse<List<GenresDTO>>> getGenres() {
+    public ResponseEntity<ApiResponse<List<GenresDTO>>> getGenres(@RequestParam String eventType) {
 
     	return ResponseEntity.ok(new ApiResponse<>( HttpStatus.OK.value(),
     			"Fetch all Genres successfully", true,
-    			eventService.getAllGenres()));
+    			eventService.getAllGenres(eventType)));
     }
     
     @Operation(summary = "Get All Formats")
@@ -297,26 +297,26 @@ public class EventController {
     
     @Operation(summary = "Get All Categories")
     @GetMapping("/categories")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getCategories() {
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getCategories(@RequestParam String eventType) {
         return ResponseEntity.ok(
             new ApiResponse<>(
                 HttpStatus.OK.value(),
                 "Fetch all Categories successfully",
                 true,
-                eventService.getAllCategories()
+                eventService.getAllCategories(eventType)
             )
         );
     }
 
     @Operation(summary = "Get All More Filters")
     @GetMapping("/more-filters")
-    public ResponseEntity<ApiResponse<List<MoreFilterDTO>>> getMoreFilters() {
+    public ResponseEntity<ApiResponse<List<MoreFilterDTO>>> getMoreFilters(@RequestParam String eventType) {
         return ResponseEntity.ok(
             new ApiResponse<>(
                 HttpStatus.OK.value(),
                 "Fetch all More Filters successfully",
                 true,
-                eventService.getAllMoreFilters()
+                eventService.getAllMoreFilters(eventType)
             )
         );
     }
