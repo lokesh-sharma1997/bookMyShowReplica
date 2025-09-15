@@ -1,8 +1,10 @@
 package com.bookmyshow.main.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,12 +20,15 @@ import com.bookmyshow.main.service.AuthService;
 import com.bookmyshow.main.service.TokenService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
+	@Value("${app.jwt.secret}")
+	String secretKey;
 	private final TokenService tokenService;
 	private final AuthService authService;
 	
@@ -37,10 +42,34 @@ public class AuthController {
 
 	@PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE) // Specify produces
 	@Operation(summary = "${auth.register}")
-	public ResponseEntity<ApiResponse<String>> register(@RequestBody RegisterRequest req) {
-		String message = authService.register(req);
-		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(201, message, true, null));
+	public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest req, BindingResult bindingResult) {
+
+	    // Check if there are validation errors
+	    if (bindingResult.hasErrors()) {
+	        // StringBuilder for storing the error messages
+	        StringBuilder errorMessage = new StringBuilder("Validation failed: ");
+	        
+	        // Iterate over field errors and append them to the error message
+	        bindingResult.getFieldErrors().forEach(error -> {
+	            errorMessage.append(error.getField())
+	                        .append(" - ")
+	                        .append(error.getDefaultMessage())
+	                        .append("; ");
+	        });
+	        
+	        // Return a custom error response with the validation messages
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                             .body(new ApiResponse<>(400, errorMessage.toString(), false, null));
+	    }
+
+	    // Proceed with registration if no validation errors
+	    String message = authService.register(req);
+
+	    // Return success response
+	    return ResponseEntity.status(HttpStatus.CREATED)
+	                         .body(new ApiResponse<>(201, message, true, null));
 	}
+
 
 	@GetMapping("/validate/username")
 	@Operation(summary = "${user.validateUsername}")
@@ -49,7 +78,7 @@ public class AuthController {
 
 		ApiResponse<Boolean> response = new ApiResponse<>();
 		response.setStatusCode(200);
-		response.setSuccess(exists ? true:false);
+		response.setSuccess(exists ? false:true);
 		response.setMessage(exists ? "Username already exists" : "Username available");
 		response.setData(exists);
 

@@ -15,7 +15,9 @@ import org.springframework.data.jpa.repository.Query;
 
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-	Optional<Event> findByName(String name); 
+	@Query("SELECT e FROM Event e WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')) AND e.deleted = false")
+	List<Event> searchByNameOnly(@Param("name") String name);
+
     Optional<Event> findByNameIgnoreCaseAndEventType(String name, String eventType);
     @Query("SELECT e FROM Event e WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')) AND LOWER(e.eventType) IN :eventTypes AND e.deleted = false")
     List<Event> searchByNameAndEventTypes(@Param("name") String name, @Param("eventTypes") List<String> eventTypes);

@@ -21,11 +21,13 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<Object>> handleRoleNotFound(RoleNotFoundException ex) {
 		return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), false);
 	}
-	//State not found
+
+	// State not found
 	@ExceptionHandler(StateNotFoundException.class)
 	public ResponseEntity<ApiResponse<Object>> handleStateNotFound(StateNotFoundException ex) {
 		return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), false);
 	}
+
 	// Invalid credentials
 	@ExceptionHandler(InvalidCredentialsException.class)
 	public ResponseEntity<ApiResponse<Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
@@ -43,12 +45,21 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
 		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error: " + ex.getMessage(), false);
 	}
-	
-	 // Event custom exception
-    @ExceptionHandler(EventCustomException.class)
-    public ResponseEntity<ApiResponse<Object>> handleEventCustomException(EventCustomException ex) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), false);
-    }
+
+	// Event custom exception
+	@ExceptionHandler(EventCustomException.class)
+	public ResponseEntity<ApiResponse<Object>> handleEventCustomException(EventCustomException ex) {
+		return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), false);
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
+		// Format the error message
+		String formattedErrors = ex.getFormattedErrors();
+
+		// Return a 400 Bad Request with the formatted error message
+		return new ResponseEntity<>(formattedErrors, HttpStatus.BAD_REQUEST);
+	}
 
 	// 🔹 Common builder method
 	private ResponseEntity<ApiResponse<Object>> buildResponse(HttpStatus status, String message, boolean success) {

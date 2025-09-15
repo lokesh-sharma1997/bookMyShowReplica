@@ -1,5 +1,12 @@
 package com.bookmyshow.main.serviceImpl;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.bookmyshow.main.dto.LoginRequest;
 import com.bookmyshow.main.dto.RegisterRequest;
 import com.bookmyshow.main.exception.InvalidCredentialsException;
@@ -17,13 +24,6 @@ import com.bookmyshow.main.util.AESUtil;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -36,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
 	private final TokenService tokenService;
 	@Value("${app.jwt.secret}")
 	String secretKey;
-	
+
 	@Value("${app.jwt.expiration-ms}")
 	private long ttl;
 
@@ -61,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
 			String token = jwtService.generateToken(req.getUsername(), role, userId);
 //            tokenService.saveToken(token, userId, jwtService.getExpirationMs());
 			//tokenService.saveToken(token, userId,ttl);
+			tokenService.saveToken(token, userId, ttl);
 			return token;
 
 		} catch (AuthenticationException ex) {
@@ -75,8 +76,12 @@ public class AuthServiceImpl implements AuthService {
 		if (userRepository.existsByUsername(req.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
 		}
+		if (userRepository.existsByEmail(req.getEmail())) {
+			throw new ResourceAlreadyExistsException("Email already taken: " + req.getEmail());
+		}
 		try {
 			String decryptedPassword = AESUtil.decrypt(req.getPassword(), secretKey);
+
 			UserMaster user = new UserMaster();
 			user.setName(req.getName());
 			user.setUsername(req.getUsername());
@@ -84,7 +89,6 @@ public class AuthServiceImpl implements AuthService {
 			user.setEmail(req.getEmail());
 			user.setPhoneNumber(req.getPhoneNumber());
 
-			// Fetch and assign role
 			Role role = roleRepository.findByRoleName("USER")
 					.orElseThrow(() -> new RoleNotFoundException("Default role USER not found"));
 			user.setRole(role);
