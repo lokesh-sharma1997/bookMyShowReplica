@@ -3,6 +3,7 @@ package com.bookmyshow.main.security;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.bookmyshow.main.service.TokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,10 +23,13 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
+	@Value("${app.jwt.expiration-ms}")
+	long expirationMs;
 	private final JwtService jwtService;
 	@Autowired
 	private UserDetailsService userDetailsService;
+	@Autowired
+	private final TokenService tokenService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -45,6 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						userDetails.getAuthorities());
 				auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(auth);
+				try {
+					Long userId = jwtService.extractUserId(jwt);
+					tokenService.refreshTokenTTL(userId, expirationMs);
+				} catch (Exception e) {
+					System.err.println("Failed to refresh token TTL: " + e.getMessage());
+				}
 			}
 		}
 		filterChain.doFilter(request, response);
