@@ -37,18 +37,18 @@ public class Venue {
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     private List<Amenity> amenities; 
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
-        name = "supported_category",
+        name = "venue_supported_category",
         joinColumns = @JoinColumn(name = "venue_id"),
         inverseJoinColumns = @JoinColumn(name = "supported_category_id")
     )
     private List<SupportedCategory> supportedCategories; 
 
-    @OneToMany(mappedBy = "venue")
+    @OneToMany(mappedBy = "venue",cascade = CascadeType.PERSIST)
     private List<Screen> screens; // Screens (only for "movies")
 
     
