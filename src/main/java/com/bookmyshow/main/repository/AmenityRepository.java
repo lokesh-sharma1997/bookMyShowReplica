@@ -9,6 +9,7 @@ import com.bookmyshow.main.model.Amenity;
 
 public interface AmenityRepository extends JpaRepository<Amenity,Long>{
 
-	
+     List<Amenity> findByAmenityNameIn(List<String> amenityNames);
+
 
 }

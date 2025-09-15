@@ -18,7 +18,8 @@ public class Amenity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String amenity_name; 
+    @Column(name = "amenity_name")  // Correctly map to the "amenity name" column in the database
+     private String amenityName; 
 
     @ManyToMany(mappedBy = "amenities")
     private List<Venue> venues; 

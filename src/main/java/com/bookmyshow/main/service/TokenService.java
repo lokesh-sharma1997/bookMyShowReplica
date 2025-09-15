@@ -1,12 +1,12 @@
 package com.bookmyshow.main.service;
 
 public interface TokenService {
-	
+
 	void saveToken(String token, Long userId, long durationSeconds);
 
 	boolean isTokenValid(Long userId);
 
 	void deleteTokenFromRedis(Long userId);
-	
-//	void saveOidName(String token, Long userId);
+
+	boolean refreshTokenTTL(Long userId, long newDurationMillis);
 }

@@ -19,7 +19,8 @@ public class Screen {
 
      private String screenName; 
     
-     @ManyToOne
+     @ManyToOne(cascade = CascadeType.ALL)
+     @JoinColumn(name = "venue_id", referencedColumnName = "id")
      private Venue venue; 
 
      @OneToMany(mappedBy = "screen")

@@ -1,9 +1,17 @@
 package com.bookmyshow.main.controller;
 
 import com.bookmyshow.main.dto.VenueDTO;
+import com.bookmyshow.main.exception.UserNotFoundException;
+import com.bookmyshow.main.exception.VenueNotFoundException;
+import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.service.VenueService;
+
+import io.swagger.v3.oas.annotations.Operation;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,9 +42,12 @@ public class VenueController {
     }
 
     @PatchMapping("/delete/{id}")
-    public ResponseEntity<Void> softDeleteVenue(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> softDeleteVenue(@PathVariable Long id) {
         boolean deleted = venueService.softDeleteVenue(id);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        if (!deleted) {
+			throw new VenueNotFoundException("Venue not found with id: " + id);
+		}
+        return ResponseEntity.ok(new ApiResponse<>(204, "Venue deleted successfully", true, "Venue with ID " + id + " deleted"));
     }
     
 }

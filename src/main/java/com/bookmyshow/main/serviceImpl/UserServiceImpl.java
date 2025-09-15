@@ -6,10 +6,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.UserDTO;
+import com.bookmyshow.main.exception.InvalidCredentialsException;
 import com.bookmyshow.main.exception.RoleNotFoundException;
 import com.bookmyshow.main.exception.UserNotFoundException;
 import com.bookmyshow.main.model.Role;
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Optional<UserDTO> getByUserId(int userId) {
+	public Optional<UserDTO> getByUserId(long userId) {
 		return Optional.ofNullable(userRepository.findByUserId(userId)).map(this::convertToDTO).or(() -> {
 			throw new UserNotFoundException("User not found with ID: " + userId);
 		});
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean deleteById(int userId) {
+	public boolean deleteById(long userId) {
 		return userRepository.findById(userId).map(user -> {
 			if (Boolean.TRUE.equals(user.getDeleteFlag())) {
 				throw new RuntimeException("User already deleted with ID: " + userId);
@@ -84,12 +84,14 @@ public class UserServiceImpl implements UserService {
 			return true;
 		}).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 	}
-
+ 
 	@Override
-	public void updateUserRole(int userId ) {
+	public void updateUserRole(long userId ) {
 		UserMaster user = userRepository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
-
+		 if (Boolean.TRUE.equals(user.getDeleteFlag())) {
+		        throw new InvalidCredentialsException("User account is deleted. Please contact support.");
+		    }
 		Role role = roleRepository.findById(2)
 				.orElseThrow(() -> new RoleNotFoundException("Role not found: Admin"));
 

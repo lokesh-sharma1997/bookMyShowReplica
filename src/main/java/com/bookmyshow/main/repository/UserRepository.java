@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.model.UserMaster;
 
-public interface UserRepository extends JpaRepository<UserMaster, Integer> {
-	UserMaster findByUserId(int userId);
+public interface UserRepository extends JpaRepository<UserMaster, Long> {
+	UserMaster findByUserId(long userId);
 
 	UserMaster findByUsername(String username);
 
@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<UserMaster, Integer> {
 
 	boolean existsByUsername(String username);
 
-	boolean deleteByUserId(int id);
+	boolean deleteByUserId(long id);
 	
 	@Query("SELECT user FROM UserMaster user WHERE " +
 		       "(LOWER(user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -28,9 +28,7 @@ public interface UserRepository extends JpaRepository<UserMaster, Integer> {
 		       "user.deleteFlag = false")
 		List<UserMaster> globalSearch(@Param("keyword") String value);
 
+
 	boolean existsByEmail(String email);
-
-
-
 
 }

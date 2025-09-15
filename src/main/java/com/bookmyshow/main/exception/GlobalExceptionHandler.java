@@ -61,6 +61,12 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(formattedErrors, HttpStatus.BAD_REQUEST);
 	}
 
+	// Redis operation failure
+	@ExceptionHandler(RedisOperationException.class)
+	public ResponseEntity<ApiResponse<Object>> handleRedisOperationException(RedisOperationException ex) {
+		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Redis error: " + ex.getMessage(), false);
+	}
+
 	// 🔹 Common builder method
 	private ResponseEntity<ApiResponse<Object>> buildResponse(HttpStatus status, String message, boolean success) {
 		ApiResponse<Object> response = new ApiResponse<>(status.value(), message, success, null);
