@@ -13,5 +13,7 @@ public interface VenueRepository extends JpaRepository<Venue, Long> {
 	@Query("SELECT v FROM Venue v WHERE LOWER(v.address.city) = LOWER(:city)")
     List<Venue> findByCity(@Param("city") String city);
     List<Venue> findByAddressCity(String city);
+    List<Venue> findByVenueFor(String venuefor);
+    
 
 }

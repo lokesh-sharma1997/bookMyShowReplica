@@ -48,17 +48,17 @@ public interface EventService {
 	        List<Integer> dateFilters
 	        );
 
-	List<LanguagesDTO> getAllLanguages();
+	List<LanguagesDTO> getAllLanguages(String eventType);
 
-	List<GenresDTO> getAllGenres();
+	List<GenresDTO> getAllGenres(String eventType);
 
 	 List<FormatDTO> getAllFormats();
 	 List<TagDTO> getAllTags();
 	 List<ReleaseMonthDTO> getAllReleaseMonths();
 	 List<DateFilterDTO> getAllDateFilters();
-	 List<CategoryDTO> getAllCategories();
+	 List<CategoryDTO> getAllCategories(String eventType);
 	 List<PriceDTO> getAllPrices();
-	 List<MoreFilterDTO> getAllMoreFilters();
+	 List<MoreFilterDTO> getAllMoreFilters(String eventType);
 
 
 	List<EventResponseDtoCard> getPopularEvents(String eventType);

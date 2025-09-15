@@ -367,20 +367,41 @@ public class EventServiceImpl implements EventService {
 
 	
 
-	public List<LanguagesDTO> getAllLanguages() {
-	    List<Languages> allLanguages = languagesRepository.findAll();
-	    return allLanguages.stream()
-	                       .map(lang -> mapper.map(lang, LanguagesDTO.class))
-	                       .collect(Collectors.toList());
+	public List<LanguagesDTO> getAllLanguages(String eventType) {
+	    List<Event> events = eventRepository.findByEventType(eventType);
+
+	  
+	    Set<Languages> allLanguagesSet = new HashSet<>();
+	    for (Event event : events) {
+	        if (event.getLanguages() != null) {
+	            allLanguagesSet.addAll(event.getLanguages());
+	        }
+	    }
+
+	  
+	    return allLanguagesSet.stream()
+	            .map(lang -> mapper.map(lang, LanguagesDTO.class))
+	            .collect(Collectors.toList());
 	}
 
 
+
 	@Override
-	public List<GenresDTO> getAllGenres() {
-		  List<Genres> allGenres = genresRepository.findAll();
-		    return allGenres.stream()
-		                       .map(genres -> mapper.map(genres, GenresDTO.class))
-		                       .collect(Collectors.toList());
+	public List<GenresDTO> getAllGenres(String eventType) {
+		 List<Event> events = eventRepository.findByEventType(eventType);
+
+		  
+		    Set<Genres> allGenresSet = new HashSet<>();
+		    for (Event event : events) {
+		        if (event.getGenres() != null) {
+		        	allGenresSet.addAll(event.getGenres());
+		        }
+		    }
+
+		  
+		    return allGenresSet.stream()
+		            .map(genre -> mapper.map(genre, GenresDTO.class))
+		            .collect(Collectors.toList());
 	}
 
 	@Override
@@ -416,32 +437,50 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public List<CategoryDTO> getAllCategories() {
-	    List<Categories> categories = categoriesRepository.findAll();
-	    return categories.stream()
-	            .map(cat -> {
-	                CategoryDTO dto = new CategoryDTO();
-	                dto.setCategoryId(cat.getCategoryId());
-	                dto.setCategoryName(cat.getCategoriesName());
-	                return dto;
-	            })
-	            .collect(Collectors.toList());
+	public List<CategoryDTO> getAllCategories(String eventType) {
+	    List<Event> events = eventRepository.findByEventType(eventType);
 
+	    Set<Categories> allCategorySet = new HashSet<>();
+	    for (Event event : events) {
+	        if (event.getCategories() != null) {
+	            allCategorySet.addAll(event.getCategories());
+	        }
+	    }
+
+	  
+	    mapper.typeMap(Categories.class, CategoryDTO.class).addMappings(mapper -> {
+	        mapper.map(Categories::getCategoryId, CategoryDTO::setCategoryId);
+	        mapper.map(Categories::getCategoriesName, CategoryDTO::setCategoryName);
+	    });
+
+	    return allCategorySet.stream()
+	            .map(category -> mapper.map(category, CategoryDTO.class))
+	            .collect(Collectors.toList());
 	}
+
 	
 	@Override
-	public List<MoreFilterDTO> getAllMoreFilters() {
-	    List<MoreFilters> filters = moreFiltersRepository.findAll();
-	    return filters.stream()
-	              .map(f -> {
-	                  MoreFilterDTO dto = new MoreFilterDTO();
-	                  dto.setMoreFilterId(f.getFilterId());
-	                  dto.setMoreFilterName(f.getName());
-	                  return dto;
-	              })
-	              .collect(Collectors.toList());
+	public List<MoreFilterDTO> getAllMoreFilters(String eventType) {
+	    List<Event> events = eventRepository.findByEventType(eventType);
 
+	    Set<MoreFilters> allMoreFiltersSet = new HashSet<>();
+	    for (Event event : events) {
+	        if (event.getMoreFilters() != null) {
+	            allMoreFiltersSet.addAll(event.getMoreFilters());
+	        }
+	    }
+
+	   
+	    mapper.typeMap(MoreFilters.class, MoreFilterDTO.class).addMappings(m -> {
+	        m.map(MoreFilters::getFilterId, MoreFilterDTO::setMoreFilterId);
+	        m.map(MoreFilters::getName, MoreFilterDTO::setMoreFilterName);
+	    });
+
+	    return allMoreFiltersSet.stream()
+	            .map(mfilter -> mapper.map(mfilter, MoreFilterDTO.class))
+	            .collect(Collectors.toList());
 	}
+
 	
 
 	@Override
@@ -699,7 +738,7 @@ public class EventServiceImpl implements EventService {
 	    dto.setName(event.getName());
 	    dto.setLikes(event.getLikes() != null ? event.getLikes() : 0.0);
 	    dto.setImageurl(event.getImageurl());
-
+	    dto.setReleasingOn(event.getReleasingOn());
 	  
 	    if (event.getGenres() != null && !event.getGenres().isEmpty()) {
 	       
@@ -710,6 +749,26 @@ public class EventServiceImpl implements EventService {
 	        dto.setGenres(genre);
 	    } else {
 	        dto.setGenres(List.of()); 
+	    }
+	    if (event.getLanguages() != null && !event.getLanguages().isEmpty()) {
+	        List<String> languageList = event.getLanguages()
+	                                         .stream()
+	                                         .map(Languages::getLanguageName)
+	                                         .toList();
+	        dto.setLanguages(languageList);
+	    } else {
+	        dto.setLanguages(List.of());
+	    }
+
+	    // Categories
+	    if (event.getCategories() != null && !event.getCategories().isEmpty()) {
+	        List<String> categoryList = event.getCategories()
+	                                         .stream()
+	                                         .map(Categories::getCategoriesName)
+	                                         .toList();
+	        dto.setCategories(categoryList);
+	    } else {
+	        dto.setCategories(List.of());
 	    }
 
 	    dto.setVotes(event.getVotes() != null ? event.getVotes() : 0.0);

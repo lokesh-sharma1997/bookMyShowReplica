@@ -6,19 +6,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.AddressDTO;
+import com.bookmyshow.main.dto.LayoutDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
-import com.bookmyshow.main.dto.SupportedCategoryDTO;
 import com.bookmyshow.main.dto.VenueDTO;
+import com.bookmyshow.main.exception.VenueNotFoundException;
 import com.bookmyshow.main.model.Address;
 import com.bookmyshow.main.model.Amenity;
-import com.bookmyshow.main.model.Languages;
-import com.bookmyshow.main.model.Layout; 
+import com.bookmyshow.main.model.Layout;
+import com.bookmyshow.main.model.LayoutRow;
 import com.bookmyshow.main.model.Screen;
+import com.bookmyshow.main.model.SupportedCategory;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.AddressRepository;
 import com.bookmyshow.main.repository.AmenityRepository;
@@ -30,49 +31,162 @@ public class VenueServiceImpl implements VenueService {
 
     @Autowired
     private VenueRepository venueRepository;
-//    @Autowired
-//    private AmenityRepository ani;
-//
-//    @Autowired
-//    private AddressRepository  addressRepository;
-    
-    @Autowired
-    private ModelMapper modelMapper;
 
-//    private VenueDTO entityToDto(Venue entity) {
-//        return modelMapper.map(entity, VenueDTO.class);
-//    }
-    
+    @Autowired
+    private AmenityRepository amenityRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
+
+    // Convert entity to DTO
     private VenueDTO entityToDto(Venue entity) {
-        VenueDTO dto = modelMapper.map(entity, VenueDTO.class);
-//        if (entity.getAmenities() != null) {
-//            List<Integer> amenityIds = entity.getAmenities()
-//                                            .stream()
-//                                            .map(a -> a.getId().intValue()) 
-//                                            .collect(Collectors.toList());
-//            dto.setAmenities(amenityIds);
-//        }
-        return dto;   
+        if (entity == null) {
+            return null;
+        }
+        
+
+        VenueDTO dto = new VenueDTO();
+//        dto.setId(entity.getId());
+        dto.setVenueName(entity.getVenueName());
+        dto.setVenueCapacity(entity.getVenueCapacity());
+        dto.setVenueFor(entity.getVenueFor());
+        dto.setVenueType(entity.getVenueType());
+
+        if (entity.getAddress() != null) {
+            AddressDTO addressDto = new AddressDTO();
+//            addressDto.setId(entity.getAddress().getId());
+            addressDto.setStreet(entity.getAddress().getStreet());
+            addressDto.setCity(entity.getAddress().getCity());
+            addressDto.setPin(entity.getAddress().getPin());
+            dto.setAddress(addressDto);
+        }
+
+        if (entity.getAmenities() != null) {
+            List<String> amenityNames = entity.getAmenities().stream()
+                    .map(Amenity::getAmenityName)
+                    .collect(Collectors.toList());
+            dto.setAmenities(amenityNames); 
+        }
+        
+        
+        
+        if (entity.getSupportedCategories() != null) {
+            List<String> supportedCategoryNames = entity.getSupportedCategories().stream()
+                    .map(SupportedCategory::getCategoryname)
+                    .collect(Collectors.toList());
+            dto.setSupportedCategories(supportedCategoryNames);
+        }
+
+        if ("movies".equalsIgnoreCase(entity.getVenueFor()) && entity.getScreens() != null) {
+            List<ScreenDTO> screenDTOs = entity.getScreens().stream().map(screen -> {
+                ScreenDTO screenDto = new ScreenDTO();
+                screenDto.setId(screen.getId());
+                screenDto.setScreenName(screen.getScreenName());
+
+                List<LayoutDTO> layoutDTOs = screen.getLayouts().stream().map(layout -> {
+                    LayoutDTO layoutDto = new LayoutDTO();
+                    layoutDto.setId(layout.getId());
+                    layoutDto.setLayoutName(layout.getLayoutName());
+                    layoutDto.setCols(layout.getCols());
+                    layoutDto.setScreenId(screen.getId());
+                    
+                    if (layout.getLayoutRows() != null) {
+                        List<String> rowStrings = layout.getLayoutRows().stream()
+                            .map(LayoutRow::getRowName) 
+                            .collect(Collectors.toList());
+                        layoutDto.setRows(rowStrings);
+                    }
+
+                    return layoutDto;
+                }).collect(Collectors.toList());
+
+                screenDto.setLayouts(layoutDTOs);
+                return screenDto;
+            }).collect(Collectors.toList());
+
+            dto.setScreens(screenDTOs);
+        }
+
+        return dto;
     }
 
+    // Convert DTO to entity 
     private Venue dtoToEntity(VenueDTO dto) {
-        return modelMapper.map(dto, Venue.class);
+        if (dto == null) {
+            return null;
+        }
+
+        Venue entity = new Venue();
+//        entity.setId(dto.getId());
+        entity.setVenueName(dto.getVenueName());
+        entity.setVenueCapacity(dto.getVenueCapacity());
+        entity.setVenueFor(dto.getVenueFor());
+        entity.setVenueType(dto.getVenueType());
+
+        if (dto.getSupportedCategories() != null) {
+            List<SupportedCategory> supportedCategories = dto.getSupportedCategories().stream()
+                    .map(categoryName -> {
+                        SupportedCategory category = new SupportedCategory();
+                        category.setCategoryname(categoryName);
+                        return category;
+                    })
+                    .collect(Collectors.toList());
+            entity.setSupportedCategories(supportedCategories);
+        }
+
+        if (dto.getAddress() != null) {
+            Address address = new Address();
+//            address.setId(dto.getAddress().getId());
+            address.setStreet(dto.getAddress().getStreet());
+            address.setCity(dto.getAddress().getCity());
+            address.setPin(dto.getAddress().getPin());
+            entity.setAddress(address);
+        }
+
+        if ("movies".equalsIgnoreCase(dto.getVenueFor()) && dto.getScreens() != null) {
+            List<Screen> screens = dto.getScreens().stream().map(screenDto -> {
+                Screen screen = new Screen();
+                screen.setId(screenDto.getId());
+                screen.setScreenName(screenDto.getScreenName());
+
+                if (screenDto.getLayouts() != null) {
+                    List<Layout> layouts = screenDto.getLayouts().stream().map(layoutDto -> {
+                        Layout layout = new Layout();
+                        layout.setId(layoutDto.getId());
+                        layout.setLayoutName(layoutDto.getLayoutName());
+                        layout.setCols(layoutDto.getCols());
+
+                        if (layoutDto.getRows() != null) {
+                            List<LayoutRow> layoutRows = layoutDto.getRows().stream().map(rowName -> {
+                                LayoutRow layoutRow = new LayoutRow();
+                                layoutRow.setRowName(rowName);
+                                layoutRow.setLayout(layout); 
+                                return layoutRow;
+                            }).collect(Collectors.toList());
+                            layout.setLayoutRows(layoutRows);
+                        }
+
+                        return layout;
+                    }).collect(Collectors.toList());
+                    screen.setLayouts(layouts);
+                }
+
+                return screen;
+            }).collect(Collectors.toList());
+            entity.setScreens(screens);
+        }
+
+        return entity;
     }
 
     @Override
     public VenueDTO createVenue(VenueDTO dto) {
         Venue entity = dtoToEntity(dto);
-//        if (dto.getAmenities() != null) {
-//            List<Long> amenityIds = dto.getAmenities().stream()
-//                                      .map(Integer::longValue) 
-//                                      .toList(); 
-//            
-//            List<Amenity> animt = ani.findAllById(amenityIds);
-//            entity.setAmenities(animt);
-//        }
-       
-       
-
+        
+        if (entity.getAddress() != null) {
+            Address savedAddress = addressRepository.save(entity.getAddress());
+            entity.setAddress(savedAddress); 
+        }
 
         if ("movies".equalsIgnoreCase(entity.getVenueFor())) {
             if (entity.getScreens() == null) {
@@ -81,10 +195,14 @@ public class VenueServiceImpl implements VenueService {
 
             for (Screen screen : entity.getScreens()) {
                 screen.setVenue(entity);
-
                 if (screen.getLayouts() != null) {
-                    for (Layout layout : screen.getLayouts()) {  
+                    for (Layout layout : screen.getLayouts()) {
                         layout.setScreen(screen);
+                        if (layout.getLayoutRows() != null) {
+                            for (LayoutRow layoutRow : layout.getLayoutRows()) {
+                                layoutRow.setLayout(layout);
+                            }
+                        }
                     }
                 }
             }
@@ -107,63 +225,24 @@ public class VenueServiceImpl implements VenueService {
 
     @Override
     public List<VenueDTO> getVenuesByCity(String city) {
-        List<Venue> venues = venueRepository.findByAddressCity(city);
-
-        if (venues == null || venues.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return venues.stream().map(venue -> {
-            VenueDTO dto = new VenueDTO();
-            dto.setId(venue.getId());
-            dto.setVenueName(venue.getVenueName());
-            dto.setVenueCapacity(venue.getVenueCapacity());
-            dto.setVenueFor(venue.getVenueFor());
-            dto.setVenueType(venue.getVenueType());
-
-            List<SupportedCategoryDTO> supportedCategoryDTOs = venue.getSupportedCategories() != null 
-                ? venue.getSupportedCategories().stream().map(category -> {
-                    SupportedCategoryDTO categoryDTO = new SupportedCategoryDTO();
-                    categoryDTO.setId(category.getId());
-                    categoryDTO.setCategoryName(category.getCategoryname());
-                    return categoryDTO;
-                }).collect(Collectors.toList()) 
-                : Collections.emptyList();
-            dto.setSupportedCategories(supportedCategoryDTOs);
-
-            if (venue.getAddress() != null) {
-                AddressDTO addressDto = new AddressDTO();
-                addressDto.setId(venue.getAddress().getId());
-                addressDto.setStreet(venue.getAddress().getStreet());
-                addressDto.setCity(venue.getAddress().getCity());
-                addressDto.setPin(venue.getAddress().getPin());
-                dto.setAddress(addressDto);
-            }
-
-            if ("movies".equalsIgnoreCase(venue.getVenueFor()) && venue.getScreens() != null) {
-                List<ScreenDTO> screenDTOs = venue.getScreens().stream().map(screen -> {
-                    ScreenDTO screenDto = new ScreenDTO();
-                    screenDto.setId(screen.getId());
-                    screenDto.setScreenName(screen.getScreenName());
-                    return screenDto;
-                }).collect(Collectors.toList());
-                dto.setScreens(screenDTOs);
-            }
-
-            return dto;
-        }).collect(Collectors.toList());
+        List<Venue> venues = Optional.ofNullable(venueRepository.findByAddressCity(city))
+                                     .orElse(Collections.emptyList()); 
+        return venues.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public boolean softDeleteVenue(Long id) {
-        Optional<Venue> optionalVenue = venueRepository.findById(id);
-        if (optionalVenue.isPresent()) {
-            Venue venue = optionalVenue.get();
-            
-            venue.setDeleted(true);
-            venueRepository.save(venue);
-            return true;
-        }
-        return false;
+        return venueRepository.findById(id)
+                .map(venue -> {
+                    if (Boolean.TRUE.equals(venue.getDeleted())) {
+                        throw new RuntimeException("Venue already deleted with id: " + id);
+                    }
+                    venue.setDeleted(true);
+                    venueRepository.save(venue);
+                    return true;
+                })
+                .orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + id));
     }
 }
