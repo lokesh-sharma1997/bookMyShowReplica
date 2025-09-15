@@ -6,7 +6,7 @@ import java.util.Optional;
 import com.bookmyshow.main.dto.UserDTO;
 
 public interface UserService {
-	Optional<UserDTO> getByUserId(int userId);
+	Optional<UserDTO> getByUserId(long userId);
 
 	Optional<UserDTO> getByUsername(String username);
 
@@ -16,8 +16,8 @@ public interface UserService {
 
 	List<UserDTO> getAllUsers();
 
-	boolean deleteById(int userId);
+	boolean deleteById(long userId);
 
-	void updateUserRole(int userId);
+	void updateUserRole(long userId);
 
 }
