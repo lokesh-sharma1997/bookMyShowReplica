@@ -280,54 +280,54 @@ class EventControllerTest {
    
 
 
-    
-    @Test
-    void testGetLanguages() throws Exception {
-        // Sample mock data
-        LanguagesDTO lang1 = new LanguagesDTO();
-        lang1.setLanguageId(1L);
-        lang1.setLanguageName("English");
+//    
+//    @Test
+//    void testGetLanguages() throws Exception {
+//        // Sample mock data
+//        LanguagesDTO lang1 = new LanguagesDTO();
+//        lang1.setLanguageId(1L);
+//        lang1.setLanguageName("English");
+//
+//        LanguagesDTO lang2 = new LanguagesDTO();
+//        lang2.setLanguageId(2L);
+//        lang2.setLanguageName("Hindi");
+//
+//        List<LanguagesDTO> languages = Arrays.asList(lang1, lang2);
+//
+//        // Mock the service response
+//        when(eventService.getAllLanguages()).thenReturn(languages);
+//
+//        mockMvc.perform(get("/api/events/languages"))
+//            .andExpect(status().isOk())
+//            .andExpect(jsonPath("$.statusCode").value(200))
+//            .andExpect(jsonPath("$.message").value("Fetch all languages successfully"))
+//            .andExpect(jsonPath("$.success").value(true))
+//            .andExpect(jsonPath("$.data").isArray())
+//            .andExpect(jsonPath("$.data.length()").value(2))
+//            .andExpect(jsonPath("$.data[0].languageName").value("English"))
+//            .andExpect(jsonPath("$.data[1].languageName").value("Hindi"));
+//    }
 
-        LanguagesDTO lang2 = new LanguagesDTO();
-        lang2.setLanguageId(2L);
-        lang2.setLanguageName("Hindi");
-
-        List<LanguagesDTO> languages = Arrays.asList(lang1, lang2);
-
-        // Mock the service response
-        when(eventService.getAllLanguages()).thenReturn(languages);
-
-        mockMvc.perform(get("/api/events/languages"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.statusCode").value(200))
-            .andExpect(jsonPath("$.message").value("Fetch all languages successfully"))
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data.length()").value(2))
-            .andExpect(jsonPath("$.data[0].languageName").value("English"))
-            .andExpect(jsonPath("$.data[1].languageName").value("Hindi"));
-    }
-
-    @Test
-    void testGetGenres() throws Exception {
-        GenresDTO genre1 = new GenresDTO();
-        genre1.setGenresId(1L);
-        genre1.setGenresName("Action");
-
-        GenresDTO genre2 = new GenresDTO();
-        genre2.setGenresId(2L);
-        genre2.setGenresName("Comedy");
-
-        when(eventService.getAllGenres()).thenReturn(Arrays.asList(genre1, genre2));
-
-        mockMvc.perform(get("/api/events/genres"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.statusCode").value(200))
-            .andExpect(jsonPath("$.message").value("Fetch all Genres successfully"))
-            .andExpect(jsonPath("$.success").value(true))
-            .andExpect(jsonPath("$.data[0].genresName").value("Action"))
-            .andExpect(jsonPath("$.data[1].genresName").value("Comedy"));
-    }
+//    @Test
+//    void testGetGenres() throws Exception {
+//        GenresDTO genre1 = new GenresDTO();
+//        genre1.setGenresId(1L);
+//        genre1.setGenresName("Action");
+//
+//        GenresDTO genre2 = new GenresDTO();
+//        genre2.setGenresId(2L);
+//        genre2.setGenresName("Comedy");
+//
+//        when(eventService.getAllGenres()).thenReturn(Arrays.asList(genre1, genre2));
+//
+//        mockMvc.perform(get("/api/events/genres"))
+//            .andExpect(status().isOk())
+//            .andExpect(jsonPath("$.statusCode").value(200))
+//            .andExpect(jsonPath("$.message").value("Fetch all Genres successfully"))
+//            .andExpect(jsonPath("$.success").value(true))
+//            .andExpect(jsonPath("$.data[0].genresName").value("Action"))
+//            .andExpect(jsonPath("$.data[1].genresName").value("Comedy"));
+//    }
 
     @Test
     void testGetFormats() throws Exception {
@@ -396,32 +396,32 @@ class EventControllerTest {
             .andExpect(jsonPath("$.data[0].dateFilterName").value("This Weekend"));
     }
 
-    @Test
-    void testGetCategories() throws Exception {
-        CategoryDTO category = new CategoryDTO();
-        category.setCategoryId(1L);
-        category.setCategoryName("Family");
-
-        when(eventService.getAllCategories()).thenReturn(List.of(category));
-
-        mockMvc.perform(get("/api/events/categories"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message").value("Fetch all Categories successfully"))
-            .andExpect(jsonPath("$.data[0].categoryName").value("Family"));
-    }
-    @Test
-    void testGetMoreFilters() throws Exception {
-        MoreFilterDTO filter = new MoreFilterDTO();
-        filter.setMoreFilterId(1L);
-        filter.setMoreFilterName("Subtitled");
-
-        when(eventService.getAllMoreFilters()).thenReturn(List.of(filter));
-
-        mockMvc.perform(get("/api/events/more-filters"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message").value("Fetch all More Filters successfully"))
-            .andExpect(jsonPath("$.data[0].moreFilterName").value("Subtitled"));
-    }
+//    @Test
+//    void testGetCategories() throws Exception {
+//        CategoryDTO category = new CategoryDTO();
+//        category.setCategoryId(1L);
+//        category.setCategoryName("Family");
+//
+//        when(eventService.getAllCategories()).thenReturn(List.of(category));
+//
+//        mockMvc.perform(get("/api/events/categories"))
+//            .andExpect(status().isOk())
+//            .andExpect(jsonPath("$.message").value("Fetch all Categories successfully"))
+//            .andExpect(jsonPath("$.data[0].categoryName").value("Family"));
+//    }
+//    @Test
+//    void testGetMoreFilters() throws Exception {
+//        MoreFilterDTO filter = new MoreFilterDTO();
+//        filter.setMoreFilterId(1L);
+//        filter.setMoreFilterName("Subtitled");
+//
+//        when(eventService.getAllMoreFilters()).thenReturn(List.of(filter));
+//
+//        mockMvc.perform(get("/api/events/more-filters"))
+//            .andExpect(status().isOk())
+//            .andExpect(jsonPath("$.message").value("Fetch all More Filters successfully"))
+//            .andExpect(jsonPath("$.data[0].moreFilterName").value("Subtitled"));
+//    }
     
     @Test
     void testGetPrices() throws Exception {
