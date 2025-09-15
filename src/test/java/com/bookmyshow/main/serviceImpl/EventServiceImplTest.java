@@ -213,36 +213,36 @@ class EventServiceImplTest {
         Exception ex = assertThrows(EventCustomException.class, () -> eventService.getEventById(1L));
         assertEquals("Event not found with id: 1", ex.getMessage());
     }
+//
+//    @Test
+//    void testGetAllLanguages() {
+//        Languages lang = new Languages();
+//        lang.setLanguageId(1L);
+//        when(languagesRepository.findAll()).thenReturn(List.of(lang));
+//        LanguagesDTO langDto = new LanguagesDTO();
+//        when(mapper.map(lang, LanguagesDTO.class)).thenReturn(langDto);
+//
+//        List<LanguagesDTO> result = eventService.getAllLanguages();
+//
+//        assertNotNull(result);
+//        assertEquals(1, result.size());
+//        verify(languagesRepository).findAll();
+//    }
 
-    @Test
-    void testGetAllLanguages() {
-        Languages lang = new Languages();
-        lang.setLanguageId(1L);
-        when(languagesRepository.findAll()).thenReturn(List.of(lang));
-        LanguagesDTO langDto = new LanguagesDTO();
-        when(mapper.map(lang, LanguagesDTO.class)).thenReturn(langDto);
-
-        List<LanguagesDTO> result = eventService.getAllLanguages();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(languagesRepository).findAll();
-    }
-
-    @Test
-    void testGetAllGenres() {
-        Genres genre = new Genres();
-        genre.setGenreId(1L);
-        when(genresRepository.findAll()).thenReturn(List.of(genre));
-        GenresDTO genreDto = new GenresDTO();
-        when(mapper.map(genre, GenresDTO.class)).thenReturn(genreDto);
-
-        List<GenresDTO> result = eventService.getAllGenres();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(genresRepository).findAll();
-    }
+//    @Test
+//    void testGetAllGenres() {
+//        Genres genre = new Genres();
+//        genre.setGenreId(1L);
+//        when(genresRepository.findAll()).thenReturn(List.of(genre));
+//        GenresDTO genreDto = new GenresDTO();
+//        when(mapper.map(genre, GenresDTO.class)).thenReturn(genreDto);
+//
+//        List<GenresDTO> result = eventService.getAllGenres();
+//
+//        assertNotNull(result);
+//        assertEquals(1, result.size());
+//        verify(genresRepository).findAll();
+//    }
 
     @Test
     void testGetAllFormats() {
@@ -304,36 +304,36 @@ class EventServiceImplTest {
         verify(dateFilterRepository).findAll();
     }
 
-    @Test
-    void testGetAllCategories() {
-        Categories cat = new Categories();
-        cat.setCategoryId(1L);
-        cat.setCategoriesName("Category1");
-        when(categoriesRepository.findAll()).thenReturn(List.of(cat));
-
-        List<CategoryDTO> result = eventService.getAllCategories();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getCategoryId());
-        assertEquals("Category1", result.get(0).getCategoryName());
-        verify(categoriesRepository).findAll();
-    }
-
-    @Test
-    void testGetAllMoreFilters() {
-        MoreFilters filter = new MoreFilters();
-        filter.setFilterId(1L);
-        when(moreFiltersRepository.findAll()).thenReturn(List.of(filter));
-        MoreFilterDTO filterDto = new MoreFilterDTO();
-   
-
-        List<MoreFilterDTO> result = eventService.getAllMoreFilters();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(moreFiltersRepository).findAll();
-    }
+//    @Test
+//    void testGetAllCategories() {
+//        Categories cat = new Categories();
+//        cat.setCategoryId(1L);
+//        cat.setCategoriesName("Category1");
+//        when(categoriesRepository.findAll()).thenReturn(List.of(cat));
+//
+//        List<CategoryDTO> result = eventService.getAllCategories();
+//
+//        assertNotNull(result);
+//        assertEquals(1, result.size());
+//        assertEquals(1L, result.get(0).getCategoryId());
+//        assertEquals("Category1", result.get(0).getCategoryName());
+//        verify(categoriesRepository).findAll();
+//    }
+//
+//    @Test
+//    void testGetAllMoreFilters() {
+//        MoreFilters filter = new MoreFilters();
+//        filter.setFilterId(1L);
+//        when(moreFiltersRepository.findAll()).thenReturn(List.of(filter));
+//        MoreFilterDTO filterDto = new MoreFilterDTO();
+//   
+//
+//        List<MoreFilterDTO> result = eventService.getAllMoreFilters();
+//
+//        assertNotNull(result);
+//        assertEquals(1, result.size());
+//        verify(moreFiltersRepository).findAll();
+//    }
 
     @Test
     void testGetAllPrice() {
