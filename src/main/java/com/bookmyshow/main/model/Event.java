@@ -160,7 +160,12 @@ public class Event {
 	    )
 	    private List<City> city = new ArrayList<>();
 	
-	
+	  @ManyToMany
+	    @JoinTable(
+	      name = "event_venue_map", 
+	      joinColumns = @JoinColumn(name = "event_id"), 
+	      inverseJoinColumns = @JoinColumn(name = "venue_id"))
+	    private List<Venue> venues;
 	
 	
 	

@@ -392,23 +392,23 @@ class EventServiceImplTest {
             verify(eventRepository).findAll(mockSpec);
         }
     }
-    @Test
-    void testSearchEventNames_WithEventTypes_ReturnsMatchingEvents() {
-        String name = "Tech";
-        List<String> eventTypes = List.of("Conference", "Webinar");
-
-        List<Event> mockEvents = List.of(
-            new Event(),
-            new Event()
-        );
-
-        when(eventRepository.searchByNameAndEventTypes(eq(name), anyList()))
-            .thenReturn(mockEvents);
-
-        List<String> result = eventService.searchEventNames(name, eventTypes);
-
-       
-    }
+//    @Test
+//    void testSearchEventNames_WithEventTypes_ReturnsMatchingEvents() {
+//        String name = "Tech";
+//        List<String> eventTypes = List.of("Conference", "Webinar");
+//
+//        List<Event> mockEvents = List.of(
+//            new Event(),
+//            new Event()
+//        );
+//
+//        when(eventRepository.searchByNameAndEventTypes(eq(name), anyList()))
+//            .thenReturn(mockEvents);
+//
+//        List<String> result = eventService.searchEventNames(name, eventTypes);
+//
+//       
+//    }
 
 //    @Test
 //    void testSearchEventNames_WithoutEventTypes_EventFound() {

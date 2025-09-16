@@ -1,6 +1,7 @@
 package com.bookmyshow.main.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import lombok.Data;
@@ -21,6 +22,9 @@ public class EventResponseDto {
     private Boolean deleted;
     private int ageLimit;
     private LocalDate releasingOn;
+    private List<String> venueName;
+	private List<Integer> pricelist;
+	private LocalTime starttime;
 
     // Nested DTOs
     private List<String> languages;

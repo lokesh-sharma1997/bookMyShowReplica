@@ -25,6 +25,7 @@ import com.bookmyshow.main.dto.EventDTO;
 import com.bookmyshow.main.dto.EventFilterRequest;
 import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.dto.EventResponseDtoCard;
+import com.bookmyshow.main.dto.EventSearchDTO;
 import com.bookmyshow.main.dto.EventSearchRequestDto;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
@@ -115,20 +116,25 @@ public class EventController {
     }
 
   
+
+    
     @Operation(summary = "Search events by partial name")
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<String>>> searchEventNames(
+    public ResponseEntity<ApiResponse<List<EventSearchDTO>>> searchEventNames(
             @RequestBody EventSearchRequestDto request) {
 
-        List<String> eventNames = eventService.searchEventNames(request.getName(), request.getEventTypes());
+        // Call the service layer to get the event names
+        List<EventSearchDTO> eventNames = eventService.searchEventNames(request.getName(), request.getEventTypes());
 
-        ApiResponse<List<String>> response = new ApiResponse<>(
+        // Create ApiResponse with event names
+        ApiResponse<List<EventSearchDTO>> response = new ApiResponse<>(
                 HttpStatus.OK.value(),
                 "Event names fetched successfully",
                 true,
                 eventNames
         );
 
+        // Return the ResponseEntity with the ApiResponse
         return ResponseEntity.ok(response);
     }
 
