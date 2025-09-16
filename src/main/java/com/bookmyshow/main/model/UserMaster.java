@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -45,7 +47,7 @@ public class UserMaster {
 	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
 	private Role role;
 
-	@Size(max = 10, message = "Mobile number cannot contain more than ten characters")
+	@Size(min = 10, max=15,message = "Mobile number cannot contain more than ten characters")
 	private String phoneNumber;
 
 	@CreationTimestamp
@@ -56,4 +58,7 @@ public class UserMaster {
 	private LocalDateTime updatedOn;
 
 	private Boolean deleteFlag = false;
+
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private UserProfile userProfile;
 }

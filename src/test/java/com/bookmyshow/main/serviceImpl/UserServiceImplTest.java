@@ -55,18 +55,18 @@ class UserServiceImplTest {
 
     @Test
     void testGetByUserIdFound() {
-        when(userRepository.findByUserId(1)).thenReturn(user);
+        when(userRepository.findByUserId(1L)).thenReturn(user);
 
         Optional<UserDTO> result = userService.getByUserId(1);
 
         assertTrue(result.isPresent());
         assertEquals("kashish11", result.get().getUsername());
-        verify(userRepository, times(1)).findByUserId(1);
+        verify(userRepository, times(1)).findByUserId(1L);
     }
 
     @Test
     void testGetByUserIdNotFound() {
-        when(userRepository.findByUserId(99)).thenReturn(null);
+        when(userRepository.findByUserId(99L)).thenReturn(null);
 
         assertThrows(UserNotFoundException.class, () -> userService.getByUserId(99));
     }
