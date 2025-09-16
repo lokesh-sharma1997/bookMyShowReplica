@@ -50,7 +50,8 @@ public class Venue {
 
     @OneToMany(mappedBy = "venue",cascade = CascadeType.PERSIST)
     private List<Screen> screens; // Screens (only for "movies")
-
+    @ManyToMany(mappedBy = "venues")
+    private List<Event> movies;
     
 
     private Boolean deleted = false;
