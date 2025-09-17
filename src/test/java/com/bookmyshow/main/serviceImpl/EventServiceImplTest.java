@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,7 +39,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.bookmyshow.main.dto.CategoryDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
+import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.dto.EventResponseDtoCard;
+import com.bookmyshow.main.dto.EventSearchDTO;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
 import com.bookmyshow.main.dto.LanguagesDTO;
@@ -46,7 +50,10 @@ import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.exception.EventCustomException;
+import com.bookmyshow.main.model.Cast;
 import com.bookmyshow.main.model.Categories;
+import com.bookmyshow.main.model.City;
+import com.bookmyshow.main.model.Crew;
 import com.bookmyshow.main.model.DateFilter;
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
@@ -56,6 +63,7 @@ import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
 import com.bookmyshow.main.model.Tag;
+import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
 import com.bookmyshow.main.repository.CategoriesRepository;
 import com.bookmyshow.main.repository.CityRepository;
@@ -111,6 +119,7 @@ class EventServiceImplTest {
 
     @BeforeEach
     void setUp() {
+    	
         event = new Event();
         event.setEventId(1L);
         event.setName("Test Event");
@@ -153,7 +162,7 @@ class EventServiceImplTest {
         eventDto.setLikes(100.0);
         eventDto.setVotes(50.0);
         eventDto.setCurrentlyPlaying(true);
-        eventDto.setDeleted(false);
+       
         eventDto.setAgeLimit(13);
         eventDto.setReleasingOn(LocalDate.of(2025, 9, 8));
         eventDto.setLanguages(Collections.emptyList());
@@ -195,16 +204,16 @@ class EventServiceImplTest {
         verify(eventRepository).save(any(Event.class));
     }
 
-//    @Test
-//    void testGetEventByIdFound() {
-//        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-//
-//
-//        EventDTO result = eventService.getEventById(1L);
-//
-//        assertNotNull(result);
-//        assertEquals("Test Event", result.getName());
-//    }
+    @Test
+    void testGetEventByIdFound() {
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+
+        EventResponseDto result = eventService.getEventById(1L);
+
+        assertNotNull(result);
+        assertEquals("Test Event", result.getName());
+    }
 
     @Test
     void testGetEventByIdNotFound() {
@@ -213,36 +222,68 @@ class EventServiceImplTest {
         Exception ex = assertThrows(EventCustomException.class, () -> eventService.getEventById(1L));
         assertEquals("Event not found with id: 1", ex.getMessage());
     }
-//
-//    @Test
-//    void testGetAllLanguages() {
-//        Languages lang = new Languages();
-//        lang.setLanguageId(1L);
-//        when(languagesRepository.findAll()).thenReturn(List.of(lang));
-//        LanguagesDTO langDto = new LanguagesDTO();
-//        when(mapper.map(lang, LanguagesDTO.class)).thenReturn(langDto);
-//
-//        List<LanguagesDTO> result = eventService.getAllLanguages();
-//
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        verify(languagesRepository).findAll();
-//    }
+    @Test
+    void testGetAllLanguages_ByEventType() {
+      
+        String eventType = "conference";
 
-//    @Test
-//    void testGetAllGenres() {
-//        Genres genre = new Genres();
-//        genre.setGenreId(1L);
-//        when(genresRepository.findAll()).thenReturn(List.of(genre));
-//        GenresDTO genreDto = new GenresDTO();
-//        when(mapper.map(genre, GenresDTO.class)).thenReturn(genreDto);
-//
-//        List<GenresDTO> result = eventService.getAllGenres();
-//
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        verify(genresRepository).findAll();
-//    }
+       
+        Languages language = new Languages();
+        language.setLanguageId(1L);
+
+        
+        Event event = new Event();
+        event.setLanguages(List.of(language)); 
+
+       
+        when(eventRepository.findByEventType(eventType)).thenReturn(List.of(event));
+
+        LanguagesDTO languageDTO = new LanguagesDTO();
+        when(mapper.map(language, LanguagesDTO.class)).thenReturn(languageDTO);
+
+       
+        List<LanguagesDTO> result = eventService.getAllLanguages(eventType);
+
+       
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(languageDTO, result.get(0)); 
+        verify(eventRepository).findByEventType(eventType);
+        verify(mapper).map(language, LanguagesDTO.class);
+    }
+
+
+    @Test
+    void testGetAllGenres_ByEventType() {
+       
+        String eventType = "music";
+
+       
+        Genres genre = new Genres();
+        genre.setGenreId(1L); 
+
+        
+        Event event = new Event();
+        event.setGenres(List.of(genre)); 
+        
+        when(eventRepository.findByEventType(eventType)).thenReturn(List.of(event));
+
+        
+        GenresDTO genreDTO = new GenresDTO();
+        when(mapper.map(genre, GenresDTO.class)).thenReturn(genreDTO);
+
+        
+        List<GenresDTO> result = eventService.getAllGenres(eventType);
+
+        
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(genreDTO, result.get(0));
+
+        verify(eventRepository).findByEventType(eventType);
+        verify(mapper).map(genre, GenresDTO.class);
+    }
+
 
     @Test
     void testGetAllFormats() {
@@ -304,36 +345,9 @@ class EventServiceImplTest {
         verify(dateFilterRepository).findAll();
     }
 
-//    @Test
-//    void testGetAllCategories() {
-//        Categories cat = new Categories();
-//        cat.setCategoryId(1L);
-//        cat.setCategoriesName("Category1");
-//        when(categoriesRepository.findAll()).thenReturn(List.of(cat));
-//
-//        List<CategoryDTO> result = eventService.getAllCategories();
-//
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        assertEquals(1L, result.get(0).getCategoryId());
-//        assertEquals("Category1", result.get(0).getCategoryName());
-//        verify(categoriesRepository).findAll();
-//    }
-//
-//    @Test
-//    void testGetAllMoreFilters() {
-//        MoreFilters filter = new MoreFilters();
-//        filter.setFilterId(1L);
-//        when(moreFiltersRepository.findAll()).thenReturn(List.of(filter));
-//        MoreFilterDTO filterDto = new MoreFilterDTO();
-//   
-//
-//        List<MoreFilterDTO> result = eventService.getAllMoreFilters();
-//
-//        assertNotNull(result);
-//        assertEquals(1, result.size());
-//        verify(moreFiltersRepository).findAll();
-//    }
+    
+
+
 
     @Test
     void testGetAllPrice() {
@@ -392,75 +406,170 @@ class EventServiceImplTest {
             verify(eventRepository).findAll(mockSpec);
         }
     }
-//    @Test
-//    void testSearchEventNames_WithEventTypes_ReturnsMatchingEvents() {
-//        String name = "Tech";
-//        List<String> eventTypes = List.of("Conference", "Webinar");
-//
-//        List<Event> mockEvents = List.of(
-//            new Event(),
-//            new Event()
-//        );
-//
-//        when(eventRepository.searchByNameAndEventTypes(eq(name), anyList()))
-//            .thenReturn(mockEvents);
-//
-//        List<String> result = eventService.searchEventNames(name, eventTypes);
-//
-//       
-//    }
-
-//    @Test
-//    void testSearchEventNames_WithoutEventTypes_EventFound() {
-//        String name = "Hackathon";
-//        Event event = new Event();
-//
-//        when(eventRepository.searchByNameOnly(name)).thenReturn(Optional.of(event));
-//
-//        List<String> result = eventService.searchEventNames(name, null);
-//
-//        
-//    }
-//
-//    @Test
-//    void testSearchEventNames_WithoutEventTypes_EventNotFound_ThrowsException() {
-//        String name = "Nonexistent";
-//
-//        when(eventRepository.findByName(name)).thenReturn(Optional.empty());
-//
-//        assertThrows(EventCustomException.class, () -> {
-//            eventService.searchEventNames(name, null);
-//        });
-//    }
-//    
     @Test
-    void testGetPopularEvents_WithEventType_ReturnsFilteredEvents() {
-        String eventType = "Movie";
+    void testSearchEventNames_WithEventTypes() {
+        String name = "concert";
+        List<String> eventTypes = List.of("Music", "Festival");
 
-        List<Event> mockEvents = List.of(
-          
-        );
+      
+        Event event1 = new Event();
+        event1.setEventId(101L);
+        event1.setName("Music Concert");
+
+        Event event2 = new Event();
+        event2.setEventId(102L);
+        event2.setName("Festival Night");
+
+        List<Event> mockEvents = List.of(event1, event2);
+
+       
+        when(eventRepository.searchByNameAndEventTypes(eq(name), anyList()))
+            .thenReturn(mockEvents);
+
+       
+        List<EventSearchDTO> result = eventService.searchEventNames(name, eventTypes);
+
+      
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(101L, result.get(0).getEventId());
+        assertEquals("Music Concert", result.get(0).getName());
+        assertEquals(102L, result.get(1).getEventId());
+        assertEquals("Festival Night", result.get(1).getName());
+
+        
+        verify(eventRepository).searchByNameAndEventTypes(eq(name), eq(List.of("music", "festival")));
+    }
+
+    @Test
+    void testSearchEventNames_WithoutEventTypes() {
+        String name = "concert";
+        List<String> eventTypes = Collections.emptyList();
+
+        Event event = new Event();
+        event.setEventId(201L);
+        event.setName("Solo Concert");
+
+        when(eventRepository.searchByNameOnly(name)).thenReturn(List.of(event));
+
+        List<EventSearchDTO> result = eventService.searchEventNames(name, eventTypes);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(201L, result.get(0).getEventId());
+        assertEquals("Solo Concert", result.get(0).getName());
+
+        verify(eventRepository).searchByNameOnly(name);
+    }
+
+    @Test
+    void testSearchEventNames_NullEventTypes() {
+        String name = "concert";
+
+        Event event = new Event();
+        event.setEventId(301L);
+        event.setName("Live Concert");
+
+        when(eventRepository.searchByNameOnly(name)).thenReturn(List.of(event));
+
+        List<EventSearchDTO> result = eventService.searchEventNames(name, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(301L, result.get(0).getEventId());
+        assertEquals("Live Concert", result.get(0).getName());
+
+        verify(eventRepository).searchByNameOnly(name);
+    }
+
+    @Test
+    void testGetPopularEvents_WithEventType() {
+        String eventType = "sports";
+
+        Event event = new Event();
+        event.setEventId(1L);
+        event.setDeleted(false);
+        event.setName("Sports Gala");
+
+        List<Event> mockEvents = List.of(event);
 
         when(eventRepository.findTop10ByEventTypeOrderByReleasingOnDesc(eventType))
             .thenReturn(mockEvents);
 
+        EventResponseDtoCard dto = new EventResponseDtoCard();
+
+
         List<EventResponseDtoCard> result = eventService.getPopularEvents(eventType);
 
-       
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+        verify(eventRepository).findTop10ByEventTypeOrderByReleasingOnDesc(eventType);
+
     }
+
     @Test
-    void testGetPopularEvents_WithoutEventType_ReturnsFilteredEvents() {
-        List<Event> mockEvents = List.of(
-            
-        );
+    void testGetPopularEvents_WithoutEventType() {
+        Event event = new Event();
+        event.setEventId(2L);
+        event.setDeleted(false);
+        event.setName("Open Festival");
 
         when(eventRepository.findTop10ByOrderByReleasingOnDesc())
-            .thenReturn(mockEvents);
+            .thenReturn(List.of(event));
+
+        EventResponseDtoCard dto = new EventResponseDtoCard();
+
+
+        List<EventResponseDtoCard> result = eventService.getPopularEvents("");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+        verify(eventRepository).findTop10ByOrderByReleasingOnDesc();
+
+    }
+
+    @Test
+    void testGetPopularEvents_ThrowsExceptionWhenNoEvents() {
+        when(eventRepository.findTop10ByOrderByReleasingOnDesc())
+            .thenReturn(Collections.emptyList());
+
+        EventCustomException exception = assertThrows(EventCustomException.class, () -> {
+            eventService.getPopularEvents("");
+        });
+
+        assertEquals("No Events found", exception.getMessage());
+        verify(eventRepository).findTop10ByOrderByReleasingOnDesc();
+    }
+
+    @Test
+    void testGetPopularEvents_FiltersDeletedEvents() {
+        Event event1 = new Event();
+        event1.setEventId(3L);
+        event1.setDeleted(false);
+        event1.setName("Live Show");
+
+        Event event2 = new Event();
+        event2.setEventId(4L);
+        event2.setDeleted(true); 
+        event2.setName("Deleted Show");
+
+        when(eventRepository.findTop10ByOrderByReleasingOnDesc())
+            .thenReturn(List.of(event1, event2));
+
+        EventResponseDtoCard dto = new EventResponseDtoCard();
+
 
         List<EventResponseDtoCard> result = eventService.getPopularEvents(null);
 
-        
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(eventRepository).findTop10ByOrderByReleasingOnDesc();
+
     }
+
+
     @Test
     void testgetEventById()
     {
@@ -522,6 +631,117 @@ class EventServiceImplTest {
         assertNotNull(result.getImageurl());
     }
 
+    @Test
+    void testToEventDto_MappingAllFields() {
+       
+        Event event = new Event();
+        event.setEventId(1L);
+        event.setName("Test Event");
+        event.setDescription("Event description");
+        event.setRunTime("120");
+        event.setStartDate(LocalDate.of(2025, 9, 1));
+        event.setEndDate(LocalDate.of(2025, 9, 10));
+        event.setEventType("concert");
+        event.setImageurl("image.jpg");
+        event.setImdbRating(8.5);
+        event.setLikes(1000.0);
+        event.setVotes(500.0);
+        event.setCurrentlyPlaying(true);
+        event.setDeleted(false);
+        event.setAgeLimit(13);
+        event.setReleasingOn(LocalDate.of(2025, 9, 5));
+
+     
+        Venue venue = new Venue();
+        venue.setVenueName("Grand Hall");
+        event.setVenues(List.of(venue));
+
+    
+        Languages language = new Languages();
+        language.setLanguageName("English");
+        event.setLanguages(List.of(language));
+
+      
+        Genres genre = new Genres();
+        genre.setGenresName("Action");
+        event.setGenres(List.of(genre));
+
+      
+        Format format = new Format();
+        format.setFormatName("3D");
+        event.setFormat(List.of(format));
+
+        
+        Tag tag = new Tag();
+        tag.setTagName("Popular");
+        event.setTag(List.of(tag));
+
+        
+        ReleaseMonth month = new ReleaseMonth();
+        month.setReleaseMonthName("September");
+        event.setReleaseMonth(List.of(month));
+
+        
+        DateFilter dateFilter = new DateFilter();
+        dateFilter.setDateFilterName("This Week");
+        event.setDateFilter(List.of(dateFilter));
+
+       
+        Categories category = new Categories();
+        category.setCategoriesName("Music");
+        event.setCategories(List.of(category));
+
+        
+        MoreFilters filter = new MoreFilters();
+        filter.setName("Indoor");
+        event.setMoreFilters(List.of(filter));
+
+       
+        Price price = new Price();
+        price.setPriceRange("₹200-₹500");
+        event.setPrice(List.of(price));
+
+        
+        Cast cast = new Cast();
+        cast.setActorName("John Doe");
+        cast.setCastImg("johndoe.jpg");
+        event.setCast(List.of(cast));
+
+       
+        Crew crew = new Crew();
+        crew.setMemberName("Jane Smith");
+        crew.setCrewImg("janesmith.jpg");
+        event.setCrew(List.of(crew));
+
+        
+        City city = new City();
+        city.setName("Mumbai");
+        event.setCity(List.of(city));
+
+       
+        EventResponseDto dto = eventService.toEventdto(event); 
+
+        
+        assertEquals(1L, dto.getEventId());
+        assertEquals("Test Event", dto.getName());
+        assertEquals("Event description", dto.getDescription());
+        assertEquals("120", dto.getRunTime());
+        assertEquals("Grand Hall", dto.getVenueName().get(0));
+        assertEquals("English", dto.getLanguages().get(0));
+        assertEquals("Action", dto.getGenres().get(0));
+        assertEquals("3D", dto.getFormat().get(0));
+        assertEquals("Popular", dto.getTag().get(0));
+        assertEquals("September", dto.getReleaseMonth().get(0));
+        assertEquals("This Week", dto.getDateFilter().get(0));
+        assertEquals("Music", dto.getCategories().get(0));
+        assertEquals("Indoor", dto.getMoreFilters().get(0));
+        assertEquals("₹200-₹500", dto.getPrice().get(0));
+        assertEquals("John Doe", dto.getCast().get(0).getActorName());
+        assertEquals("johndoe.jpg", dto.getCast().get(0).getCastImg());
+        assertEquals("Jane Smith", dto.getCrew().get(0).getMemberName());
+        assertEquals("janesmith.jpg", dto.getCrew().get(0).getCrewImg());
+        assertEquals("Mumbai", dto.getCity().get(0));
+    }
 
 
 }

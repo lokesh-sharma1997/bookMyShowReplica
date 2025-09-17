@@ -101,7 +101,7 @@ class EventControllerTest {
         eventDto.setLikes(100.0);
         eventDto.setVotes(50.0);
         eventDto.setCurrentlyPlaying(true);
-        eventDto.setDeleted(false);
+       
         eventDto.setAgeLimit(13);
         eventDto.setReleasingOn(LocalDate.of(2025, 9, 8));
         eventDto.setLanguages(Collections.emptyList());
@@ -256,36 +256,13 @@ class EventControllerTest {
     }
  
  
-//    @Test
-//    void testSearchEventNames() throws Exception {
-//       
-//        List<String> mockEventNames = Arrays.asList("Concert", "Conference");
-//        EventSearchRequestDto requestDto = new EventSearchRequestDto();
-//        requestDto.setName("Con");
-//        requestDto.setEventTypes(Arrays.asList("Music", "Business"));
-// 
-//        
-//        when(eventService.searchEventNames(requestDto.getName(), requestDto.getEventTypes()))
-//                .thenReturn(mockEventNames);
-// 
-//      
-//        mockMvc.perform(post("/api/events/search")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(new ObjectMapper().writeValueAsString(requestDto)))
-//        .andExpect(status().isOk())
-//        .andExpect(jsonPath("$.statusCode").value(200))
-//           .andExpect(jsonPath("$.message").value("Event names fetched successfully"))
-//            .andExpect(jsonPath("$.success").value(true))
-//            .andExpect(jsonPath("$.data").isArray())
-//            .andExpect(jsonPath("$.data[0]").value("Concert"))
-//            .andExpect(jsonPath("$.data[1]").value("Conference"));
-//    }
+
  
    
  
     @Test
     void testSearchEventNames() throws Exception {
-        // Given: Create a mock list of event names and request DTO
+       
         List<EventSearchDTO> mockEventNames = Arrays.asList(
                 new EventSearchDTO(1L, "Concert"),
                 new EventSearchDTO(2L, "Conference")
@@ -295,11 +272,11 @@ class EventControllerTest {
         requestDto.setName("Con");
         requestDto.setEventTypes(Arrays.asList("Music", "Business"));
 
-        // When: Mock the service call to return the mock data
+       
         when(eventService.searchEventNames(requestDto.getName(), requestDto.getEventTypes()))
                 .thenReturn(mockEventNames);
 
-        // Then: Perform the mock HTTP request and verify the response
+      
         mockMvc.perform(post("/api/events/search")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(requestDto)))

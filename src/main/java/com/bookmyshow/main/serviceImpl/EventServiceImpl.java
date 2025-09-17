@@ -119,7 +119,7 @@ public class EventServiceImpl implements EventService {
 	    dto.setLikes(event.getLikes());
 	    dto.setVotes(event.getVotes());
 	    dto.setCurrentlyPlaying(event.getCurrentlyPlaying());
-	    dto.setDeleted(event.getDeleted());
+	   
 	    dto.setAgeLimit(event.getAgeLimit());
 	    dto.setReleasingOn(event.getReleasingOn());
 
@@ -232,6 +232,7 @@ public class EventServiceImpl implements EventService {
 
 	  
 	    Event event = toEntity(eventDto);
+	    event.setDeleted(false);
 	    event.setImageurl(base64Poster);
 
 	   
@@ -771,7 +772,10 @@ if (events == null || events.isEmpty())
 	    } else {
 	        events = eventRepository.findTop10ByOrderByReleasingOnDesc();
 	    }
-
+	    if (events == null || events.isEmpty())
+		 {
+		 	throw new EventCustomException("No Events found");
+		 }
 	    return events.stream()
 	            .filter(event -> !event.getDeleted())
 	            .map(this::mapToResponseDto)
