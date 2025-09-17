@@ -12,7 +12,7 @@ import com.bookmyshow.main.util.AESUtil;
 public class Base64PasswordValidator implements ConstraintValidator<ValidBase64Password, String> {
 
 	private static final Pattern PASSWORD_PATTERN = Pattern
-			.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?!.*\\s).{8,20}$");
+			.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$");
 
 	@Override
 	public boolean isValid(String encodedPassword, ConstraintValidatorContext context) {

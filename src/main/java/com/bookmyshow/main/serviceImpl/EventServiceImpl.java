@@ -26,6 +26,7 @@ import com.bookmyshow.main.dto.EventDTO;
 
 import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.dto.EventResponseDtoCard;
+import com.bookmyshow.main.dto.EventSearchDTO;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
 import com.bookmyshow.main.dto.LanguagesDTO;
@@ -47,6 +48,7 @@ import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
 import com.bookmyshow.main.model.Tag;
+import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
 import com.bookmyshow.main.repository.CategoriesRepository;
 import com.bookmyshow.main.repository.CityRepository;
@@ -59,18 +61,22 @@ import com.bookmyshow.main.repository.LanguagesRepository;
 import com.bookmyshow.main.repository.MoreFiltersRepository;
 import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
+import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import com.bookmyshow.main.specification.EventSpecification;
 
 @Service
 public class EventServiceImpl implements EventService {
 
+   @Autowired
+   private VenueRepository venueRepository;
+
 	@Autowired
 	private EventRepository eventRepository;
 	@Autowired
     private LanguagesRepository languagesRepository;
 	@Autowired
-    private GenresRepository genresRepository;
+    private GenresRepository genresRepository;   
 	@Autowired
     private FormatRepository formatRepository;
 	@Autowired
@@ -94,6 +100,8 @@ public class EventServiceImpl implements EventService {
 
 	@Autowired
 	private ModelMapper mapper;
+
+    
 
 	private EventDTO toDto(Event event) {
 	    EventDTO dto = new EventDTO();
@@ -197,6 +205,12 @@ public class EventServiceImpl implements EventService {
 	            .stream()
 	            .map(city -> city.getCityId().intValue())
 	            .toList());
+	    }
+	    if (event.getVenues() != null) {
+	        dto.setVenue(event.getVenues()
+	        .stream()
+	        .map(venue->venue.getId().intValue())
+	        .toList());
 	    }
 
 	    return dto;
@@ -342,6 +356,19 @@ public class EventServiceImpl implements EventService {
 	        List<City> cities = cityRepository.findAllById(eventDto.getCity());
 	        event.setCity(cities);
 	    }
+	    if (eventDto.getVenue() != null) {
+	     
+	        List<Long> venueIds = eventDto.getVenue().stream()
+	                                      .map(Integer::longValue) 
+	                                      .collect(Collectors.toList());
+
+	      
+	        List<Venue> venues = venueRepository.findAllById(venueIds);
+
+	     
+	        event.setVenues(venues);
+	    }
+
 
 	    Event savedEvent = eventRepository.save(event);
 
@@ -367,20 +394,48 @@ public class EventServiceImpl implements EventService {
 
 	
 
-	public List<LanguagesDTO> getAllLanguages() {
-	    List<Languages> allLanguages = languagesRepository.findAll();
-	    return allLanguages.stream()
-	                       .map(lang -> mapper.map(lang, LanguagesDTO.class))
-	                       .collect(Collectors.toList());
+	public List<LanguagesDTO> getAllLanguages(String eventType) {
+		
+	    List<Event> events = eventRepository.findByEventType(eventType);
+if (events == null || events.isEmpty())
+{
+	throw new EventCustomException("No Languages found");
+}
+	  
+	    Set<Languages> allLanguagesSet = new HashSet<>();
+	    for (Event event : events) {
+	        if (event.getLanguages() != null) {
+	            allLanguagesSet.addAll(event.getLanguages());
+	        }
+	    }
+
+	  
+	    return allLanguagesSet.stream()
+	            .map(lang -> mapper.map(lang, LanguagesDTO.class))
+	            .collect(Collectors.toList());
 	}
 
 
+
 	@Override
-	public List<GenresDTO> getAllGenres() {
-		  List<Genres> allGenres = genresRepository.findAll();
-		    return allGenres.stream()
-		                       .map(genres -> mapper.map(genres, GenresDTO.class))
-		                       .collect(Collectors.toList());
+	public List<GenresDTO> getAllGenres(String eventType) {
+		 List<Event> events = eventRepository.findByEventType(eventType);
+
+		 if (events == null || events.isEmpty())
+		 {
+		 	throw new EventCustomException("No Genres found");
+		 }
+		    Set<Genres> allGenresSet = new HashSet<>();
+		    for (Event event : events) {
+		        if (event.getGenres() != null) {
+		        	allGenresSet.addAll(event.getGenres());
+		        }
+		    }
+
+		  
+		    return allGenresSet.stream()
+		            .map(genre -> mapper.map(genre, GenresDTO.class))
+		            .collect(Collectors.toList());
 	}
 
 	@Override
@@ -416,32 +471,56 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public List<CategoryDTO> getAllCategories() {
-	    List<Categories> categories = categoriesRepository.findAll();
-	    return categories.stream()
-	            .map(cat -> {
-	                CategoryDTO dto = new CategoryDTO();
-	                dto.setCategoryId(cat.getCategoryId());
-	                dto.setCategoryName(cat.getCategoriesName());
-	                return dto;
-	            })
-	            .collect(Collectors.toList());
+	public List<CategoryDTO> getAllCategories(String eventType) {
+	    List<Event> events = eventRepository.findByEventType(eventType);
+	    if (events == null || events.isEmpty())
+		 {
+		 	throw new EventCustomException("No Categories found");
+		 }
+	    Set<Categories> allCategorySet = new HashSet<>();
+	    for (Event event : events) {
+	        if (event.getCategories() != null) {
+	            allCategorySet.addAll(event.getCategories());
+	        }
+	    }
 
+	  
+	    mapper.typeMap(Categories.class, CategoryDTO.class).addMappings(mapper -> {
+	        mapper.map(Categories::getCategoryId, CategoryDTO::setCategoryId);
+	        mapper.map(Categories::getCategoriesName, CategoryDTO::setCategoryName);
+	    });
+
+	    return allCategorySet.stream()
+	            .map(category -> mapper.map(category, CategoryDTO.class))
+	            .collect(Collectors.toList());
 	}
+
 	
 	@Override
-	public List<MoreFilterDTO> getAllMoreFilters() {
-	    List<MoreFilters> filters = moreFiltersRepository.findAll();
-	    return filters.stream()
-	              .map(f -> {
-	                  MoreFilterDTO dto = new MoreFilterDTO();
-	                  dto.setMoreFilterId(f.getFilterId());
-	                  dto.setMoreFilterName(f.getName());
-	                  return dto;
-	              })
-	              .collect(Collectors.toList());
+	public List<MoreFilterDTO> getAllMoreFilters(String eventType) {
+	    List<Event> events = eventRepository.findByEventType(eventType);
+	    if (events == null || events.isEmpty())
+		 {
+		 	throw new EventCustomException("No MoreFilters found");
+		 }
+	    Set<MoreFilters> allMoreFiltersSet = new HashSet<>();
+	    for (Event event : events) {
+	        if (event.getMoreFilters() != null) {
+	            allMoreFiltersSet.addAll(event.getMoreFilters());
+	        }
+	    }
 
+	   
+	    mapper.typeMap(MoreFilters.class, MoreFilterDTO.class).addMappings(m -> {
+	        m.map(MoreFilters::getFilterId, MoreFilterDTO::setMoreFilterId);
+	        m.map(MoreFilters::getName, MoreFilterDTO::setMoreFilterName);
+	    });
+
+	    return allMoreFiltersSet.stream()
+	            .map(mfilter -> mapper.map(mfilter, MoreFilterDTO.class))
+	            .collect(Collectors.toList());
 	}
+
 	
 
 	@Override
@@ -518,6 +597,16 @@ public class EventServiceImpl implements EventService {
 	    if (eventDto.getPrice() != null) {
 	        event.setPrice(priceRepository.findAllById(eventDto.getPrice()));
 	    }
+	    if (eventDto.getVenue() != null) {
+	      
+	        List<Long> venueIds = eventDto.getVenue().stream()
+	                                      .map(Integer::longValue) 
+	                                      .collect(Collectors.toList());
+
+	       
+	        event.setVenues(venueRepository.findAllById(venueIds));
+	    }
+
 
 	   
 	    if (eventDto.getCast() != null) {
@@ -597,25 +686,24 @@ public class EventServiceImpl implements EventService {
 	
 	
 	
-	public List<String> searchEventNames(String name, List<String> eventTypes) {
-	    List<Event> events;
 
+	
+	public List<EventSearchDTO> searchEventNames(String name, List<String> eventTypes) {
+	    List<Event> events;
+	 
 	    if (eventTypes != null && !eventTypes.isEmpty()) {
 	        List<String> lowerEventTypes = eventTypes.stream()
 	                                                 .map(String::toLowerCase)
 	                                                 .toList();
-
+	 
 	        events = eventRepository.searchByNameAndEventTypes(name, lowerEventTypes);
 	    } else {
 	        events = eventRepository.searchByNameOnly(name);
-	        if (events == null || events.isEmpty()) {
-	            throw new EventCustomException("No event found");
-	        }
+	        
 	    }
-
 	 
 	    return events.stream()
-	                 .map(Event::getName) 
+	                 .map(event -> new EventSearchDTO(event.getEventId(), event.getName()))
 	                 .toList();
 	}
 
@@ -699,8 +787,19 @@ public class EventServiceImpl implements EventService {
 	    dto.setName(event.getName());
 	    dto.setLikes(event.getLikes() != null ? event.getLikes() : 0.0);
 	    dto.setImageurl(event.getImageurl());
-
-	  
+	    dto.setReleasingOn(event.getReleasingOn());
+	    dto.setStartDate(event.getStartDate());
+	   
+	    if (event.getVenues() != null && !event.getVenues().isEmpty()) {
+		       
+	        List<String> venueName = event.getVenues()
+	                                   .stream()
+	                                   .map(v -> v.getVenueName())
+	                                   .toList();
+	        dto.setVenueName(venueName);
+	    } else {
+	        dto.setVenueName(List.of()); 
+	    }
 	    if (event.getGenres() != null && !event.getGenres().isEmpty()) {
 	       
 	        List<String> genre = event.getGenres()
@@ -710,6 +809,26 @@ public class EventServiceImpl implements EventService {
 	        dto.setGenres(genre);
 	    } else {
 	        dto.setGenres(List.of()); 
+	    }
+	    if (event.getLanguages() != null && !event.getLanguages().isEmpty()) {
+	        List<String> languageList = event.getLanguages()
+	                                         .stream()
+	                                         .map(Languages::getLanguageName)
+	                                         .toList();
+	        dto.setLanguages(languageList);
+	    } else {
+	        dto.setLanguages(List.of());
+	    }
+
+	    // Categories
+	    if (event.getCategories() != null && !event.getCategories().isEmpty()) {
+	        List<String> categoryList = event.getCategories()
+	                                         .stream()
+	                                         .map(Categories::getCategoriesName)
+	                                         .toList();
+	        dto.setCategories(categoryList);
+	    } else {
+	        dto.setCategories(List.of());
 	    }
 
 	    dto.setVotes(event.getVotes() != null ? event.getVotes() : 0.0);
@@ -737,7 +856,18 @@ public class EventServiceImpl implements EventService {
 	    dto.setDeleted(event.getDeleted());
 	    dto.setAgeLimit(event.getAgeLimit() != null ? event.getAgeLimit() : 0);
 	    dto.setReleasingOn(event.getReleasingOn());
-
+	    if (event.getVenues() != null && !event.getVenues().isEmpty()) {
+		       
+	        List<String> venueName = event.getVenues()
+	                                   .stream()
+	                                   .map(v -> v.getVenueName())
+	                                   .toList();
+	        dto.setVenueName(venueName);
+	    } else {
+	        dto.setVenueName(List.of()); 
+	    }
+	    
+	    
 	    dto.setLanguages(event.getLanguages() != null ? event.getLanguages().stream()
 	        .map(Languages::getLanguageName)
 	        .toList() : new ArrayList<>());

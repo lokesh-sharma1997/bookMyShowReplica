@@ -10,6 +10,7 @@ import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
 import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.dto.EventResponseDtoCard;
+import com.bookmyshow.main.dto.EventSearchDTO;
 import com.bookmyshow.main.dto.FormatDTO;
 import com.bookmyshow.main.dto.GenresDTO;
 import com.bookmyshow.main.dto.LanguagesDTO;
@@ -28,7 +29,8 @@ public interface EventService {
 	EventResponseDto getEventById(Long id);
 
 	
-	List<String> searchEventNames(String name, List<String> eventTypes);
+
+	List<EventSearchDTO> searchEventNames(String name, List<String> eventTypes);
 
 	EventDTO updateEvent(Long id, EventDTO movieDto, MultipartFile poster, List<MultipartFile> castImages,
 			List<MultipartFile> crewImages)
@@ -48,17 +50,17 @@ public interface EventService {
 	        List<Integer> dateFilters
 	        );
 
-	List<LanguagesDTO> getAllLanguages();
+	List<LanguagesDTO> getAllLanguages(String eventType);
 
-	List<GenresDTO> getAllGenres();
+	List<GenresDTO> getAllGenres(String eventType);
 
 	 List<FormatDTO> getAllFormats();
 	 List<TagDTO> getAllTags();
 	 List<ReleaseMonthDTO> getAllReleaseMonths();
 	 List<DateFilterDTO> getAllDateFilters();
-	 List<CategoryDTO> getAllCategories();
+	 List<CategoryDTO> getAllCategories(String eventType);
 	 List<PriceDTO> getAllPrices();
-	 List<MoreFilterDTO> getAllMoreFilters();
+	 List<MoreFilterDTO> getAllMoreFilters(String eventType);
 
 
 	List<EventResponseDtoCard> getPopularEvents(String eventType);
