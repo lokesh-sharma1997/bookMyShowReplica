@@ -38,7 +38,7 @@ public class JwtService {
 	private String createToken(Map<String, Object> claims, String subject) {
 		return Jwts.builder().claims(claims).subject(subject).header().empty().add("typ", "JWT").and()
 				.issuedAt(new Date(System.currentTimeMillis()))
-				.expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 100)) // 10 minutes expiration time
+				.expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes expiration time
 				.signWith(getSigningKey()).compact();
 	}
 
