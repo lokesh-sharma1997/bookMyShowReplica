@@ -43,7 +43,7 @@ public class UserMaster {
 	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
 	private Role role;
 
-	@Size(min = 10, max=15,message = "Mobile number cannot contain more than ten characters")
+	@Size(min = 10, max=10,message = "Mobile number cannot contain more than ten characters")
 	private String phoneNumber;
 
 	@CreationTimestamp

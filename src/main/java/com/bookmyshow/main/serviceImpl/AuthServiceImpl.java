@@ -62,13 +62,14 @@ public class AuthServiceImpl implements AuthService {
 			// Generate token with role and return as string
 			String token = jwtService.generateToken(req.getUsername(), role, userId);
 
-			//tokenService.saveToken(token, userId, ttl);
+			tokenService.saveToken(token, userId, ttl);
 			return token;
 
 		} catch (AuthenticationException ex) {
 			ex.printStackTrace();
 			throw new InvalidCredentialsException("Invalid credentials for username: " + req.getUsername());
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException("Failed to decrypt password or login: " + e.getMessage(), e);
 		}
 	}

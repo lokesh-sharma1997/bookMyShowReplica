@@ -18,11 +18,10 @@ public class EditProfileRequest {
 	@Email(message = "Email should be a valid email address")
 	private String email;
 
-	@Size(min = 10, max = 15, message = "Phone number should be between 10 and 15 characters")
-	@Pattern(regexp = "^\\d{10,15}$", message = "Phone number should contain only digits and be between 10 and 15 digits")
+	@Size(min = 10, max = 10, message = "Phone number should be exactly 10 characters")
+	@Pattern(regexp = "^\\d{10}$", message = "Phone number should contain exactly 10 digits")
 	private String phoneNumber;
 
-	@Past(message = "Date of birth should be in the past")
 	private String dob;
 
 	@Size(max = 255, message = "Identity field should not exceed 255 characters")
@@ -30,7 +29,6 @@ public class EditProfileRequest {
 
 	private String married;
 
-//	@Past(message = "Anniversary date should be in the past")
 	private String anniversaryDate;
 
 	@Pattern(regexp = "^[0-9]{6}$", message = "Pincode should be a valid 6-digit number")

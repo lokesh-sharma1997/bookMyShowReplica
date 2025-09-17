@@ -28,6 +28,8 @@ public class RegisterRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    @Pattern(regexp = "^[0-9]{10,15}$", message = "Invalid phone number format")
+    @Size(min = 10, max = 10, message = "Phone number should be exactly 10 digits")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number should contain only digits and be exactly 10 digits long")
     private String phoneNumber;
+
 }
