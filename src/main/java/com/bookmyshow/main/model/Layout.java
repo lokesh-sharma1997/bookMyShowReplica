@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -32,6 +33,11 @@ public class Layout {
     private List<LayoutRow> layoutRows;
 	
 	private int cols;
+	
+	
+	@ManyToOne
+	@JoinColumn(name = "show_id")
+	private Show show;
 	
 	
 }

@@ -70,7 +70,7 @@ public class SecurityConfig {
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
-	String password = "kashish01"; //8JoAiIFelx1XrGgRk0NolQ==	
+//	String password = "kashish01"; //8JoAiIFelx1XrGgRk0NolQ==	
 //	public static void main(String[] args) throws Exception {
 //		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
 //   String password = "Kashish@2004";

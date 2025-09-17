@@ -54,6 +54,8 @@ public class UserMaster {
 
 	@UpdateTimestamp
 	private LocalDateTime updatedOn;
+	
+	
 
 	private Boolean deleteFlag = false;
 }

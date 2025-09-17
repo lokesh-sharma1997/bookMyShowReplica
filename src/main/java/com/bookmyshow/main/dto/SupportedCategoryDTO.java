@@ -6,4 +6,5 @@ import lombok.Data;
 public class SupportedCategoryDTO {
 	private Long id;
     private String categoryName;
+    private Integer price;
 }
