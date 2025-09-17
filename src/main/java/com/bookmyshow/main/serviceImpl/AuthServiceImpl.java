@@ -54,19 +54,19 @@ public class AuthServiceImpl implements AuthService {
 			if (user == null || user.getRole() == null) {
 				throw new UserNotFoundException("User or role not found for username: " + req.getUsername());
 			}
-			if (Boolean.TRUE.equals(user.getDeleteFlag())) {  
-	            throw new InvalidCredentialsException("User account is deleted . Please contact support.");
-	        }
+			if (Boolean.TRUE.equals(user.getDeleteFlag())) {
+				throw new InvalidCredentialsException("User account is deleted . Please contact support.");
+			}
 			String role = user.getRole().getRoleName(); // Already a String
 			Long userId = user.getUserId();
 			// Generate token with role and return as string
 			String token = jwtService.generateToken(req.getUsername(), role, userId);
-//            tokenService.saveToken(token, userId, jwtService.getExpirationMs());
-			//tokenService.saveToken(token, userId,ttl);
-			tokenService.saveToken(token, userId, ttl);
+
+			//tokenService.saveToken(token, userId, ttl);
 			return token;
 
 		} catch (AuthenticationException ex) {
+			ex.printStackTrace();
 			throw new InvalidCredentialsException("Invalid credentials for username: " + req.getUsername());
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to decrypt password or login: " + e.getMessage(), e);

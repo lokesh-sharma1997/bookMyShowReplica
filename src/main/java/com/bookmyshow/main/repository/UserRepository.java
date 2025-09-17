@@ -10,7 +10,7 @@ import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.model.UserMaster;
 
 public interface UserRepository extends JpaRepository<UserMaster, Long> {
-	UserMaster findByUserId(long userId);
+	UserMaster findByUserId(Long userId);
 
 	UserMaster findByUsername(String username);
 
