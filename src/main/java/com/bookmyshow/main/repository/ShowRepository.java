@@ -12,11 +12,8 @@ import com.bookmyshow.main.model.Venue;
 public interface ShowRepository extends JpaRepository<Show, Long> {
 
 	Long save(ShowRequestDTO showDTO);
-	// Before - this can throw error if no results
 	
 
-//	// After - safer way
-//	Optional<Screen> findByVenueAndScreenName(Venue venue, String screenName);
 
 
 }

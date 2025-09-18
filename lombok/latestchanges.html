@@ -1,8 +1,0 @@
-<ul>
-<li>PLATFORM: JDK25 support added #3859.</li>
-<li>BUGFIX: Recent versions of eclipse (or the eclipse-based java lang server for VSCode) caused <code>java.lang.IllegalArgumentException: Document does not match the AST</code>. .</li>
-<li>PERFORMANCE: <code>@ExtensionMethod</code> is now significantly faster .</li>
-<li>BUGFIX: the command line <code>config</code> tool would emit incorrect output for nullity annotations. .</li>
-<li>FEATURE: <code>@Jacksonized @Accessors(fluent=true)</code> automatically creates the relevant annotations such that Jackson correctly identifies fluent accessors. , .</li>
-<li>IMPROBABLE BREAKING CHANGE: From versions 1.18.16 to 1.18.38, lombok automatically copies certain Jackson annotations (e.g., <code>@JsonProperty</code>) from fields to the corresponding accessors (getters/setters). However, it turned out to be harmful in certain situations. Thus, Lombok does not automatically copy those annotations any more. You can restore the old behavior using the config key <code>lombok.copyJacksonAnnotationsToAccessors = true</code>.</li>
-</ul>
