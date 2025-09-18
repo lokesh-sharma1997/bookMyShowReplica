@@ -158,9 +158,7 @@ public class EventController {
     ) throws IOException {
        
     	EventDTO eventDto = objectMapper.readValue(eventJson, EventDTO.class);
-    	if (eventDto.getName() == null || eventDto.getName().isBlank()) {
-            throw new EventCustomException("Event name must not be empty while updating");
-        }
+
     	 eventService.updateEvent(id,eventDto, poster,castImages,crewImages);
     	 ApiResponse<Void> response = new ApiResponse<>(
    	            HttpStatus.CREATED.value(),
