@@ -21,44 +21,86 @@ public class UserProfileServiceImpl implements UserProfileService {
 	@Autowired
 	private UserProfileRepository userProfileRepository;
 
+	// Utility method to check if the value is a "default" value
+	private boolean isDefaultValue(String value) {
+		return value != null && (value.equals("string") || value.equals("user@example.com") || value.equals("")
+				|| value.equals("0000000000") // Add more default values as needed
+		);
+	}
+
 	@Override
 	public UserProfileResponse updateProfile(Long userId, EditProfileRequest request) {
+		// Fetch the existing user from the database
 		UserMaster user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
+		// Fetch or create user profile
 		UserProfile userProfile = user.getUserProfile();
 		if (userProfile == null) {
 			userProfile = new UserProfile();
 			userProfile.setUser(user);
 		}
+
+		// Check if the email or username already exists
 		if (userRepository.existsByEmail(request.getEmail())) {
-	        throw new ResourceAlreadyExistsException("Email already exists: "+ request.getEmail());
-	    }
+			throw new ResourceAlreadyExistsException("Email already exists: " + request.getEmail());
+		}
 		if (userRepository.existsByUsername(request.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + request.getUsername());
 		}
-		// Update editable fields from UserMaster
-		user.setName(request.getName());
-		user.setUsername(request.getUsername());
-		user.setEmail(request.getEmail());
-		user.setPhoneNumber(request.getPhoneNumber());
 
-		// Update extra fields from EditProfile
-		userProfile.setProfileImg(request.getProfileImg());
-		userProfile.setDob(request.getDob());
-		userProfile.setIdentity(request.getIdentity());
-		userProfile.setMarried(request.getMarried());
-		userProfile.setAnniversaryDate(request.getAnniversaryDate());
-		userProfile.setPincode(request.getPincode());
-		userProfile.setAddressLine1(request.getAddressLine1());
-		userProfile.setAddressLine2(request.getAddressLine2());
-		userProfile.setCity(request.getCity());
-		userProfile.setState(request.getState());
-		userProfile.setCountry(request.getCountry());
+		// Update UserMaster fields (only if non-null, non-empty, and not a default
+		// value)
+		if (request.getName() != null && !isDefaultValue(request.getName())) {
+			user.setName(request.getName());
+		}
+		if (request.getUsername() != null && !isDefaultValue(request.getUsername())) {
+			user.setUsername(request.getUsername());
+		}
+		if (request.getEmail() != null && !isDefaultValue(request.getEmail())) {
+			user.setEmail(request.getEmail());
+		}
+		if (request.getPhoneNumber() != null && !isDefaultValue(request.getPhoneNumber())) {
+			user.setPhoneNumber(request.getPhoneNumber());
+		}
+
+		// Update UserProfile fields (only if non-null, non-empty, and not a default
+		// value)
+		if (request.getProfileImg() != null && !isDefaultValue(request.getProfileImg())) {
+			userProfile.setProfileImg(request.getProfileImg());
+		}
+		if (request.getDob() != null && !isDefaultValue(request.getDob())) {
+			userProfile.setDob(request.getDob());
+		}
+		if (request.getIdentity() != null && !isDefaultValue(request.getIdentity())) {
+			userProfile.setIdentity(request.getIdentity());
+		}
+		if (request.getMarried() != null && !isDefaultValue(request.getMarried())) {
+			userProfile.setMarried(request.getMarried());
+		}
+		if (request.getAnniversaryDate() != null && !isDefaultValue(request.getAnniversaryDate())) {
+			userProfile.setAnniversaryDate(request.getAnniversaryDate());
+		}
+		if (request.getPincode() != null && !isDefaultValue(request.getPincode())) {
+			userProfile.setPincode(request.getPincode());
+		}
+		if (request.getAddressLine1() != null && !isDefaultValue(request.getAddressLine1())) {
+			userProfile.setAddressLine1(request.getAddressLine1());
+		}
+		if (request.getAddressLine2() != null && !isDefaultValue(request.getAddressLine2())) {
+			userProfile.setAddressLine2(request.getAddressLine2());
+		}
+		if (request.getCity() != null && !isDefaultValue(request.getCity())) {
+			userProfile.setCity(request.getCity());
+		}
+		if (request.getState() != null && !isDefaultValue(request.getState())) {
+			userProfile.setState(request.getState());
+		}
 
 		// Save both entities
 		userRepository.save(user);
 		userProfileRepository.save(userProfile);
 
+		// Map the updated entities to the response object
 		return mapToResponse(user, userProfile);
 	}
 
@@ -88,7 +130,6 @@ public class UserProfileServiceImpl implements UserProfileService {
 			response.setAddressLine2(profile.getAddressLine2());
 			response.setCity(profile.getCity());
 			response.setState(profile.getState());
-			response.setCountry(profile.getCountry());
 		}
 
 		return response;

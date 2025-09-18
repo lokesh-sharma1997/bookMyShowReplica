@@ -20,5 +20,4 @@ public class UserProfileResponse {
 	private String addressLine2;
 	private String city;
 	private String state;
-	private String country;
 }
