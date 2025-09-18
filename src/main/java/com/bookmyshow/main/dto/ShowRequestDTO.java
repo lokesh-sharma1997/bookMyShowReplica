@@ -11,20 +11,20 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShowDTO {
-    private Long id;
-    private Long eventid;
-    private Long venueid;
-    private String city;
+public class ShowRequestDTO {
+    private Long showId;
     private String eventType;
+    private Long eventId;
+    private Long venueId;
+    private String city;
     private String date;
     private String startTime;
-    private int duration;
+    private Integer duration;
     private List<String> languageName;  // <- updated to LanguagesDTO
     private String status;
-    private String format;
-    private String screen;
-    private List<Integer> showprice;
+    private List<String> format;
+    private String screenName;
+    private List<Integer> showPrice;
     private List<SupportedCategoryDTO> supportedCategories;
     private List<ReserveSeatDTO> reserveSeat;
     

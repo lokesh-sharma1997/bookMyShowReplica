@@ -1,9 +1,10 @@
 package com.bookmyshow.main.controller;
 
-import com.bookmyshow.main.dto.ShowDTO;
-import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.dto.ShowRequestDTO;
 import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.service.ShowService;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,16 +17,33 @@ public class ShowController {
     @Autowired
     private ShowService showService;
 
-    @PostMapping("/create/show")
-    public ResponseEntity<ApiResponse<Long>> createShow(@RequestBody ShowDTO showDTO) {
-        Long showId = showService.createShow(showDTO);
-        ApiResponse<Long> response = new ApiResponse<>(
-                HttpStatus.CREATED.value(),
-                "Show created successfully",
-                true,
-                showId
-        );
+    @PostMapping("/create-show")
+    public ResponseEntity<ApiResponse<ShowRequestDTO>> createShow(@RequestBody ShowRequestDTO showRequestDTO) {
+        showService.createShow(showRequestDTO);
+        
+        ApiResponse<ShowRequestDTO> response = new ApiResponse<>();
+        response.setMessage("Show created successfully");
+        response.setSuccess(true);
+        response.setData(showRequestDTO);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+//    @PutMapping("/update-show/{id}")
+//    public ResponseEntity<ApiResponse<ShowRequestDTO>> updateShow(
+//            @PathVariable Long id,
+//            @RequestBody ShowRequestDTO showRequestDTO) {
+//
+//        ShowRequestDTO updatedShow = showService.updateShow(id, showRequestDTO);
+//
+//        ApiResponse<ShowRequestDTO> response = new ApiResponse<>();
+//        response.setMessage("Show updated successfully");
+//        response.setSuccess(true);
+//        response.setData(updatedShow);
+//
+//        return ResponseEntity.ok(response);
+//    }
+
+    
+
 
 }

@@ -1,11 +1,11 @@
 package com.bookmyshow.main.service;
 
-import com.bookmyshow.main.dto.ShowDTO;
-import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.dto.ShowRequestDTO;
 
 public  interface ShowService {
 
-    Long createShow(ShowDTO showDTO);
-
+    
+	ShowRequestDTO createShow(ShowRequestDTO showDTO);
+//	ShowRequestDTO updateShow(Long showId, ShowRequestDTO dto);
 	
 }

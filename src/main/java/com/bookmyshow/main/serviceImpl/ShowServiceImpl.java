@@ -1,14 +1,12 @@
 package com.bookmyshow.main.serviceImpl;
 
-import com.bookmyshow.main.dto.EventDTO;
-import com.bookmyshow.main.dto.ShowDTO;
+import com.bookmyshow.main.dto.ShowRequestDTO;
 import com.bookmyshow.main.dto.SupportedCategoryDTO;
 import com.bookmyshow.main.model.*;
-import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.LayoutRepository;
-import com.bookmyshow.main.repository.SeatRepository;
-import com.bookmyshow.main.repository.SupportedCategoryRepository;
+import com.bookmyshow.main.repository.*;
 import com.bookmyshow.main.service.ShowService;
+
+import jakarta.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ShowServiceImpl implements ShowService {
@@ -24,84 +23,82 @@ public class ShowServiceImpl implements ShowService {
     private ShowRepository showRepository;
 
     @Autowired
-    private LayoutRepository layoutRepository;
+    private EventRepository eventRepository;
 
     @Autowired
-    private SeatRepository seatRepository;
+    private VenueRepository venueRepository;
+
     @Autowired
-	private ModelMapper mapper;
+    private ScreenRepository screenRepository;
+    
     @Autowired
-    private SupportedCategoryRepository supportedCategoryRepository;
-    private Show toEntity(ShowDTO dto) {
-		return mapper.map(dto, Show.class);
-	}
+    private LanguagesRepository languagesRepository;
+
+
+
     @Override
-    public Long createShow(ShowDTO showDTO) {
-        Show show = toEntity(showDTO);
+    @Transactional
+    public ShowRequestDTO createShow(ShowRequestDTO dto) {
+        Show show = new Show();
 
-        show.setEventid(Long.valueOf(showDTO.getEventid()));
-        show.setVenueid(Long.valueOf(showDTO.getVenueid())); 
-        show.setCity(showDTO.getCity());
-        show.setDate(showDTO.getDate());
-        show.setStartTime(showDTO.getStartTime());
-        show.setDuration(showDTO.getDuration());
+        Event event = eventRepository.findById(dto.getEventId())
+                .orElseThrow(() -> new RuntimeException("Event not found with id " + dto.getEventId()));
+        show.setEvent(event);
 
-        List<Showprice> showPrices = new ArrayList<>();
-        
-        if ("Movie".equalsIgnoreCase(showDTO.getEventType())) {
-            show.setShowPrices(null); 
-        } else {
-            for (Integer price : showDTO.getShowprice()) {
-                Showprice showPrice = new Showprice();
-                showPrice.setPrice(price);
-                showPrice.setShow(show); 
-                showPrices.add(showPrice);
-            }
-            show.setShowPrices(showPrices); 
+        Venue venue = venueRepository.findById(dto.getVenueId())
+                .orElseThrow(() -> new RuntimeException("Venue not found with id " + dto.getVenueId()));
+        show.setVenue(venue);
+
+        if (dto.getScreenName() != null) {
+            Screen screen = screenRepository.findByVenueAndScreenName(venue, dto.getScreenName())
+                .orElseThrow(() -> new RuntimeException("Screen not found"));
+            show.setScreen(screen);
         }
 
-        // Set the language(s)
-        List<Languages> languagesList = new ArrayList<>();
-        languagesList.add(new Languages());  
-        show.setLanguages(languagesList);
-        show.setStatus(showDTO.getStatus());
+        show.setEventType(dto.getEventType());
+        show.setCity(dto.getCity());
+        show.setDate(dto.getDate());
+        show.setStartTime(dto.getStartTime());
+        show.setDuration(dto.getDuration());
+        show.setStatus(dto.getStatus());
+        show.setFormat(dto.getFormat());
 
-        if ("movies".equalsIgnoreCase(showDTO.getEventType())) {
-            show.setEventType("movies");
-            show.setFormat(showDTO.getFormat()); 
-
-//            // Process layouts (only for movies) and set them to the show
-//            List<Layout> layouts = processLayouts(showDTO.getSupportedCategories());
-//            show.setLayouts(layouts);  // Assign the processed layouts
-
-        } else {
-            // For non-movie events (like concerts or plays), set event type
-            show.setEventType(showDTO.getEventType());  
-            show.setFormat(null);  
-            show.setScreen(null); 
+        if (dto.getLanguageName() != null) {
+            List<Languages> languages = dto.getLanguageName().stream()
+                .map(name -> {
+                    return languagesRepository.findByLanguageName(name)
+                            .orElseThrow(() -> new RuntimeException("Language not found: " + name));
+                }).collect(Collectors.toList());
+            show.setLanguages(languages);
         }
 
-        return showRepository.save(showDTO);
+
+        Show savedShow = showRepository.save(show);
+
+        return convertEntityToDto(savedShow);
     }
 
-//    // Method to process layouts (only relevant for movies)
-//    private List<Layout> processLayouts(List<SupportedCategoryDTO> supportedCategories) {
-//        List<Layout> layouts = new ArrayList<>();
-//
-//        // Check if supported categories are provided
-//        if (supportedCategories != null && !supportedCategories.isEmpty()) {
-//            for (SupportedCategoryDTO category : supportedCategories) {
-//                Layout layout = new Layout();
-//                layout.setLayoutName(category.getLayoutName());  // Layout name (e.g., "Premium")
-//                layout.setRows(category.getRows());  // Rows in the layout (e.g., ["A", "B", "C"])
-//                layout.setCols(Integer.parseInt(category.getCols()));  // Number of columns (e.g., 20)
-//                layout.setPrice(category.getPrice());  // Price for the layout
-//
-//                // Save Layout to the database (optional, if needed)
-//                layouts.add(layoutRepository.save(layout));  // Save layout to the database (if needed)
-//            }
-//        }
-//
-//        return layouts;
-//    }
+    private ShowRequestDTO convertEntityToDto(Show show) {
+        ShowRequestDTO dto = new ShowRequestDTO();
+        dto.setShowId(show.getId());
+        dto.setEventId(show.getEvent().getEventId());
+        dto.setVenueId(show.getVenue().getId());
+        dto.setEventType(show.getEventType());
+        dto.setCity(show.getCity());
+        dto.setDate(show.getDate());
+        dto.setStartTime(show.getStartTime());
+        dto.setDuration(show.getDuration());
+        dto.setStatus(show.getStatus());
+        dto.setFormat(show.getFormat());
+        dto.setScreenName(show.getScreen() != null ? show.getScreen().getScreenName() : null);
+
+        dto.setLanguageName(show.getLanguages().stream()
+                .map(Languages::getLanguageName)
+                .collect(Collectors.toList()));
+
+
+        return dto;
+    }
+    
+    
 }

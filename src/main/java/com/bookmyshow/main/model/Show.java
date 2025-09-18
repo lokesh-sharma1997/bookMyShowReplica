@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,39 +21,52 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name="shows")
+@Table(name = "shows")
 public class Show {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "eventid")
     private Long eventid;
-    private Long venueid;  
+
+    @Column(name = "venueid")
+    private Long venueid;
+
     private String city;
-    private String eventType; 
+    private String eventType;
     private String date;
     private String startTime;
     private int duration;
 
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Languages> languages;
+    private List<Languages> languages = new ArrayList<>();
 
     private String status;
 
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SupportedCategory> supportedCategories;
+    private List<SupportedCategory> supportedCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Showprice> showPrices;
+    private List<Showprice> showPrices = new ArrayList<>();
 
-    private String format; 
+    private List<String> format;
 
     @ManyToOne
     @JoinColumn(name = "screen_id")
     private Screen screen;
 
-    // Layouts for movies
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Layout> layouts;
+    private List<Layout> layouts = new ArrayList<>();
+
+    @ManyToOne(cascade = CascadeType.PERSIST) 
+    @JoinColumn(name = "event_id")
+    private Event event;
+
+
+    @ManyToOne
+    @JoinColumn(name = "venueid", insertable = false, updatable = false)
+    private Venue venue;
+
 }

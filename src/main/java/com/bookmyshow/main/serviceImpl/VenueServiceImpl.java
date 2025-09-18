@@ -46,7 +46,7 @@ public class VenueServiceImpl implements VenueService {
         
 
         VenueDTO dto = new VenueDTO();
-//        dto.setId(entity.getId());
+        dto.setId(entity.getId());
         dto.setVenueName(entity.getVenueName());
         dto.setVenueCapacity(entity.getVenueCapacity());
         dto.setVenueFor(entity.getVenueFor());
@@ -110,33 +110,42 @@ public class VenueServiceImpl implements VenueService {
         return dto;
     }
 
-    // Convert DTO to entity 
     private Venue dtoToEntity(VenueDTO dto) {
         if (dto == null) {
             return null;
         }
 
         Venue entity = new Venue();
-//        entity.setId(dto.getId());
         entity.setVenueName(dto.getVenueName());
         entity.setVenueCapacity(dto.getVenueCapacity());
         entity.setVenueFor(dto.getVenueFor());
         entity.setVenueType(dto.getVenueType());
 
+        if (dto.getAmenities() != null) {
+            List<Amenity> amenities = dto.getAmenities().stream()
+                .map(amenityName -> {
+                    Amenity amenity = new Amenity();
+                    amenity.setAmenityName(amenityName);
+                    return amenity;
+                }).collect(Collectors.toList());
+            entity.setAmenities(amenities);
+        } else {
+            entity.setAmenities(new ArrayList<>());
+        }
+
         if (dto.getSupportedCategories() != null) {
             List<SupportedCategory> supportedCategories = dto.getSupportedCategories().stream()
-                    .map(categoryName -> {
-                        SupportedCategory category = new SupportedCategory();
-                        category.setCategoryname(categoryName);
-                        return category;
-                    })
-                    .collect(Collectors.toList());
+                .map(categoryName -> {
+                    SupportedCategory category = new SupportedCategory();
+                    category.setCategoryname(categoryName);
+                    return category;
+                })
+                .collect(Collectors.toList());
             entity.setSupportedCategories(supportedCategories);
         }
 
         if (dto.getAddress() != null) {
             Address address = new Address();
-//            address.setId(dto.getAddress().getId());
             address.setStreet(dto.getAddress().getStreet());
             address.setCity(dto.getAddress().getCity());
             address.setPin(dto.getAddress().getPin());
@@ -146,29 +155,31 @@ public class VenueServiceImpl implements VenueService {
         if ("movies".equalsIgnoreCase(dto.getVenueFor()) && dto.getScreens() != null) {
             List<Screen> screens = dto.getScreens().stream().map(screenDto -> {
                 Screen screen = new Screen();
-                screen.setId(screenDto.getId());
                 screen.setScreenName(screenDto.getScreenName());
 
-                if (screenDto.getLayouts() != null) {
+                if (screenDto.getLayouts() != null && !screenDto.getLayouts().isEmpty()) {
                     List<Layout> layouts = screenDto.getLayouts().stream().map(layoutDto -> {
                         Layout layout = new Layout();
-                        layout.setId(layoutDto.getId());
                         layout.setLayoutName(layoutDto.getLayoutName());
                         layout.setCols(layoutDto.getCols());
 
-                        if (layoutDto.getRows() != null) {
+                        if (layoutDto.getRows() != null && !layoutDto.getRows().isEmpty()) {
                             List<LayoutRow> layoutRows = layoutDto.getRows().stream().map(rowName -> {
                                 LayoutRow layoutRow = new LayoutRow();
                                 layoutRow.setRowName(rowName);
-                                layoutRow.setLayout(layout); 
+                                layoutRow.setLayout(layout);  // Set back reference to the layout
                                 return layoutRow;
                             }).collect(Collectors.toList());
                             layout.setLayoutRows(layoutRows);
+                        } else {
+                            layout.setLayoutRows(new ArrayList<>()); 
                         }
 
                         return layout;
                     }).collect(Collectors.toList());
                     screen.setLayouts(layouts);
+                } else {
+                    screen.setLayouts(new ArrayList<>()); 
                 }
 
                 return screen;
@@ -178,6 +189,8 @@ public class VenueServiceImpl implements VenueService {
 
         return entity;
     }
+
+
 
     @Override
     public VenueDTO createVenue(VenueDTO dto) {
@@ -245,4 +258,6 @@ public class VenueServiceImpl implements VenueService {
                 })
                 .orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + id));
     }
+    
+    
 }

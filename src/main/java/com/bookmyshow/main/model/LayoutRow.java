@@ -14,10 +14,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "layout_row")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LayoutRow {
 
     @Id
@@ -29,4 +29,5 @@ public class LayoutRow {
     @ManyToOne
     @JoinColumn(name = "layout_id")
     private Layout layout;
+
 }

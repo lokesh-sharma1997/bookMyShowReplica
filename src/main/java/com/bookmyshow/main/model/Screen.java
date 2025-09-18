@@ -3,26 +3,28 @@ package com.bookmyshow.main.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
+@Entity
+@Table(name = "screen")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "screen")
 public class Screen {
 
-     @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-     private String screenName; 
-    
-     @ManyToOne(cascade = CascadeType.ALL)
-     @JoinColumn(name = "venue_id", referencedColumnName = "id")
-     private Venue venue; 
+    private String screenName;
 
-     @OneToMany(mappedBy = "screen")
-     private List<Layout> layouts;
+    @ManyToOne(cascade = CascadeType.ALL)  // Ensure cascades to venue if needed
+    @JoinColumn(name = "venue_id", referencedColumnName = "id")
+    private Venue venue;
+
+    @OneToMany(mappedBy = "screen", fetch = FetchType.EAGER, cascade = CascadeType.ALL)  // Cascade all operations
+    private List<Layout> layouts;
+
 }
