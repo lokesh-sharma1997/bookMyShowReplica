@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -217,6 +219,78 @@ class EventServiceImplTest {
         assertEquals(event.getName(), result.getName());
         verify(eventRepository).save(any(Event.class));
     }
+
+    @Test
+    void testCreateEvent_withCastCrewAndVenues() throws IOException {
+       
+        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "poster-bytes".getBytes());
+        MockMultipartFile castImage = new MockMultipartFile("cast", "cast1.jpg", "image/jpeg", "cast-image".getBytes());
+        MockMultipartFile crewImage = new MockMultipartFile("crew", "crew1.jpg", "image/jpeg", "crew-image".getBytes());
+
+      
+        CastDTO castDTO = new CastDTO();
+        castDTO.setActorName("Actor Name");
+
+        CrewDTO crewDTO = new CrewDTO();
+        crewDTO.setMemberName("Crew Member");
+
+       
+        eventDto.setCast(List.of(castDTO));
+        eventDto.setCrew(List.of(crewDTO));
+        eventDto.setVenue(List.of(10)); 
+        eventDto.setAgeLimit(18); 
+
+       
+        Venue venue = new Venue();
+        venue.setId(10L); 
+
+       
+        when(castRepository.findByActorName("Actor Name")).thenReturn(Optional.empty());
+        when(castRepository.save(any(Cast.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(crewRepository.findByMemberName("Crew Member")).thenReturn(Optional.empty());
+        when(crewRepository.save(any(Crew.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(venueRepository.findAllById(anyList())).thenReturn(List.of(venue));
+
+       
+        when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(new Event());
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event e = invocation.getArgument(0);
+            e.setEventId(1L);
+            e.setAgeLimit(18); 
+            return e;
+        });
+       
+       
+        EventDTO result = eventService.createEvent(eventDto, poster, List.of(castImage), List.of(crewImage));
+
+       
+        assertNotNull(result);
+
+       
+        verify(castRepository).save(argThat(cast ->
+            cast.getActorName().equals("Actor Name") &&
+            cast.getCastImg() != null && !cast.getCastImg().isEmpty()
+        ));
+
+      
+        verify(crewRepository).save(argThat(crew ->
+            crew.getMemberName().equals("Crew Member") &&
+            crew.getCrewImg() != null && !crew.getCrewImg().isEmpty()
+        ));
+
+       
+        verify(venueRepository).findAllById(argThat(ids -> {
+            List<Long> idList = new ArrayList<>();
+            ids.forEach(idList::add);
+            return idList.contains(10L);
+        }));
+
+   
+        verify(eventRepository).save(any(Event.class));
+    }
+
 
     @Test
     void testGetEventByIdFound() {
@@ -661,6 +735,66 @@ class EventServiceImplTest {
         assertEquals("No Events found", exception.getMessage());
         verify(eventRepository).findTop10ByOrderByReleasingOnDesc();
     }
+    
+    @Test
+    public void testUpdateEvent_success() throws IOException {
+        // Given
+        Long eventId = 1L;
+        Event existingEvent = new Event();
+        existingEvent.setEventId(eventId);
+        existingEvent.setName("Old Event");
+
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.setName("New Event");
+        eventDTO.setDescription("Updated description");
+        eventDTO.setAgeLimit(16); 
+
+        // Mock poster file
+        MultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "fake-image-content".getBytes());
+
+        // Mock cast
+        CastDTO castDTO = new CastDTO();
+        castDTO.setActorName("New Actor");
+        List<CastDTO> castList = List.of(castDTO);
+        eventDTO.setCast(castList);
+
+        MultipartFile castImage = new MockMultipartFile("cast", "cast.jpg", "image/jpeg", "cast-image-content".getBytes());
+        List<MultipartFile> castImages = List.of(castImage);
+
+        // Mock crew
+        CrewDTO crewDTO = new CrewDTO();
+        crewDTO.setMemberName("New Crew");
+        List<CrewDTO> crewList = List.of(crewDTO);
+        eventDTO.setCrew(crewList);
+
+        MultipartFile crewImage = new MockMultipartFile("crew", "crew.jpg", "image/jpeg", "crew-image-content".getBytes());
+        List<MultipartFile> crewImages = List.of(crewImage);
+
+        // When
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(existingEvent));
+        when(castRepository.findByActorName(anyString())).thenReturn(Optional.empty());
+        when(castRepository.save(any(Cast.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(crewRepository.findByMemberName(anyString())).thenReturn(Optional.empty());
+        when(crewRepository.save(any(Crew.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(eventRepository.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // Then
+        EventDTO result = eventService.updateEvent(eventId, eventDTO, poster, castImages, crewImages);
+
+        assertNotNull(result);
+        assertEquals("New Event", result.getName());
+        assertEquals("Updated description", result.getDescription());
+
+        verify(eventRepository, times(1)).findById(eventId);
+        verify(eventRepository, times(1)).save(any(Event.class));
+        verify(castRepository, times(2)).save(any(Cast.class));
+
+        verify(crewRepository, times(2)).save(any(Crew.class));
+    }
+   
+
+
+
 
     @Test
     void testGetPopularEvents_FiltersDeletedEvents() {
@@ -749,6 +883,8 @@ class EventServiceImplTest {
         
         assertNotNull(result.getImageurl());
     }
+    
+   
 
     @Test
     void testToEventDto_MappingAllFields() {
