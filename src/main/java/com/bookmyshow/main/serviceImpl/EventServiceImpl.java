@@ -541,6 +541,10 @@ if (events == null || events.isEmpty())
 	        throws IOException {
 	    Event event = eventRepository.findById(id)
 	            .orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
+	    if(event.getDeleted())
+	    {
+	    	throw new EventCustomException("Event not found with id: " + id);
+	    }
 	    event.setDeleted(false);
 
 	    if (poster != null && !poster.isEmpty()) {
