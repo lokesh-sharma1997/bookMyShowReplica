@@ -3,24 +3,32 @@ package com.bookmyshow.main.serviceImpl;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.modelmapper.TypeMap;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +42,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bookmyshow.main.dto.CastDTO;
 import com.bookmyshow.main.dto.CategoryDTO;
+import com.bookmyshow.main.dto.CrewDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
 import com.bookmyshow.main.dto.EventResponseDto;
@@ -76,6 +87,7 @@ import com.bookmyshow.main.repository.LanguagesRepository;
 import com.bookmyshow.main.repository.MoreFiltersRepository;
 import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
+import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.specification.EventSpecification;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,6 +119,8 @@ class EventServiceImplTest {
     private CrewRepository crewRepository;
     @Mock
     private CityRepository cityRepository;
+    @Mock
+    private VenueRepository venueRepository;
 
     @Mock
     private ModelMapper mapper;
@@ -314,6 +328,9 @@ class EventServiceImplTest {
         assertEquals(1, result.size());
         verify(tagRepository).findAll();
     }
+  
+
+
 
     @Test
     void testGetAllReleaseMonths() {
@@ -329,7 +346,109 @@ class EventServiceImplTest {
         assertEquals(1, result.size());
         verify(releaseMonthRepository).findAll();
     }
+    
+    
+    
+    @Test
+    void testGetAllCategories_Success() {
+     
+        String eventType = "CONCERT";
 
+      
+        ModelMapper testMapper = new ModelMapper();
+        TypeMap<Categories, CategoryDTO> typeMap = testMapper.getTypeMap(Categories.class, CategoryDTO.class);
+        if (typeMap == null) {
+            typeMap = testMapper.createTypeMap(Categories.class, CategoryDTO.class);
+        }
+        typeMap.addMappings(mapper -> {
+            mapper.map(Categories::getCategoryId, CategoryDTO::setCategoryId);
+            mapper.map(Categories::getCategoriesName, CategoryDTO::setCategoryName);
+        });
+
+      
+        Categories category1 = new Categories();
+        category1.setCategoryId(1L);
+        category1.setCategoriesName("Music");
+
+        Categories category2 = new Categories();
+        category2.setCategoryId(2L);
+        category2.setCategoriesName("Art");
+
+     
+        Event event1 = new Event();
+        event1.setCategories(List.of(category1));
+
+        Event event2 = new Event();
+        event2.setCategories(List.of(category2));
+
+   
+        when(eventRepository.findByEventType(eventType)).thenReturn(Arrays.asList(event1, event2));
+
+      
+        ReflectionTestUtils.setField(eventService, "mapper", testMapper);
+
+      
+        List<CategoryDTO> result = eventService.getAllCategories(eventType);
+
+      
+        assertEquals(2, result.size());
+
+        List<Long> ids = result.stream().map(CategoryDTO::getCategoryId).collect(Collectors.toList());
+        assertTrue(ids.containsAll(Arrays.asList(1L, 2L)));
+
+        List<String> names = result.stream().map(CategoryDTO::getCategoryName).collect(Collectors.toList());
+        assertTrue(names.containsAll(Arrays.asList("Music", "Art")));
+    }
+
+    
+    
+    @Test
+    void testGetAllMoreFilters_Success() {
+      
+        String eventType = "CONCERT";
+
+       
+        ModelMapper testMapper = new ModelMapper();
+        TypeMap<MoreFilters, MoreFilterDTO> typeMap = testMapper.getTypeMap(MoreFilters.class, MoreFilterDTO.class);
+        if (typeMap == null) {
+            typeMap = testMapper.createTypeMap(MoreFilters.class, MoreFilterDTO.class);
+        }
+        typeMap.addMappings(m -> {
+            m.map(MoreFilters::getFilterId, MoreFilterDTO::setMoreFilterId);
+            m.map(MoreFilters::getName, MoreFilterDTO::setMoreFilterName);
+        });
+
+   
+        MoreFilters filter1 = new MoreFilters();
+        filter1.setFilterId(1L);
+        filter1.setName("VIP");
+
+        MoreFilters filter2 = new MoreFilters();
+        filter2.setFilterId(2L);
+        filter2.setName("Backstage");
+
+        Event event1 = new Event();
+        event1.setMoreFilters(List.of(filter1));
+
+        Event event2 = new Event();
+        event2.setMoreFilters(List.of(filter2));
+
+        when(eventRepository.findByEventType(eventType)).thenReturn(Arrays.asList(event1, event2));
+
+     
+        ReflectionTestUtils.setField(eventService, "mapper", testMapper);
+
+       
+        List<MoreFilterDTO> result = eventService.getAllMoreFilters(eventType);
+
+        
+        assertEquals(2, result.size());
+
+        List<Long> ids = result.stream().map(MoreFilterDTO::getMoreFilterId).collect(Collectors.toList());
+        assertTrue(ids.containsAll(Arrays.asList(1L, 2L)));
+    }
+
+    
     @Test
     void testGetAllDateFilters() {
         DateFilter filter = new DateFilter();

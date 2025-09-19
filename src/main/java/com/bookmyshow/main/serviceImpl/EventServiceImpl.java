@@ -539,9 +539,9 @@ if (events == null || events.isEmpty())
 	        MultipartFile poster, List<MultipartFile> castImages,
 	        List<MultipartFile> crewImages)
 	        throws IOException {
-
 	    Event event = eventRepository.findById(id)
 	            .orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
+	    event.setDeleted(false);
 
 	    if (poster != null && !poster.isEmpty()) {
 	        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
@@ -549,7 +549,7 @@ if (events == null || events.isEmpty())
 	    }
 
 	 
-	    if (eventDto.getName() != null) event.setName(eventDto.getName());
+	    if (eventDto.getName() != null ) event.setName(eventDto.getName());
 	    if (eventDto.getDescription() != null) event.setDescription(eventDto.getDescription());
 	    if (eventDto.getRunTime() != null) event.setRunTime(eventDto.getRunTime());
 	    if (eventDto.getStartDate() != null) event.setStartDate(eventDto.getStartDate());
