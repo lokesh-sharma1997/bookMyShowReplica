@@ -77,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
 		if (userRepository.existsByUsername(req.getUsername())) {
 			throw new ResourceAlreadyExistsException("Username already taken: " + req.getUsername());
 		}
-		if (userRepository.existsByEmail(req.getEmail())) {
+		if (userRepository.existsByEmailAndDeleteFlag(req.getEmail(),false)) {
 			throw new ResourceAlreadyExistsException("Email already taken: " + req.getEmail());
 		}
 		try {

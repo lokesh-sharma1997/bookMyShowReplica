@@ -3,6 +3,7 @@ package com.bookmyshow.main.security;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -37,8 +38,8 @@ public class JwtService {
 
 	private String createToken(Map<String, Object> claims, String subject) {
 		return Jwts.builder().claims(claims).subject(subject).header().empty().add("typ", "JWT").and()
-				.issuedAt(new Date(System.currentTimeMillis()))
-				.expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes expiration time
+				//.issuedAt(new Date(System.currentTimeMillis()))
+				//.expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes expiration time
 				.signWith(getSigningKey()).compact();
 	}
 
@@ -59,11 +60,18 @@ public class JwtService {
 		return extractAllClaims(token).getExpiration();
 	}
 
-	public Boolean validateToken(String token) {
-		return !isTokenExpired(token);
-	}
+//	public Boolean validateToken(String token) {
+//		return !isTokenExpired(token);
+//	}
+//
+//	public Boolean isTokenExpired(String token) {
+//		return extractExpiration(token).before(new Date());
+//	}
+	 public Boolean isTokenValid(String token, UserDetails userDetails) {
+	        String username = extractUsername(token);
+	        Long userId = extractUserId(token);
 
-	private Boolean isTokenExpired(String token) {
-		return extractExpiration(token).before(new Date());
-	}
+	        // Compare token username with userDetails username and user ID
+	        return username.equals(userDetails.getUsername());
+	    }
 }

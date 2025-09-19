@@ -29,6 +29,6 @@ public interface UserRepository extends JpaRepository<UserMaster, Long> {
 		List<UserMaster> globalSearch(@Param("keyword") String value);
 
 
-	boolean existsByEmail(String email);
+	boolean existsByEmailAndDeleteFlag(String email, boolean deleteFlag);
 
 }
