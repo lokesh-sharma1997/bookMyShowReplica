@@ -43,7 +43,7 @@ public class EditProfileRequest {
 	@Schema(defaultValue = "01/01/1990")
 	private String anniversaryDate;
 
-	@Pattern(regexp = "^[0-9]{6}$", message = "Pincode should be a valid 6-digit number")
+	@Pattern(regexp = "^$|^[0-9]{6}$", message = "Pincode should be a valid 6-digit number")
 	@Schema(defaultValue = "000000")
 	private String pincode;
 
