@@ -4,10 +4,16 @@ import com.bookmyshow.main.model.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EventSpecification {
+
+
 	
 	public static Specification<Event> filterEvents(
 	        String type,
@@ -78,12 +84,37 @@ public class EventSpecification {
 	        	Join<Event, ?> releaseMonthJoin = root.join("releaseMonth");
 	            predicates.add(releaseMonthJoin.get("releaseMonthId").in(releaseMonths));
 	        }
-
-	       
+	        
+	        
 	        if (dateFilters != null && !dateFilters.isEmpty()) {
-	        	Join<Event, ?> dateFilterJoin = root.join("dateFilter");
-	            predicates.add(dateFilterJoin.get("dateFilterId").in(dateFilters));
+	            LocalDate today = LocalDate.now();
+	            List<Predicate> datePredicates = new ArrayList<>();
+
+	            for (Integer i : dateFilters) {
+	                switch (i) {
+	                    case 1: 
+	                        datePredicates.add(
+	                            builder.equal(root.get("startDate"), today)
+	                        );
+	                        break;
+	                    case 2: 
+	                        LocalDate tomorrow = today.plusDays(1);
+	                        datePredicates.add(
+	                            builder.equal(root.get("startDate"), tomorrow)
+	                        );
+	                        break;
+	                    case 3: 
+	                        LocalDate saturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+	                        LocalDate sunday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+	                        datePredicates.add(
+	                            builder.between(root.get("startDate"), saturday, sunday)
+	                        );
+	                        break;
+	                }
+	            }
+	            predicates.add(builder.or(datePredicates.toArray(new Predicate[0])));
 	        }
+
 
 	        return builder.and(predicates.toArray(new Predicate[0]));
 	    };

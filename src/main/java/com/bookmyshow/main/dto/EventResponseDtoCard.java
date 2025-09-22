@@ -22,6 +22,7 @@ public class EventResponseDtoCard {
 	 private Double votes;    
 	 private Double imdbRating;  
     private Boolean releasedFlag; 
+    private int ageLimit;
     private List<String> languages;
     private List<String> categories;
 }

@@ -267,7 +267,7 @@ class EventServiceImplTest {
 
        
         assertNotNull(result);
-
+      
        
         verify(castRepository).save(argThat(cast ->
             cast.getActorName().equals("Actor Name") &&
@@ -570,8 +570,10 @@ class EventServiceImplTest {
         List<Integer> dateFilters = List.of(1, 2);
 
         Event event1 = new Event();
-        event1.setDeleted(false); 
+        event1.setDeleted(false);
+        event1.setAgeLimit(16);
         Event event2 = new Event();
+        event1.setAgeLimit(16);
         event2.setDeleted(true);  
 
         List<Event> events = List.of(event1, event2);
@@ -683,6 +685,7 @@ class EventServiceImplTest {
         event.setEventId(1L);
         event.setDeleted(false);
         event.setName("Sports Gala");
+        event.setAgeLimit(16);
 
         List<Event> mockEvents = List.of(event);
 
@@ -707,6 +710,7 @@ class EventServiceImplTest {
         event.setEventId(2L);
         event.setDeleted(false);
         event.setName("Open Festival");
+        event.setAgeLimit(16);
 
         when(eventRepository.findTop10ByOrderByReleasingOnDesc())
             .thenReturn(List.of(event));
@@ -802,11 +806,13 @@ class EventServiceImplTest {
         event1.setEventId(3L);
         event1.setDeleted(false);
         event1.setName("Live Show");
+        event1.setAgeLimit(16);
 
         Event event2 = new Event();
         event2.setEventId(4L);
         event2.setDeleted(true); 
         event2.setName("Deleted Show");
+        event1.setAgeLimit(16);
 
         when(eventRepository.findTop10ByOrderByReleasingOnDesc())
             .thenReturn(List.of(event1, event2));

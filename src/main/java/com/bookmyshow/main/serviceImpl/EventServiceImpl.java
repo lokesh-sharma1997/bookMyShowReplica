@@ -797,6 +797,7 @@ if (events == null || events.isEmpty())
 	    dto.setImageurl(event.getImageurl());
 	    dto.setReleasingOn(event.getReleasingOn());
 	    dto.setStartDate(event.getStartDate());
+	    dto.setAgeLimit(event.getAgeLimit());
 	   
 	    if (event.getVenues() != null && !event.getVenues().isEmpty()) {
 		       
