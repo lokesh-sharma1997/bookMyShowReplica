@@ -31,7 +31,7 @@ public class Layout {
     @JoinColumn(name = "screen_id")
     private Screen screen;
 
-    @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL)  // Ensure layout rows are cascaded
+    @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL) 
     private List<LayoutRow> layoutRows;
 
     private int cols;

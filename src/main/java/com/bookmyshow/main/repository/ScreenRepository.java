@@ -13,7 +13,7 @@ import io.lettuce.core.dynamic.annotation.Param;
 public interface ScreenRepository extends JpaRepository<Screen, Long> {
 //	
 //	@Query("SELECT s FROM Screen s WHERE s.venue = :venue AND s.screenName = :screenName")
-Optional<Screen> findByVenueAndScreenName(@Param("venue") Venue venue, @Param("screenName")String screenName);
+	Optional<Screen> findByVenueAndScreenName(Venue venue, String screenName);
 //	
 
 }

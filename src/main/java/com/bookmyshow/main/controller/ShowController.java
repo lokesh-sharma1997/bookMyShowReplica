@@ -18,30 +18,19 @@ public class ShowController {
     private ShowService showService;
 
     @PostMapping("/create-show")
-    public ResponseEntity<ApiResponse<ShowRequestDTO>> createShow(@RequestBody ShowRequestDTO showRequestDTO) {
+    public ResponseEntity<ApiResponse<Void>> createShow(@RequestBody ShowRequestDTO showRequestDTO) {
         showService.createShow(showRequestDTO);
         
-        ApiResponse<ShowRequestDTO> response = new ApiResponse<>();
-        response.setMessage("Show created successfully");
-        response.setSuccess(true);
-        response.setData(showRequestDTO);
+        ApiResponse<Void> response = new ApiResponse<>(
+	            HttpStatus.CREATED.value(),
+	            "Show created successfully",
+	            true,
+	            null
+	    );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	    return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-//    @PutMapping("/update-show/{id}")
-//    public ResponseEntity<ApiResponse<ShowRequestDTO>> updateShow(
-//            @PathVariable Long id,
-//            @RequestBody ShowRequestDTO showRequestDTO) {
-//
-//        ShowRequestDTO updatedShow = showService.updateShow(id, showRequestDTO);
-//
-//        ApiResponse<ShowRequestDTO> response = new ApiResponse<>();
-//        response.setMessage("Show updated successfully");
-//        response.setSuccess(true);
-//        response.setData(updatedShow);
-//
-//        return ResponseEntity.ok(response);
-//    }
+
 
     
 

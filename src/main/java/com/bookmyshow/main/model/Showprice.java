@@ -21,11 +21,11 @@ public class Showprice {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+      private Long id;
 	
-	private Integer price;
+	  private Integer price;
 	
-	 @ManyToOne
+	    @ManyToOne
 	    @JoinColumn(name = "show_id")
 	    private Show show;
 

@@ -1,7 +1,7 @@
 package com.bookmyshow.main.model;
 
 import jakarta.persistence.Entity;
-
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -28,18 +28,24 @@ public class Seat {
     private boolean reserved;  
 
     
-    private String userId;     
+//    private String userId;     
 
     @ManyToOne
     @JoinColumn(name = "show_id")
     private Show show;         
 
+//    @ManyToOne
+//    @JoinColumn(name = "category_id")
+//    private SupportedCategory supportedcategory;  
+//    
     @ManyToOne
-    @JoinColumn(name = "category_id")
-    private SupportedCategory supportedcategory;  
-    
-    @ManyToOne
-    @JoinColumn(name = "screen_id") // Ensure this matches your DB schema
+    @JoinColumn(name = "screen_id") 
     private Screen screen;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")  
+    private UserMaster user;
+    
+    
 
 }
