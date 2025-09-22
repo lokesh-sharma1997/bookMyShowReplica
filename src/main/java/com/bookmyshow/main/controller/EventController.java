@@ -125,12 +125,20 @@ public class EventController {
 
         // Call the service layer to get the event names
         List<EventSearchDTO> eventNames = eventService.searchEventNames(request.getName(), request.getEventTypes());
-
+String message;
+boolean flag;
+        if(eventNames.isEmpty() || eventNames ==null) {
+        	message="event not found";
+        	flag=false;
+        }else {
+        	message="Event names fetched successfully";
+        	flag=true;
+        }
         // Create ApiResponse with event names
         ApiResponse<List<EventSearchDTO>> response = new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Event names fetched successfully",
-                true,
+                message,
+                flag,
                 eventNames
         );
 
