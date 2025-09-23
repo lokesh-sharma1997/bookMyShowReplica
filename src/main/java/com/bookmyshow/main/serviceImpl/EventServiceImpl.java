@@ -14,6 +14,7 @@ import com.bookmyshow.main.dto.CastDTO;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,7 @@ import com.bookmyshow.main.dto.MoreFilterDTO;
 import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.TagDTO;
+import com.bookmyshow.main.events.NotificationEvent;
 import com.bookmyshow.main.exception.EventCustomException;
 import com.bookmyshow.main.model.Cast;
 import com.bookmyshow.main.model.Categories;
@@ -100,6 +102,9 @@ public class EventServiceImpl implements EventService {
 
 	@Autowired
 	private ModelMapper mapper;
+	
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
 
     
 
@@ -372,6 +377,13 @@ public class EventServiceImpl implements EventService {
 
 
 	    Event savedEvent = eventRepository.save(event);
+	    
+	    eventPublisher.publishEvent(new NotificationEvent(
+	            this,
+	            "New "+savedEvent.getEventType()+" Added",
+	            savedEvent.getName() + " is now available!",
+	            savedEvent.getEventType()
+	    ));
 
 	   
 	    return toDto(savedEvent);

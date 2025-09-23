@@ -2,10 +2,12 @@ package com.bookmyshow.main.model;
 
 import java.time.LocalDateTime;
 
-//import java.time.LocalDateTime;
-//
+import com.bookmyshow.main.enumData.NotificationType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,15 +32,16 @@ public class Notification {
 
     private String title;       // e.g. "New Movie Added"
     private String message;     // e.g. "Jawan is now available in theatres"
-    private String type;        // MOVIE, SPORTS, THEATRE, STADIUM, ACTIVITY
+    
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;		// EVENT, VENUE, BOOKING, etc.
+    
+    private boolean read = false;
 
-    private boolean read = false;   // To mark notification as read/unread
-
+    @Column(name = "created_on", updatable = false)
     private LocalDateTime createdOn = LocalDateTime.now();
 
-    // Optional: Link notification to User
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false) // Many notifications belong to 1 user
     private UserMaster user;
-
 }

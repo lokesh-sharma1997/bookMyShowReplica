@@ -4,7 +4,8 @@ import com.bookmyshow.main.dto.NotificationDTO;
 import java.util.List;
 
 public interface NotificationService {
-    List<NotificationDTO> getUserNotifications(Long userId);
-    NotificationDTO createNotification(Long userId, NotificationDTO dto);
-    void markAsRead(Long notificationId);
+//    NotificationDTO createNotification(Long userId, NotificationDTO dto);
+    String markAsRead(Long userId, Long notificationId);
+    List<NotificationDTO> getNotificationsForUser(Long userId);
+    Long getUnreadCount(Long userId);
 }

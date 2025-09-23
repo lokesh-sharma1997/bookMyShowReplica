@@ -26,7 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<NotificationDTO> getUserNotifications(Long userId) {
+    public List<NotificationDTO> getNotificationsForUser(Long userId) {
         UserMaster user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
         return notificationRepository.findByUserOrderByCreatedOnDesc(user).stream()
@@ -34,22 +34,40 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public NotificationDTO createNotification(Long userId, NotificationDTO dto) {
-        UserMaster user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+//    @Override
+//    public NotificationDTO createNotification(Long userId, NotificationDTO dto) {
+//        UserMaster user = userRepository.findById(userId)
+//                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+//
+//        Notification notification = modelMapper.map(dto, Notification.class);
+//        notification.setUser(user);
+//        Notification saved = notificationRepository.save(notification);
+//        return modelMapper.map(saved, NotificationDTO.class);
+//    }
 
-        Notification notification = modelMapper.map(dto, Notification.class);
-        notification.setUser(user);
-        Notification saved = notificationRepository.save(notification);
-        return modelMapper.map(saved, NotificationDTO.class);
+    @Override
+    public String markAsRead(Long userId, Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found with id: " + notificationId));
+
+        // Check if the notification belongs to the given user
+        if (!notification.getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Notification does not belong to the specified user");
+        }
+
+        // Check if already read
+        if (notification.isRead()) {
+            return "Notification is already read by user";
+        } else {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+
+            return "Notification marked as read successfully";
+        }
     }
 
     @Override
-    public void markAsRead(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
-        notification.setRead(true);
-        notificationRepository.save(notification);
+    public Long getUnreadCount(Long userId) {
+        return notificationRepository.countByUser_UserIdAndReadFalse(userId);
     }
 }

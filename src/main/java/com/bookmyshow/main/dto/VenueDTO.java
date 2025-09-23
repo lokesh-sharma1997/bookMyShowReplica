@@ -28,5 +28,5 @@ public class VenueDTO {
     
     
 //    private Boolean deleted;  
-
+    
 }
