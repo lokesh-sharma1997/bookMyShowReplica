@@ -20,7 +20,6 @@ public class EventDTO {
     private Double likes;
     private Double votes;
     private Boolean currentlyPlaying;
-    private Boolean deleted;
     private int ageLimit;
     private LocalDate releasingOn;
 

@@ -16,12 +16,13 @@ public class EventResponseDtoCard {
 	private LocalDate releasingOn;
 	private LocalDate startDate;
 	private List<String> venueName;
-	private List<Integer> pricelist;
-	private LocalTime starttime;
+	private List<Integer> pricelist =List.of(400,500,800,1000,2000);
+	private LocalTime starttime=LocalTime.of(14, 30);;
 	private List<String> genres; 
 	 private Double votes;    
 	 private Double imdbRating;  
     private Boolean releasedFlag; 
+    private int ageLimit;
     private List<String> languages;
     private List<String> categories;
 }

@@ -119,7 +119,7 @@ public class EventServiceImpl implements EventService {
 	    dto.setLikes(event.getLikes());
 	    dto.setVotes(event.getVotes());
 	    dto.setCurrentlyPlaying(event.getCurrentlyPlaying());
-	    dto.setDeleted(event.getDeleted());
+	   
 	    dto.setAgeLimit(event.getAgeLimit());
 	    dto.setReleasingOn(event.getReleasingOn());
 
@@ -232,6 +232,7 @@ public class EventServiceImpl implements EventService {
 
 	  
 	    Event event = toEntity(eventDto);
+	    event.setDeleted(false);
 	    event.setImageurl(base64Poster);
 
 	   
@@ -538,9 +539,13 @@ if (events == null || events.isEmpty())
 	        MultipartFile poster, List<MultipartFile> castImages,
 	        List<MultipartFile> crewImages)
 	        throws IOException {
-
 	    Event event = eventRepository.findById(id)
 	            .orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
+	    if(event.getDeleted())
+	    {
+	    	throw new EventCustomException("Event not found with id: " + id);
+	    }
+	    event.setDeleted(false);
 
 	    if (poster != null && !poster.isEmpty()) {
 	        String base64Image = Base64.getEncoder().encodeToString(poster.getBytes());
@@ -548,7 +553,7 @@ if (events == null || events.isEmpty())
 	    }
 
 	 
-	    if (eventDto.getName() != null) event.setName(eventDto.getName());
+	    if (eventDto.getName() != null ) event.setName(eventDto.getName());
 	    if (eventDto.getDescription() != null) event.setDescription(eventDto.getDescription());
 	    if (eventDto.getRunTime() != null) event.setRunTime(eventDto.getRunTime());
 	    if (eventDto.getStartDate() != null) event.setStartDate(eventDto.getStartDate());
@@ -771,7 +776,10 @@ if (events == null || events.isEmpty())
 	    } else {
 	        events = eventRepository.findTop10ByOrderByReleasingOnDesc();
 	    }
-
+	    if (events == null || events.isEmpty())
+		 {
+		 	throw new EventCustomException("No Events found");
+		 }
 	    return events.stream()
 	            .filter(event -> !event.getDeleted())
 	            .map(this::mapToResponseDto)
@@ -789,6 +797,7 @@ if (events == null || events.isEmpty())
 	    dto.setImageurl(event.getImageurl());
 	    dto.setReleasingOn(event.getReleasingOn());
 	    dto.setStartDate(event.getStartDate());
+	    dto.setAgeLimit(event.getAgeLimit());
 	   
 	    if (event.getVenues() != null && !event.getVenues().isEmpty()) {
 		       

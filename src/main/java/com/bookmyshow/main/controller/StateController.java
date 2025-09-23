@@ -14,6 +14,7 @@ import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.response.StateResponse;
 import com.bookmyshow.main.service.StateService;
 
+import io.jsonwebtoken.lang.Collections;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
@@ -28,9 +29,11 @@ public class StateController {
 	@Operation(summary = "${user.getAllStates}")
 	public ResponseEntity<ApiResponse<StateResponse>> getAllStates() {
 		List<StateDto> states = stateService.getAllStates();
-		if (states.isEmpty()) {
-			throw new StateNotFoundException("No states found");
+		if (states == null || states.isEmpty()) {
+		    StateResponse emptyResponse = new StateResponse(Collections.emptyList());
+		    return ResponseEntity.ok(new ApiResponse<>(200, "No states found", true, emptyResponse));
 		}
+
 		StateResponse stateResponse = new StateResponse(states);
 		return ResponseEntity.ok(new ApiResponse<>(200, "All states retrieved", true, stateResponse));
 	}
