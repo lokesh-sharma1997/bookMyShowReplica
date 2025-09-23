@@ -7,30 +7,27 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@NoArgsConstructor
-@AllArgsConstructor
+
 @Data
-@Table(name="supported_category")
-public class SupportedCategory {
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+public class Showprice {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+      private Long id;
 	
-	 private String categoryname;
+	  private Integer price;
 	
-	 @ManyToMany(mappedBy = "supportedCategories")
-	    private List<Venue> venues;
-	 
-	 @ManyToOne
-	    @JoinColumn(name = "show_id")  
+	    @ManyToOne
+	    @JoinColumn(name = "show_id")
 	    private Show show;
+
+	 
 }

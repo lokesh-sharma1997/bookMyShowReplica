@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -38,7 +39,7 @@ public class Venue {
     private Address address;
 
     @ManyToMany(cascade = CascadeType.PERSIST)
-    private List<Amenity> amenities; 
+    private List<Amenity> amenities= new ArrayList<>(); 
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
@@ -49,9 +50,18 @@ public class Venue {
     private List<SupportedCategory> supportedCategories; 
 
     @OneToMany(mappedBy = "venue",cascade = CascadeType.PERSIST)
-    private List<Screen> screens; // Screens (only for "movies")
+    private List<Screen> screens= new ArrayList<>(); // Screens (only for "movies")
+    
+    
     @ManyToMany(mappedBy = "venues")
     private List<Event> movies;
+    
+    @OneToMany(mappedBy = "venue")
+    private List<Show> shows;
+    
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TimeSlot> timeSlots = new ArrayList<>();
+
     
 
     private Boolean deleted = false;
