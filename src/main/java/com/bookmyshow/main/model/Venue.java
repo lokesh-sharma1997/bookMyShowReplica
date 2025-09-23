@@ -53,6 +53,8 @@ public class Venue {
     @ManyToMany(mappedBy = "venues")
     private List<Event> movies;
     
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.PERSIST)
+    private List<Show> show;
 
     private Boolean deleted = false;
 }

@@ -1,6 +1,7 @@
 package com.bookmyshow.main.serviceImpl;
 
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -33,6 +34,8 @@ import com.bookmyshow.main.dto.LanguagesDTO;
 import com.bookmyshow.main.dto.MoreFilterDTO;
 import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
+import com.bookmyshow.main.dto.ShowDTO;
+import com.bookmyshow.main.dto.ShowTimeDTO;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.exception.EventCustomException;
 import com.bookmyshow.main.model.Cast;
@@ -44,9 +47,14 @@ import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
 import com.bookmyshow.main.model.Genres;
 import com.bookmyshow.main.model.Languages;
+import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
+import com.bookmyshow.main.model.Screen;
+import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.model.ShowTime;
+import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Tag;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
@@ -58,9 +66,13 @@ import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.repository.FormatRepository;
 import com.bookmyshow.main.repository.GenresRepository;
 import com.bookmyshow.main.repository.LanguagesRepository;
+import com.bookmyshow.main.repository.LayoutRepository;
 import com.bookmyshow.main.repository.MoreFiltersRepository;
 import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
+import com.bookmyshow.main.repository.ScreenRepository;
+import com.bookmyshow.main.repository.ShowRepository;
+import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import com.bookmyshow.main.specification.EventSpecification;
@@ -97,6 +109,14 @@ public class EventServiceImpl implements EventService {
     private CrewRepository crewRepository;
 	@Autowired
     private CityRepository cityRepository;
+	@Autowired
+	private ScreenRepository screenRepository;
+	@Autowired 
+	 private LayoutRepository layoutRepository;
+	@Autowired 
+	 private ShowRepository showRepository;
+	@Autowired 
+	 private ShowtimedateRepository showtimedateRepository;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -370,10 +390,84 @@ public class EventServiceImpl implements EventService {
 	        event.setVenues(venues);
 	    }
 
+	    if (eventDto.getShow() != null) {
+	        List<Show> shows = new ArrayList<>();
+	        for (ShowDTO showDTO : eventDto.getShow()) {
+	            Show show = new Show();
+	            show.setId(showDTO.getShowid());
 
+	            
+	            if (showDTO.getVenue() != null) {
+	                Venue venue = venueRepository.findById(showDTO.getVenue())
+	                    .orElseThrow(() -> new RuntimeException("Venue not found"));
+	                show.setVenue(venue);
+	            }
+	            if (showDTO.getScreen() != null) {
+	                Screen screen = screenRepository.findById(showDTO.getScreen())
+	                    .orElseThrow(() -> new RuntimeException("Screen not found"));
+	                show.setScreen(screen);
+	            }
+	            if (showDTO.getLayout() != null) {
+	                Layout layout = layoutRepository.findById(showDTO.getLayout())
+	                    .orElseThrow(() -> new RuntimeException("Layout not found"));
+	                show.setLayout(layout);
+	            }
+
+	         
+	            show.setShowPrice(showDTO.getShowPrice());
+
+	           
+	            List<ShowTimeDate> showtimes = new ArrayList<>();
+	            if (showDTO.getShowtimesdate() != null) {  // Check if showtimesdate is not null
+	                for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
+
+	                 
+	                    ShowTimeDate showTimeDate = new ShowTimeDate();
+	                    showTimeDate.setShowDate(showTimeDTO.getShowDate());
+	                    showTimeDate.setShow(show); 
+	                  
+	                    List<ShowTime> showTimes = new ArrayList<>();
+
+	                    
+	                    if (showTimeDTO.getShowTime() != null) {
+	                        for (LocalTime showTime : showTimeDTO.getShowTime()) {
+	                            ShowTime showTimeEntity = new ShowTime();
+	                            showTimeEntity.setShowTime(showTime);                 
+	                            showTimeEntity.setShowTimeDate(showTimeDate);         
+	                            showTimes.add(showTimeEntity);                         
+	                        }
+	                    }
+
+	                    
+	                    showTimeDate.setShowTimes(showTimes);
+
+	                    
+	                    showtimes.add(showTimeDate);
+	                }
+	            }
+
+	         
+	            show.setShowstimedate(showtimes);
+
+	            shows.add(show);
+	        }
+
+	        event.setShows(shows); 
+	    }
+
+	 
 	    Event savedEvent = eventRepository.save(event);
 
 	   
+	    for (Show show : event.getShows()) {
+	        
+	        for (ShowTimeDate showTimeDate : show.getShowstimedate()) {
+	            
+	        }
+	        
+	        showRepository.save(show);
+	    }
+
 	    return toDto(savedEvent);
 	}
 

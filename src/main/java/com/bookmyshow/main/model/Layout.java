@@ -1,6 +1,7 @@
 package com.bookmyshow.main.model;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,5 +34,7 @@ public class Layout {
 	
 	private int cols;
 	
+	@OneToMany(mappedBy = "layout", cascade = CascadeType.PERSIST)
+    private List<Show> shows;
 	
 }

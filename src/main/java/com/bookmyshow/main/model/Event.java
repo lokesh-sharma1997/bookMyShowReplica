@@ -166,7 +166,11 @@ public class Event {
 	      joinColumns = @JoinColumn(name = "event_id"), 
 	      inverseJoinColumns = @JoinColumn(name = "venue_id"))
 	    private List<Venue> venues;
-	
+	 
+	  
+	  @OneToMany(mappedBy = "event")
+	  private List<Show> shows;
+
 	
 	
 }

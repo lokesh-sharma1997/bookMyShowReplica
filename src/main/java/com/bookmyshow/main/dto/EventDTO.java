@@ -37,4 +37,5 @@ public class EventDTO {
     private List<CrewDTO> crew;
     private List<Integer> city;
     private List<Integer> venue;
+    private List<ShowDTO> show;
 }
