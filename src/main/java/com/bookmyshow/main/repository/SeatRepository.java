@@ -9,4 +9,15 @@ import com.bookmyshow.main.model.Seat;
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 	List<Seat> findByScreenId(Long id);
 
+	
+
+	static List<Seat> findByShowCategoryId(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	List<Seat> findByShowCategoryIdAndReservedTrue(Long id);
+
 }

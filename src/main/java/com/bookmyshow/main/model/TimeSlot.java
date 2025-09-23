@@ -1,38 +1,35 @@
 package com.bookmyshow.main.model;
- 
+
+import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+
+
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name="address")
-public class Address {
+@Data
+@Table(name="time_slot")
+public class TimeSlot {
 
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-    private String street;
+	 @Id
+	    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	    private Long id;
 
-    
-    private String city;
+	    private LocalTime startTime;   
 
-    private String pin;
-    
-    
-    @OneToMany(mappedBy = "address")
-    private List<Venue> venues;
-
-    
+	    @ManyToOne
+	    @JoinColumn(name = "venue_id")
+	    private Venue venue;
 }

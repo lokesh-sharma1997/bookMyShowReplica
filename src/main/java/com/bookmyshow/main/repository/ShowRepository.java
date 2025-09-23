@@ -14,6 +14,9 @@ import com.bookmyshow.main.model.Venue;
 public interface ShowRepository extends JpaRepository<Show, Long> {
 
 	Long save(ShowRequestDTO showDTO);
+
+
+	List<Show> findByEventEventIdAndEventTypeAndCityAndDate(Long eventId, String eventType, String city, LocalDate showDate);
 	
 
 }

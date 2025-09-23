@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.bookmyshow.main.dto.AddressDTO;
 import com.bookmyshow.main.dto.LayoutDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
+import com.bookmyshow.main.dto.TimeSlotDTO;
 import com.bookmyshow.main.dto.VenueDTO;
 import com.bookmyshow.main.exception.VenueNotFoundException;
 import com.bookmyshow.main.model.Address;
@@ -20,6 +21,7 @@ import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.LayoutRow;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.SupportedCategory;
+import com.bookmyshow.main.model.TimeSlot;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.AddressRepository;
 import com.bookmyshow.main.repository.AmenityRepository;
@@ -49,7 +51,7 @@ public class VenueServiceImpl implements VenueService {
         dto.setId(entity.getId());
         dto.setVenueName(entity.getVenueName());
         dto.setVenueCapacity(entity.getVenueCapacity());
-        dto.setVenueFor(entity.getVenueFor());
+//        dto.setVenueFor(entity.getVenueFor());
         dto.setVenueType(entity.getVenueType());
 
         if (entity.getAddress() != null) {
@@ -67,6 +69,16 @@ public class VenueServiceImpl implements VenueService {
                     .collect(Collectors.toList());
             dto.setAmenities(amenityNames); 
         }
+        
+        if (entity.getTimeSlots() != null) {
+            List<TimeSlotDTO> timeSlotDTOs = entity.getTimeSlots().stream().map(ts -> {
+                TimeSlotDTO tsDto = new TimeSlotDTO();
+                tsDto.setStartTime(ts.getStartTime());
+                return tsDto;
+            }).collect(Collectors.toList());
+            dto.setTimeSlots(timeSlotDTOs);
+        }
+
         
         
         
@@ -118,7 +130,7 @@ public class VenueServiceImpl implements VenueService {
         Venue entity = new Venue();
         entity.setVenueName(dto.getVenueName());
         entity.setVenueCapacity(dto.getVenueCapacity());
-        entity.setVenueFor(dto.getVenueFor());
+//        entity.setVenueFor(dto.getVenueFor());
         entity.setVenueType(dto.getVenueType());
 
         if (dto.getAmenities() != null) {
@@ -143,6 +155,19 @@ public class VenueServiceImpl implements VenueService {
                 .collect(Collectors.toList());
             entity.setSupportedCategories(supportedCategories);
         }
+        
+        if (dto.getTimeSlots() != null) {
+            List<TimeSlot> timeSlots = dto.getTimeSlots().stream().map(tsDto -> {
+                TimeSlot ts = new TimeSlot();
+                ts.setStartTime(tsDto.getStartTime());
+                ts.setVenue(entity);  
+                return ts;
+            }).collect(Collectors.toList());
+            entity.setTimeSlots(timeSlots);
+        } else {
+            entity.setTimeSlots(new ArrayList<>());
+        }
+
 
         if (dto.getAddress() != null) {
             Address address = new Address();
@@ -152,7 +177,7 @@ public class VenueServiceImpl implements VenueService {
             entity.setAddress(address);
         }
 
-        if ("movies".equalsIgnoreCase(dto.getVenueFor()) && dto.getScreens() != null) {
+        if ("movies".equalsIgnoreCase(dto.getVenueName()) && dto.getScreens() != null) {
             List<Screen> screens = dto.getScreens().stream().map(screenDto -> {
                 Screen screen = new Screen();
                 screen.setScreenName(screenDto.getScreenName());
@@ -167,7 +192,7 @@ public class VenueServiceImpl implements VenueService {
                             List<LayoutRow> layoutRows = layoutDto.getRows().stream().map(rowName -> {
                                 LayoutRow layoutRow = new LayoutRow();
                                 layoutRow.setRowName(rowName);
-                                layoutRow.setLayout(layout);  // Set back reference to the layout
+                                layoutRow.setLayout(layout);  
                                 return layoutRow;
                             }).collect(Collectors.toList());
                             layout.setLayoutRows(layoutRows);
@@ -221,6 +246,12 @@ public class VenueServiceImpl implements VenueService {
             }
         } else {
             entity.setScreens(new ArrayList<>());
+        }
+        
+        if (entity.getTimeSlots() != null) {
+            for (TimeSlot ts : entity.getTimeSlots()) {
+                ts.setVenue(entity);
+            }
         }
 
         Venue saved = venueRepository.save(entity);

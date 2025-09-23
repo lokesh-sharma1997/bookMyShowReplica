@@ -12,40 +12,34 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+@Entity
+@Table(name = "seat")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name="seat")
 public class Seat {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    private String seatNumber; 
+    private String seatNumber;
 
-    private boolean reserved;  
-
-    
-//    private String userId;     
+    private boolean reserved;
 
     @ManyToOne
     @JoinColumn(name = "show_id")
-    private Show show;         
+    private Show show;
 
-//    @ManyToOne
-//    @JoinColumn(name = "category_id")
-//    private SupportedCategory supportedcategory;  
-//    
     @ManyToOne
-    @JoinColumn(name = "screen_id") 
+    @JoinColumn(name = "screen_id")
     private Screen screen;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")  
-    private UserMaster user;
-    
-    
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserMaster user;
+
+    @ManyToOne
+    @JoinColumn(name = "show_category_id")
+    private ShowCategory showCategory;
 }
