@@ -553,6 +553,10 @@ if (events == null || events.isEmpty())
 	        throws IOException {
 	    Event event = eventRepository.findById(id)
 	            .orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
+	    if(event.getDeleted())
+	    {
+	    	throw new EventCustomException("Event not found with id: " + id);
+	    }
 	    event.setDeleted(false);
 
 	    if (poster != null && !poster.isEmpty()) {
@@ -805,6 +809,7 @@ if (events == null || events.isEmpty())
 	    dto.setImageurl(event.getImageurl());
 	    dto.setReleasingOn(event.getReleasingOn());
 	    dto.setStartDate(event.getStartDate());
+	    dto.setAgeLimit(event.getAgeLimit());
 	   
 	    if (event.getVenues() != null && !event.getVenues().isEmpty()) {
 		       
