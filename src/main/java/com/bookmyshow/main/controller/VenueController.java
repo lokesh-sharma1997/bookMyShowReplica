@@ -9,6 +9,7 @@ import com.bookmyshow.main.service.VenueService;
 import io.swagger.v3.oas.annotations.Operation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,9 +25,16 @@ public class VenueController {
     private VenueService venueService;
 
     @PostMapping("/create")
-    public ResponseEntity<VenueDTO> createVenue(@RequestBody VenueDTO venueDto) {
-        VenueDTO created = venueService.createVenue(venueDto);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<ApiResponse<Void>> createVenue(@RequestBody VenueDTO venueDto) {
+         venueService.createVenue(venueDto);
+        ApiResponse<Void> response = new ApiResponse<>(
+	            HttpStatus.CREATED.value(),
+	            "Venue created successfully",
+	            true,
+	            null
+	    );
+
+	    return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/getAll")

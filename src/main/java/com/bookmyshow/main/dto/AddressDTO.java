@@ -1,6 +1,7 @@
 
 package com.bookmyshow.main.dto;
 
+import com.bookmyshow.main.model.City;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -14,5 +15,6 @@ public class AddressDTO {
     private String street;
     private String city;
     private String pin;
+	
 
 }

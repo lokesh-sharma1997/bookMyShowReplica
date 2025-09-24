@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -24,6 +25,9 @@ public class Languages {
 	
 	@ManyToMany(mappedBy = "languages")
 	private List<Event> events;
+	
+	@ManyToOne
+	private Show show;
 
 
 }

@@ -167,6 +167,9 @@ public class Event {
 	      inverseJoinColumns = @JoinColumn(name = "venue_id"))
 	    private List<Venue> venues;
 	
+	  
+	  @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+	  private List<Show> shows;
 	
 	
 }

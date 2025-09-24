@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShowDTO {
-	 private Long showId;
-	    private LocalTime time;          
-	    private String venueName;
-	    private List<ShowCategoryDTO> showcategories;
-		
+public class ShowCategoryDTO {
+	private String layoutName;
+    private List<String> rows;
+    private Integer cols;
+    private Integer price;
+    private List<ReserveSeatDTO> reservedSeats;
 }
