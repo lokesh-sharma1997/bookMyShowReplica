@@ -274,7 +274,7 @@ boolean flag;
        
         Map<String, Object> data = new HashMap<>();
         data.put("content", eventsPage.getContent());  
-        data.put("Totalcount", count);  
+        data.put("count", count);  
 
       
         ApiResponse<Map<String, Object>> response = new ApiResponse<>(
