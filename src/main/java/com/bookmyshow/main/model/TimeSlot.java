@@ -27,7 +27,9 @@ public class TimeSlot {
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 
-	    private LocalTime startTime;   
+	    private LocalTime startTime;  
+	    
+	    private LocalTime endTime;
 
 	    @ManyToOne
 	    @JoinColumn(name = "venue_id")

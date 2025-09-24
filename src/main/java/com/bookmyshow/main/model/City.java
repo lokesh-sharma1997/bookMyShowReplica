@@ -3,6 +3,8 @@ package com.bookmyshow.main.model;
 import java.util.List;
 import java.util.Set;
 
+import com.bookmyshow.main.dto.CityVDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -50,6 +53,9 @@ public class City {
     @ManyToOne
     @JoinColumn(name = "state_id")   
     private State state;
+    
+    @OneToMany(mappedBy = "city")
+    private List<Address> addresses;
     
 }
 

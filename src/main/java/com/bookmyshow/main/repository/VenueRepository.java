@@ -12,7 +12,9 @@ import java.util.List;
 public interface VenueRepository extends JpaRepository<Venue, Long> {
 	@Query("SELECT v FROM Venue v WHERE LOWER(v.address.city) = LOWER(:city)")
     List<Venue> findByCity(@Param("city") String city);
-    List<Venue> findByAddressCity(String city);
+	public List<Venue> findByAddress_City_Name(String cityName);
+
+//    List<Venue> findByAddressCity_Name(String cityName);
     List<Venue> findByVenueFor(String venuefor);
 	
 	

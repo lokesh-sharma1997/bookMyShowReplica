@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.AddressDTO;
+import com.bookmyshow.main.dto.CityVDTO;
 import com.bookmyshow.main.dto.LayoutDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
 import com.bookmyshow.main.dto.TimeSlotDTO;
@@ -17,6 +18,7 @@ import com.bookmyshow.main.dto.VenueDTO;
 import com.bookmyshow.main.exception.VenueNotFoundException;
 import com.bookmyshow.main.model.Address;
 import com.bookmyshow.main.model.Amenity;
+import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.LayoutRow;
 import com.bookmyshow.main.model.Screen;
@@ -25,6 +27,7 @@ import com.bookmyshow.main.model.TimeSlot;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.AddressRepository;
 import com.bookmyshow.main.repository.AmenityRepository;
+import com.bookmyshow.main.repository.CityRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
 
@@ -39,6 +42,9 @@ public class VenueServiceImpl implements VenueService {
 
     @Autowired
     private AddressRepository addressRepository;
+    
+    @Autowired
+    private CityRepository cityRepository;
 
     // Convert entity to DTO
     private VenueDTO entityToDto(Venue entity) {
@@ -53,16 +59,22 @@ public class VenueServiceImpl implements VenueService {
         dto.setVenueCapacity(entity.getVenueCapacity());
 //        dto.setVenueFor(entity.getVenueFor());
         dto.setVenueType(entity.getVenueType());
-
+        
+        
         if (entity.getAddress() != null) {
             AddressDTO addressDto = new AddressDTO();
-//            addressDto.setId(entity.getAddress().getId());
             addressDto.setStreet(entity.getAddress().getStreet());
-            addressDto.setCity(entity.getAddress().getCity());
             addressDto.setPin(entity.getAddress().getPin());
-            dto.setAddress(addressDto);
-        }
 
+            // Map City from Entity to CityVDTO
+            if (entity.getAddress().getCity() != null) {
+                CityVDTO cityVDTO = new CityVDTO();
+                cityVDTO.setCityName(entity.getAddress().getCity().getName());
+                addressDto.setCity(cityVDTO); // Set CityVDTO in AddressDTO
+            }
+
+            dto.setAddress(addressDto); 
+        }
         if (entity.getAmenities() != null) {
             List<String> amenityNames = entity.getAmenities().stream()
                     .map(Amenity::getAmenityName)
@@ -74,6 +86,8 @@ public class VenueServiceImpl implements VenueService {
             List<TimeSlotDTO> timeSlotDTOs = entity.getTimeSlots().stream().map(ts -> {
                 TimeSlotDTO tsDto = new TimeSlotDTO();
                 tsDto.setStartTime(ts.getStartTime());
+                tsDto.setEndTime(ts.getEndTime());
+
                 return tsDto;
             }).collect(Collectors.toList());
             dto.setTimeSlots(timeSlotDTOs);
@@ -89,7 +103,7 @@ public class VenueServiceImpl implements VenueService {
             dto.setSupportedCategories(supportedCategoryNames);
         }
 
-        if ("movies".equalsIgnoreCase(entity.getVenueFor()) && entity.getScreens() != null) {
+        if ("movie".equalsIgnoreCase(entity.getVenueType()) && entity.getScreens() != null) {
             List<ScreenDTO> screenDTOs = entity.getScreens().stream().map(screen -> {
                 ScreenDTO screenDto = new ScreenDTO();
                 screenDto.setId(screen.getId());
@@ -160,6 +174,7 @@ public class VenueServiceImpl implements VenueService {
             List<TimeSlot> timeSlots = dto.getTimeSlots().stream().map(tsDto -> {
                 TimeSlot ts = new TimeSlot();
                 ts.setStartTime(tsDto.getStartTime());
+                ts.setEndTime(tsDto.getEndTime());
                 ts.setVenue(entity);  
                 return ts;
             }).collect(Collectors.toList());
@@ -167,17 +182,20 @@ public class VenueServiceImpl implements VenueService {
         } else {
             entity.setTimeSlots(new ArrayList<>());
         }
-
-
         if (dto.getAddress() != null) {
             Address address = new Address();
             address.setStreet(dto.getAddress().getStreet());
-            address.setCity(dto.getAddress().getCity());
             address.setPin(dto.getAddress().getPin());
+
+            if (dto.getAddress().getCity() != null) {
+                City city = new City();
+                city.setName(dto.getAddress().getCity().getCityName());  
+                address.setCity(city);  
+            }
+
             entity.setAddress(address);
         }
-
-        if ("movies".equalsIgnoreCase(dto.getVenueName()) && dto.getScreens() != null) {
+        if ("movie".equalsIgnoreCase(dto.getVenueType()) && dto.getScreens() != null) {
             List<Screen> screens = dto.getScreens().stream().map(screenDto -> {
                 Screen screen = new Screen();
                 screen.setScreenName(screenDto.getScreenName());
@@ -220,16 +238,36 @@ public class VenueServiceImpl implements VenueService {
     @Override
     public VenueDTO createVenue(VenueDTO dto) {
         Venue entity = dtoToEntity(dto);
-        
-        if (entity.getAddress() != null) {
-            Address savedAddress = addressRepository.save(entity.getAddress());
-            entity.setAddress(savedAddress); 
+        if (dto.getAddress() != null) {
+            Address address = new Address();
+            address.setStreet(dto.getAddress().getStreet());
+            address.setPin(dto.getAddress().getPin());
+
+            if (dto.getAddress().getCity() != null) {
+                String cityName = dto.getAddress().getCity().getCityName();
+
+                City city = cityRepository.findByName(cityName);
+
+                if (city == null) {
+                    city = new City();
+                    city.setName(cityName);
+                    city = cityRepository.save(city);
+                }
+
+                address.setCity(city);
+            }
+
+            Address savedAddress = addressRepository.save(address);
+            entity.setAddress(savedAddress);
         }
 
-        if ("movies".equalsIgnoreCase(entity.getVenueFor())) {
+        if ("movie".equalsIgnoreCase(entity.getVenueType())) {
             if (entity.getScreens() == null) {
                 entity.setScreens(new ArrayList<>());
             }
+            
+            
+            	
 
             for (Screen screen : entity.getScreens()) {
                 screen.setVenue(entity);
@@ -269,7 +307,7 @@ public class VenueServiceImpl implements VenueService {
 
     @Override
     public List<VenueDTO> getVenuesByCity(String city) {
-        List<Venue> venues = Optional.ofNullable(venueRepository.findByAddressCity(city))
+        List<Venue> venues = Optional.ofNullable(venueRepository.findByAddress_City_Name(city))
                                      .orElse(Collections.emptyList()); 
         return venues.stream()
                 .map(this::entityToDto)

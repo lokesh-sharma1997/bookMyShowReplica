@@ -8,7 +8,7 @@ import lombok.Data;
 public class SupportedCategoryDTO {
 	private Long id;
     private String categoryName;
-    private Integer price;
+//    private Integer price;
     private String Layoutname;
     private List<ReserveSeatDTO> reservedSeats;
 }
