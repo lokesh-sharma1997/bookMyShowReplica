@@ -63,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
 			String token = jwtService.generateToken(req.getUsername(), role, userId);
 
 			tokenService.saveToken(token, userId, ttl);
+
 			return token;
 
 		} catch (AuthenticationException ex) {

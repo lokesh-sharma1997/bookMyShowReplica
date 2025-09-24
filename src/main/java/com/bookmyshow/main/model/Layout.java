@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -14,27 +15,32 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "layout")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-@Table(name="layout")
 public class Layout {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-	
-	private String layoutName;
-	
-	@ManyToOne
-	private Screen screen;
-	
-	@OneToMany(mappedBy = "layout")
+
+    private String layoutName;
+
+    @ManyToOne
+    @JoinColumn(name = "screen_id")
+    private Screen screen;
+
+    @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL) 
     private List<LayoutRow> layoutRows;
-	
-	private int cols;
-	
+
 	@OneToMany(mappedBy = "layout", cascade = CascadeType.PERSIST)
     private List<Show> shows;
 	
+
+
+    private int cols;
+
+   
 }
+

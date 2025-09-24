@@ -12,6 +12,6 @@ public class LayoutRowDTO {
 	@JsonIgnore
     private Long id;
     private String rowName;
-    private Long layoutId;  // You can store the related layout's ID, not the entire Layout object
+    private Long layoutId;  
 
 }

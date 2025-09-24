@@ -16,7 +16,7 @@ public class VenueDTO {
 	
     private String venueName;
     private int venueCapacity;
-    private String venueFor;
+//    private String venueFor;
     private String venueType;
     
     
@@ -25,7 +25,8 @@ public class VenueDTO {
 //    private List<Integer> amenities;
     private List<String> supportedCategories;  
     private List<ScreenDTO> screens; 
-    
+    private List<TimeSlotDTO> timeSlots;
+
     
 //    private Boolean deleted;  
 

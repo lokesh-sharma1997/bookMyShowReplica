@@ -17,6 +17,8 @@ public class LayoutDTO {
     private List<String> rows;  
     private int cols;
     
+   private int price;
+   
     @JsonIgnore
 	private Long ScreenId;
 

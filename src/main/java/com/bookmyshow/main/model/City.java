@@ -31,6 +31,7 @@ public class City {
     private Long cityId; 
 
     @NotBlank(message = "City name is required")
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @NotNull(message = "Popular flag is required")
@@ -41,8 +42,11 @@ public class City {
     
 //    @ManyToMany(mappedBy = "city")
 //	private List<Event> events;
+    
     @ManyToMany(mappedBy = "city")
     private List<Event> events;
+    
+    
     @ManyToOne
     @JoinColumn(name = "state_id")   
     private State state;
