@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,8 +27,9 @@ public class ShowTimeDate {
     private Long id;
 
     private LocalDate showDate;
-    @OneToMany(mappedBy = "showTimeDate") // This will automatically map to showTimeDate in ShowTime
+    @OneToMany(mappedBy = "showTimeDate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShowTime> showTimes;
+
     
     @ManyToOne
     @JoinColumn(name = "show_id", referencedColumnName = "id")

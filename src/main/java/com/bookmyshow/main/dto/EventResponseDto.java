@@ -23,8 +23,8 @@ public class EventResponseDto {
     private int ageLimit;
     private LocalDate releasingOn;
     private List<String> venueName;
-	private List<Integer> pricelist = List.of(400,500,800,1000,2000);
-	private LocalTime starttime=LocalTime.of(14, 30);
+	private List<Integer> pricelist ;
+	private LocalTime starttime;
 
     // Nested DTOs
     private List<String> languages;

@@ -225,11 +225,21 @@ boolean flag;
             filterRequest.getDateFilters()
             
         );
+        String message;
+        boolean flag;
+                if(events.isEmpty() || events ==null) {
+                	message="Event not found";
+                	flag=false;
+                }else {
+                	message="Events filtered successfully";
+                	flag=true;
+                }
+        
 
         ApiResponse<List<EventResponseDtoCard>> response = new ApiResponse<>(
             HttpStatus.OK.value(),
-            "Events filtered successfully",
-            true,
+            message,
+            flag,
             events
         );
 

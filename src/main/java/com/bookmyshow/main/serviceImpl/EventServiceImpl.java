@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -418,7 +419,7 @@ public class EventServiceImpl implements EventService {
 
 	           
 	            List<ShowTimeDate> showtimes = new ArrayList<>();
-	            if (showDTO.getShowtimesdate() != null) {  // Check if showtimesdate is not null
+	            if (showDTO.getShowtimesdate() != null) {  
 	                for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
 
 	                 
@@ -446,13 +447,16 @@ public class EventServiceImpl implements EventService {
 	                }
 	            }
 
-	         
+	            show.setEvent(event);  
+
 	            show.setShowstimedate(showtimes);
 
 	            shows.add(show);
 	        }
 
 	        event.setShows(shows); 
+	    }else {
+	        event.setShows(Collections.emptyList()); 
 	    }
 
 	 
@@ -467,7 +471,6 @@ public class EventServiceImpl implements EventService {
 	        
 	        showRepository.save(show);
 	    }
-
 	    return toDto(savedEvent);
 	}
 
@@ -657,7 +660,7 @@ if (events == null || events.isEmpty())
 	    if (eventDto.getLikes() != null) event.setLikes(eventDto.getLikes());
 	    if (eventDto.getVotes() != null) event.setVotes(eventDto.getVotes());
 	    if (eventDto.getCurrentlyPlaying() != null) event.setCurrentlyPlaying(eventDto.getCurrentlyPlaying());
-	    if (eventDto.getAgeLimit() != 0) event.setAgeLimit(eventDto.getAgeLimit());  // If 0 is valid default, adjust accordingly
+	    if (eventDto.getAgeLimit() != 0) event.setAgeLimit(eventDto.getAgeLimit());  
 	    if (eventDto.getReleasingOn() != null) event.setReleasingOn(eventDto.getReleasingOn());
 
 	  
@@ -776,6 +779,69 @@ if (events == null || events.isEmpty())
 	    if (eventDto.getCity() != null) {
 	        event.setCity(cityRepository.findAllById(eventDto.getCity()));
 	    }
+	    
+	    
+	    if (eventDto.getShow() != null) {
+	        List<Show> shows = new ArrayList<>();
+	        for (ShowDTO showDTO : eventDto.getShow()) {
+	           
+	            Show show = (showDTO.getShowid() != null) ?
+	                          showRepository.findById(showDTO.getShowid()).orElse(new Show()) :
+	                          new Show();
+
+	           
+	            if (showDTO.getVenue() != null) {
+	                venueRepository.findById(showDTO.getVenue())
+	                    .ifPresent(show::setVenue);
+	            }
+	            if (showDTO.getScreen() != null) {
+	                screenRepository.findById(showDTO.getScreen())
+	                    .ifPresent(show::setScreen);
+	            }
+	            if (showDTO.getLayout() != null) {
+	                layoutRepository.findById(showDTO.getLayout())
+	                    .ifPresent(show::setLayout);
+	            }
+
+	            if (showDTO.getShowPrice() != null) {
+	                show.setShowPrice(showDTO.getShowPrice());
+	            }
+	            show.setEvent(event);
+
+	            List<ShowTimeDate> showtimes = new ArrayList<>();
+	            if (showDTO.getShowtimesdate() != null) {
+	                for (ShowTimeDTO std : showDTO.getShowtimesdate()) {
+	                    if (std == null || std.getShowDate() == null) continue; 
+	                    ShowTimeDate stdEntity = new ShowTimeDate();
+	                    stdEntity.setShowDate(std.getShowDate());
+	                    stdEntity.setShow(show);
+
+	                    List<ShowTime> times = new ArrayList<>();
+	                    if (std.getShowTime() != null) {
+	                        for (LocalTime t : std.getShowTime()) {
+	                            if (t != null) {
+	                                ShowTime st = new ShowTime();
+	                                st.setShowTime(t);
+	                                st.setShowTimeDate(stdEntity);
+	                                times.add(st);
+	                            }
+	                        }
+	                    }
+
+	                    if (!times.isEmpty()) {
+	                        stdEntity.setShowTimes(times);
+	                        showtimes.add(stdEntity);
+	                    }
+	                }
+	            }
+
+	            show.setShowstimedate(showtimes);
+	            shows.add(showRepository.save(show));
+	        }
+	        event.setShows(shows);
+	    } else {
+	        event.setShows(Collections.emptyList());
+	    }
 
 	    Event updated = eventRepository.save(event);
 	    return toDto(updated);
@@ -892,6 +958,28 @@ if (events == null || events.isEmpty())
 	    dto.setReleasingOn(event.getReleasingOn());
 	    dto.setStartDate(event.getStartDate());
 	    dto.setAgeLimit(event.getAgeLimit());
+	    
+	    
+	    if (event.getShows() != null && !event.getShows().isEmpty()) {
+	        List<Integer> showPrices = event.getShows()
+	                                        .stream()
+	                                        .map(Show::getShowPrice)
+	                                        .toList();
+	        dto.setPricelist(showPrices); 
+	    }
+
+	    
+	    if (event.getShows() != null && !event.getShows().isEmpty()) {
+	        LocalTime firstShowTime = event.getShows().stream()
+	                                       .filter(s -> s.getShowstimedate() != null && !s.getShowstimedate().isEmpty())
+	                                       .flatMap(s -> s.getShowstimedate().stream())
+	                                       .filter(std -> std.getShowTimes() != null && !std.getShowTimes().isEmpty())
+	                                       .flatMap(std -> std.getShowTimes().stream())
+	                                       .map(ShowTime::getShowTime)
+	                                       .findFirst()
+	                                       .orElse(null);
+	        dto.setStarttime(firstShowTime);
+	    }
 	   
 	    if (event.getVenues() != null && !event.getVenues().isEmpty()) {
 		       
@@ -1033,6 +1121,29 @@ if (events == null || events.isEmpty())
 	    dto.setCity(event.getCity() != null ? event.getCity().stream()
 	        .map(City::getName)
 	        .toList() : new ArrayList<>());
+	    
+	    
+	 // Price extract
+	    if (event.getShows() != null && !event.getShows().isEmpty()) {
+	        List<Integer> showPrices = event.getShows()
+	                                        .stream()
+	                                        .map(Show::getShowPrice)
+	                                        .toList();
+	        dto.setPricelist(showPrices); 
+	    }
+
+	    
+	    if (event.getShows() != null && !event.getShows().isEmpty()) {
+	        LocalTime firstShowTime = event.getShows().stream()
+	                                       .filter(s -> s.getShowstimedate() != null && !s.getShowstimedate().isEmpty())
+	                                       .flatMap(s -> s.getShowstimedate().stream())
+	                                       .filter(std -> std.getShowTimes() != null && !std.getShowTimes().isEmpty())
+	                                       .flatMap(std -> std.getShowTimes().stream())
+	                                       .map(ShowTime::getShowTime)
+	                                       .findFirst()
+	                                       .orElse(null);
+	        dto.setStarttime(firstShowTime);
+	    }
 
 	    return dto;
 	}

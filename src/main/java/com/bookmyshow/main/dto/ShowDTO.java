@@ -15,6 +15,6 @@ public class ShowDTO {
 	    private Long venue;  
 	    private Long screen; 
 	    private Long layout; 
-	    private int showPrice;
+	    private Integer showPrice;
 	    private List<ShowTimeDTO> showtimesdate;
 }

@@ -2,6 +2,7 @@ package com.bookmyshow.main.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -36,14 +37,16 @@ private Screen screen;
 private Layout layout;
 private int showPrice;
 
-@OneToMany(mappedBy = "show", cascade = CascadeType.PERSIST)
+@OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
 @JsonManagedReference
 private List<ShowTimeDate> showstimedate; 
 
 
 @ManyToOne
 @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+@JsonBackReference
 private Event event;
+
 
 
 }
