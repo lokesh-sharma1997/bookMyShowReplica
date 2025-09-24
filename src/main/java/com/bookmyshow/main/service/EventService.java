@@ -3,6 +3,7 @@ package com.bookmyshow.main.service;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bookmyshow.main.dto.CategoryDTO;
@@ -38,18 +39,25 @@ public interface EventService {
 
 	boolean deleteEvent(Long id);
 
-	List<EventResponseDtoCard> filterEvents(String type,
-	        List<Integer> languages,
-	        List<Integer> genres,
-	        List<Integer> formats,
-	        List<Integer> tags,
-	        List<Integer> categories,
-	        List<Integer> price,
-	        List<Integer> moreFilters,
-	        List<Integer> releaseMonths,
-	        List<Integer> dateFilters
-	        );
 
+
+	
+	
+	Page<EventResponseDtoCard> filterEvents(
+		    String type,
+		    List<Integer> languages,
+		    List<Integer> genres,
+		    List<Integer> formats,
+		    List<Integer> tags,
+		    List<Integer> categories,
+		    List<Integer> price,
+		    List<Integer> moreFilters,
+		    List<Integer> releaseMonths,
+		    List<Integer> dateFilters,
+		    int page, 
+		    int size  
+		);
+	
 	List<LanguagesDTO> getAllLanguages(String eventType);
 
 	List<GenresDTO> getAllGenres(String eventType);

@@ -56,13 +56,15 @@ public class Venue {
     @ManyToMany(mappedBy = "venues")
     private List<Event> movies;
     
-    @OneToMany(mappedBy = "venue")
-    private List<Show> shows;
+
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.PERSIST)
+    private List<Show> show;
+
     
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeSlot> timeSlots = new ArrayList<>();
 
-    
+
 
     private Boolean deleted = false;
 

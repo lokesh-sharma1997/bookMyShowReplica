@@ -27,4 +27,8 @@ public class Screen {
     @OneToMany(mappedBy = "screen", fetch = FetchType.EAGER, cascade = CascadeType.ALL)  // Cascade all operations
     private List<Layout> layouts;
 
+
+     @OneToMany(mappedBy = "screen", cascade = CascadeType.PERSIST)
+     private List<Show> shows;
+
 }
