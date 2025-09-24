@@ -2,6 +2,9 @@ package com.bookmyshow.main.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +13,7 @@ import com.bookmyshow.main.model.Role;
 import com.bookmyshow.main.model.UserMaster;
 
 public interface UserRepository extends JpaRepository<UserMaster, Long> {
+
 	UserMaster findByUserId(long userId);
 
 	UserMaster findByUsername(String username);
@@ -19,16 +23,14 @@ public interface UserRepository extends JpaRepository<UserMaster, Long> {
 	boolean existsByUsername(String username);
 
 	boolean deleteByUserId(long id);
-	
-	@Query("SELECT user FROM UserMaster user WHERE " +
-		       "(LOWER(user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-		       "LOWER(user.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-		       "LOWER(user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-		       "user.phoneNumber LIKE CONCAT('%', :keyword, '%')) AND " +
-		       "user.deleteFlag = false")
-		List<UserMaster> globalSearch(@Param("keyword") String value);
-
 
 	boolean existsByEmailAndDeleteFlag(String email, boolean deleteFlag);
 
+	Page<UserMaster> findByDeleteFlagFalse(Pageable pageable);
+
+	@Query("SELECT user FROM UserMaster user WHERE " + "(LOWER(user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR "
+			+ "LOWER(user.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR "
+			+ "LOWER(user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR "
+			+ "user.phoneNumber LIKE CONCAT('%', :keyword, '%')) AND " + "user.deleteFlag = false")
+	Page<UserMaster> globalSearch(@Param("keyword") String keyword, Pageable pageable);
 }

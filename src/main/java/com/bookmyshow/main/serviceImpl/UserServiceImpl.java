@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.UserDTO;
@@ -80,9 +83,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserDTO> getAllUsers() {
-		return userRepository.findAll().stream().filter(user -> !user.getDeleteFlag()).map(this::convertToDTO)
-				.collect(Collectors.toList());
+	public Page<UserDTO> getAllUsers(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<UserMaster> usersPage = userRepository.findByDeleteFlagFalse(pageable);
+		return usersPage.map(this::convertToDTO);
 	}
 
 	@Override
@@ -111,7 +115,7 @@ public class UserServiceImpl implements UserService {
 		UserMaster user = userRepository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 		if (user.getRole().getRoleName().equals("ADMIN")) {
-			throw new IllegalArgumentException("User is already an admin. Cannot change role of admin.");	
+			throw new IllegalArgumentException("User is already an admin. Cannot change role of admin.");
 		}
 		if (Boolean.TRUE.equals(user.getDeleteFlag())) {
 			throw new InvalidCredentialsException("User account is deleted. Please contact support.");
@@ -127,11 +131,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserDTO> searchUser(String value) {
+	public Page<UserDTO> searchUser(String value, int page, int size) {
 		if (value == null || value.trim().isEmpty()) {
 			throw new IllegalArgumentException("Search value cannot be null or empty.");
 		}
 
-		return userRepository.globalSearch(value).stream().map(this::convertToDTO).collect(Collectors.toList());
+		Pageable pageable = PageRequest.of(page, size);
+		Page<UserMaster> usersPage = userRepository.globalSearch(value, pageable);
+
+		return usersPage.map(this::convertToDTO);
 	}
+
 }
