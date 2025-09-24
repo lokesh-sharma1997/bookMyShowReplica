@@ -1,5 +1,11 @@
 package com.bookmyshow.main.model;
+
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -10,37 +16,23 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "layout")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Layout {
-
-    @Id
+@Entity
+@Table(name="showtimedate")
+public class ShowTimeDate {
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String layoutName;
+    private LocalDate showDate;
+    @OneToMany(mappedBy = "showTimeDate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ShowTime> showTimes;
 
+    
     @ManyToOne
-    @JoinColumn(name = "screen_id")
-    private Screen screen;
-
-    @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL) 
-    private List<LayoutRow> layoutRows;
-
-	@OneToMany(mappedBy = "layout", cascade = CascadeType.PERSIST)
-    private List<Show> shows;
-	
-
-
-    private int cols;
-
-   
+    @JoinColumn(name = "show_id", referencedColumnName = "id")
+    @JsonBackReference 
+    private Show show; 
 }
-
