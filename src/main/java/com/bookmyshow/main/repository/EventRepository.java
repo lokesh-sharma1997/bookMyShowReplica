@@ -27,13 +27,15 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     
     List<Event> findByEventType(String eventType);
 
-
+   
 	
 	List<Event> findTop10ByEventTypeOrderByReleasingOnDesc(String eventType);
 
 	List<Event> findTop10ByOrderByReleasingOnDesc();
 	
 	Page<Event> findAll(Specification<Event> spec, Pageable pageable);
+
+	
 
 
 
