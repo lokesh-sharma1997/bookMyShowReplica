@@ -1,6 +1,7 @@
 package com.bookmyshow.main.model;
 
 import java.time.LocalDateTime;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,4 +85,7 @@ public class UserMaster {
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private UserProfile userProfile;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
 }
