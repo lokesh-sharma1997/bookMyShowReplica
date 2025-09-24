@@ -1,16 +1,21 @@
 package com.bookmyshow.main.serviceImpl;
 
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.bookmyshow.main.dto.NotificationDTO;
+import com.bookmyshow.main.exception.UserNotFoundException;
 import com.bookmyshow.main.model.Notification;
 import com.bookmyshow.main.model.UserMaster;
-import com.bookmyshow.main.exception.UserNotFoundException;
 import com.bookmyshow.main.repository.NotificationRepository;
 import com.bookmyshow.main.repository.UserRepository;
+import com.bookmyshow.main.response.NotificationPageResponse;
 import com.bookmyshow.main.service.NotificationService;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -26,13 +31,26 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<NotificationDTO> getNotificationsForUser(Long userId) {
+    public NotificationPageResponse<NotificationDTO> getNotificationsForUser(Long userId, int page, int size) {
         UserMaster user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
-        return notificationRepository.findByUserOrderByCreatedOnDesc(user).stream()
-                .map(notification -> modelMapper.map(notification, NotificationDTO.class))
-                .collect(Collectors.toList());
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Notification> notificationPage =
+                notificationRepository.findByUserOrderByCreatedOnDesc(user, pageable);
+
+        // map entities → DTOs
+        List<NotificationDTO> dtos = notificationPage
+                .map(n -> modelMapper.map(n, NotificationDTO.class))
+                .getContent();
+
+        // get total count (ignores pagination)
+        long totalCount = notificationRepository.countByUser_UserId(userId);
+
+        return new NotificationPageResponse<>(totalCount, dtos);
     }
+
+
 
 //    @Override
 //    public NotificationDTO createNotification(Long userId, NotificationDTO dto) {

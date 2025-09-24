@@ -34,11 +34,12 @@ public class NotificationEventListener {
         notification.setTitle(event.getTitle());
         notification.setMessage(event.getMessage());
 
-        // Convert string type into enum
+     // Dynamically set the type based on event type string, fallback to GENERAL
+        String typeStr = event.getType() != null ? event.getType().toUpperCase() : "";
         try {
-            notification.setType(NotificationType.valueOf(event.getType().toUpperCase()));
+            notification.setType(NotificationType.valueOf(typeStr));
         } catch (IllegalArgumentException e) {
-            notification.setType(NotificationType.EVENT); // default fallback
+            notification.setType(NotificationType.GENERAL); // default fallback
         }
 
         notification.setUser(user);

@@ -1,19 +1,17 @@
 package com.bookmyshow.main.controller;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookmyshow.main.dto.NotificationDTO;
 import com.bookmyshow.main.response.ApiResponse;
+import com.bookmyshow.main.response.NotificationPageResponse;
 import com.bookmyshow.main.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,12 +24,17 @@ public class NotificationController {
     private final NotificationService notificationService;
     
 
-    // Get all notifications for a user
+ // Get paginated notifications for a user
     @GetMapping("/get-notification/{userId}")
-    public ResponseEntity<ApiResponse<List<NotificationDTO>>> getUserNotifications(@PathVariable Long userId) {
-        List<NotificationDTO> notifications = notificationService.getNotificationsForUser(userId);
+    public ResponseEntity<ApiResponse<NotificationPageResponse<NotificationDTO>>> getUserNotifications(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        ApiResponse<List<NotificationDTO>> response = new ApiResponse<>(
+        NotificationPageResponse<NotificationDTO> notifications =
+                notificationService.getNotificationsForUser(userId, page, size);
+
+        ApiResponse<NotificationPageResponse<NotificationDTO>> response = new ApiResponse<>(
                 HttpStatus.OK.value(),
                 "Notifications fetched successfully",
                 true,
@@ -40,6 +43,7 @@ public class NotificationController {
 
         return ResponseEntity.ok(response);
     }
+
 
 	/*
 	 * // Create a new notification

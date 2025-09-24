@@ -265,7 +265,7 @@ public class VenueServiceImpl implements VenueService {
                 this,
                 "New "+saved.getVenueType()+" Added",
                 saved.getVenueName() + " is now available!",
-                saved.getVenueType()
+                "VENUE"
         ));
         return entityToDto(saved);
     }
