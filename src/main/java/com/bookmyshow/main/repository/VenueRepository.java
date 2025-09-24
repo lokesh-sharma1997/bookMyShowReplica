@@ -14,7 +14,6 @@ public interface VenueRepository extends JpaRepository<Venue, Long> {
     List<Venue> findByCity(@Param("city") String city);
 	public List<Venue> findByAddress_City_Name(String cityName);
 
-//    List<Venue> findByAddressCity_Name(String cityName);
     List<Venue> findByVenueFor(String venuefor);
 	
 	
