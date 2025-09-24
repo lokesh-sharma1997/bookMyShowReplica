@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -209,10 +210,19 @@ boolean flag;
     }
 
 
-    @Operation(summary = "event filter")
+
+    
+    
+    
+    @Operation(summary = "Event filter with pagination")
     @PostMapping("/filter")
-    public ResponseEntity<ApiResponse<List<EventResponseDtoCard>>> filterEvents(@RequestBody EventFilterRequest filterRequest) {
-        List<EventResponseDtoCard> events = eventService.filterEvents(
+    public ResponseEntity<ApiResponse<Page<EventResponseDtoCard>>> filterEvents(
+            @RequestBody EventFilterRequest filterRequest, 
+            @RequestParam int page, 
+            @RequestParam  int size  
+    ) {
+       
+        Page<EventResponseDtoCard> eventsPage = eventService.filterEvents(
             filterRequest.getType(),
             filterRequest.getLanguages(),
             filterRequest.getGenres(),
@@ -222,30 +232,34 @@ boolean flag;
             filterRequest.getPrice(),
             filterRequest.getMorefilter(),
             filterRequest.getReleaseMonths(),
-            filterRequest.getDateFilters()
-            
+            filterRequest.getDateFilters(),
+            page, 
+            size
         );
+
+      
         String message;
         boolean flag;
-                if(events.isEmpty() || events ==null) {
-                	message="Event not found";
-                	flag=false;
-                }else {
-                	message="Events filtered successfully";
-                	flag=true;
-                }
-        
 
-        ApiResponse<List<EventResponseDtoCard>> response = new ApiResponse<>(
+        if (eventsPage.isEmpty()) {
+            message = "No events found for the given filters.";
+            flag = false;
+        } else {
+            message = "Events filtered successfully";
+            flag = true;
+        }
+
+       
+        ApiResponse<Page<EventResponseDtoCard>> response = new ApiResponse<>(
             HttpStatus.OK.value(),
             message,
             flag,
-            events
+            eventsPage
         );
 
+       
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
     
     @Operation(summary = "Get All languages")
     @GetMapping("/languages")

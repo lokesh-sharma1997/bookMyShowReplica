@@ -12,6 +12,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.bookmyshow.main.dto.CastDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 
 import org.modelmapper.ModelMapper;
@@ -76,6 +80,8 @@ import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
+import java.util.Objects;
+
 import com.bookmyshow.main.specification.EventSpecification;
 
 @Service
@@ -888,41 +894,41 @@ if (events == null || events.isEmpty())
 
 
 
-	@Override
-	public List<EventResponseDtoCard> filterEvents(
-	    String type,
-	    List<Integer> languages,
-	    List<Integer> genres,
-	    List<Integer> formats,
-	    List<Integer> tags,
-	    List<Integer> categories,
-	    List<Integer> price,
-        List<Integer> moreFilters,
-        List<Integer> releaseMonths,
-        List<Integer> dateFilters
+
+	public Page<EventResponseDtoCard> filterEvents(
+	        String type,
+	        List<Integer> languages,
+	        List<Integer> genres,
+	        List<Integer> formats,
+	        List<Integer> tags,
+	        List<Integer> categories,
+	        List<Integer> price,
+	        List<Integer> moreFilters,
+	        List<Integer> releaseMonths,
+	        List<Integer> dateFilters,
+	        int page, 
+	        int size  
 	) {
+	    
+	    Pageable pageable = PageRequest.of(page, size);
+
+	  
 	    Specification<Event> spec = EventSpecification.filterEvents(
-	            type,
-	            languages,
-	            genres,
-	            formats,
-	            tags,
-	            categories,
-	            price,
-	            moreFilters,
-	            releaseMonths,
-	            dateFilters
+	            type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters
 	    );
 
-	    return eventRepository.findAll(spec).stream()
-	            .filter(event -> !event.getDeleted())
-	            .map(this::mapToResponseDto)  
+	 
+	    Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+
+	 
+	    List<EventResponseDtoCard> eventDtoList = eventPage.getContent().stream()
+	            .filter(event -> !event.getDeleted()) 
+	            .map(this::mapToResponseDto) 
 	            .collect(Collectors.toList());
+
+	   
+	    return new PageImpl<>(eventDtoList, pageable, eventPage.getTotalElements());
 	}
-
-
-
-
 
 	
 	
