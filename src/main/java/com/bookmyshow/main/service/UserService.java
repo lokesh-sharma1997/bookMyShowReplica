@@ -3,6 +3,8 @@ package com.bookmyshow.main.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+
 import com.bookmyshow.main.dto.UserDTO;
 
 public interface UserService {
@@ -12,9 +14,9 @@ public interface UserService {
 
 	List<UserDTO> getByRole(String roleName);
 
-	public List<UserDTO> searchUser(String value);
+	public Page<UserDTO> searchUser(String value, int page, int size);
 
-	List<UserDTO> getAllUsers();
+    Page<UserDTO> getAllUsers(int page, int size);
 
 	boolean deleteById(long userId);
 
