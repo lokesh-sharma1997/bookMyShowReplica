@@ -10,12 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +25,7 @@ import org.modelmapper.TypeMap;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,6 +67,8 @@ import com.bookmyshow.main.dto.LanguagesDTO;
 import com.bookmyshow.main.dto.MoreFilterDTO;
 import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
+import com.bookmyshow.main.dto.ShowDTO;
+import com.bookmyshow.main.dto.ShowTimeDTO;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.exception.EventCustomException;
 import com.bookmyshow.main.model.Cast;
@@ -75,9 +80,12 @@ import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
 import com.bookmyshow.main.model.Genres;
 import com.bookmyshow.main.model.Languages;
+import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
+import com.bookmyshow.main.model.Screen;
+import com.bookmyshow.main.model.Show;
 import com.bookmyshow.main.model.Tag;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
@@ -89,9 +97,12 @@ import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.repository.FormatRepository;
 import com.bookmyshow.main.repository.GenresRepository;
 import com.bookmyshow.main.repository.LanguagesRepository;
+import com.bookmyshow.main.repository.LayoutRepository;
 import com.bookmyshow.main.repository.MoreFiltersRepository;
 import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
+import com.bookmyshow.main.repository.ScreenRepository;
+import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.specification.EventSpecification;
 
@@ -126,6 +137,12 @@ class EventServiceImplTest {
     private CityRepository cityRepository;
     @Mock
     private VenueRepository venueRepository;
+    @Mock
+    private ScreenRepository  screenRepository;
+    @Mock
+    private LayoutRepository layoutRepository;
+    @Mock
+    private ShowRepository showRepository;
 
     @Mock
     private ModelMapper mapper;
@@ -246,6 +263,7 @@ class EventServiceImplTest {
        
         Venue venue = new Venue();
         venue.setId(10L); 
+       
 
        
         when(castRepository.findByActorName("Actor Name")).thenReturn(Optional.empty());
@@ -292,6 +310,79 @@ class EventServiceImplTest {
 
    
         verify(eventRepository).save(any(Event.class));
+    }
+    @Test
+    void testCreateEvent_withShows()throws IOException {
+        
+        EventDTO eventDto = new EventDTO();
+     
+        
+        ShowDTO showDTO = new ShowDTO();
+        showDTO.setShowid(1L);
+        showDTO.setShowPrice(100);
+        showDTO.setVenue(10L); 
+        showDTO.setScreen(1L); 
+        showDTO.setLayout(1L); 
+
+        ShowTimeDTO showTimeDTO = new ShowTimeDTO();
+        showTimeDTO.setShowDate(LocalDate.of(2025, 9, 25));
+        showTimeDTO.setShowTime(List.of(LocalTime.of(10, 0), LocalTime.of(14, 0)));
+        showDTO.setShowtimesdate(List.of(showTimeDTO));
+
+        eventDto.setShow(List.of(showDTO));
+
+      
+        Venue venue = new Venue();
+        venue.setId(10L);
+        when(venueRepository.findById(10L)).thenReturn(Optional.of(venue));
+
+        Screen screen = new Screen();
+        screen.setId(1L);
+        when(screenRepository.findById(1L)).thenReturn(Optional.of(screen));
+
+        Layout layout = new Layout();
+        layout.setId(1L);
+        when(layoutRepository.findById(1L)).thenReturn(Optional.of(layout));
+
+      
+        Event savedEvent = new Event();
+        savedEvent.setEventId(1L);
+        savedEvent.setAgeLimit(16);
+        when(eventRepository.save(any(Event.class))).thenReturn(savedEvent);
+
+        Show savedShow = new Show();
+        when(showRepository.save(any(Show.class))).thenReturn(savedShow);
+
+       
+        Event event = spy(new Event());
+        event.setEventId(1L);
+        event.setAgeLimit(16);
+        when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(event);
+        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "poster-bytes".getBytes());
+
+       
+        EventDTO result = eventService.createEvent(eventDto, poster, null, null);
+     
+
+      
+        assertNotNull(result);
+
+        verify(venueRepository).findById(10L);
+        verify(screenRepository).findById(1L);
+        verify(layoutRepository).findById(1L);
+        verify(eventRepository).save(event); 
+        verify(showRepository).save(any(Show.class)); 
+
+     
+        Show show = event.getShows().get(0);
+        assertEquals(1, show.getShowstimedate().size()); 
+        assertEquals(LocalDate.of(2025, 9, 25), show.getShowstimedate().get(0).getShowDate()); 
+        assertEquals(LocalTime.of(10, 0), show.getShowstimedate().get(0).
+        		getShowTimes().get(0).getShowTime()); 
+        assertEquals(100, show.getShowPrice()); 
+
+
+      
     }
 
 
@@ -813,7 +904,7 @@ class EventServiceImplTest {
     }
    
 
-
+  
 
 
     @Test
