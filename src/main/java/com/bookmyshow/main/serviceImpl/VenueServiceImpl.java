@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.AddressDTO;
@@ -27,6 +28,7 @@ import com.bookmyshow.main.repository.AddressRepository;
 import com.bookmyshow.main.repository.AmenityRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
+import com.bookmyshow.main.events.NotificationEvent;
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -39,6 +41,9 @@ public class VenueServiceImpl implements VenueService {
 
     @Autowired
     private AddressRepository addressRepository;
+    
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     // Convert entity to DTO
     private VenueDTO entityToDto(Venue entity) {
@@ -255,6 +260,13 @@ public class VenueServiceImpl implements VenueService {
         }
 
         Venue saved = venueRepository.save(entity);
+        
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                "New "+saved.getVenueType()+" Added",
+                saved.getVenueName() + " is now available!",
+                "VENUE"
+        ));
         return entityToDto(saved);
     }
 

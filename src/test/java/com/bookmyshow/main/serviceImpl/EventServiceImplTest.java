@@ -45,6 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -143,7 +144,8 @@ class EventServiceImplTest {
     private LayoutRepository layoutRepository;
     @Mock
     private ShowRepository showRepository;
-
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
     @Mock
     private ModelMapper mapper;
 
