@@ -12,9 +12,7 @@ import lombok.Data;
 @Data
 public class NotificationDTO {
 
-	@JsonIgnore
-    private Long id;
-	
+    private Long notificationId;
 	@Schema(defaultValue = "string")
     private String title;
     private String message;
