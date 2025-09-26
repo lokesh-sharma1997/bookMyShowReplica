@@ -655,63 +655,7 @@ class EventServiceImplTest {
         assertEquals(1, result.size());
         verify(priceRepository).findAll();
     }
-//    @Test
-//    void testFilterEvents() throws Exception {
-//       
-//        String type = "Movie";
-//        List<Integer> languages = List.of(1, 2);
-//        List<Integer> genres = List.of(1, 2);
-//        List<Integer> formats = List.of(1, 2);
-//        List<Integer> tags = List.of(1, 2);
-//        List<Integer> categories = List.of(1, 2);
-//        List<Integer> price = List.of(1, 2);
-//        List<Integer> moreFilters = List.of(1, 2);
-//        List<Integer> releaseMonths = List.of(1, 2);
-//        List<Integer> dateFilters = List.of(1, 2);
-//
-//      
-//        int page = 0;  
-//        int size = 10; 
-//
-//     
-//        Event event1 = new Event();
-//        event1.setDeleted(false);
-//        event1.setAgeLimit(16);
-//        event1.setName("Sample Movie");
-//
-//        Event event2 = new Event();
-//        event2.setDeleted(true);  
-//        event2.setAgeLimit(16);
-//        event2.setName("Deleted Movie");
-//
-//     
-//        List<Event> events = List.of(event1, event2);
-//
-//   
-//        Specification<Event> mockSpec = Mockito.mock(Specification.class);
-//
-//      
-//        try (MockedStatic<EventSpecification> mockedStatic = Mockito.mockStatic(EventSpecification.class)) {
-//            mockedStatic.when(() -> EventSpecification.filterEvents(
-//                    type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters
-//            )).thenReturn(mockSpec);
-//
-//         
-//            when(eventRepository.findAll(mockSpec, PageRequest.of(page, size))).thenReturn(new PageImpl<>(events, PageRequest.of(page, size), events.size()));
-//
-//         
-//            Page<EventResponseDtoCard> result = eventService.filterEvents(
-//                    type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters, page, size
-//            );
-//
-//        
-//            assertEquals(1, result.getContent().size());
-//            assertEquals("Sample Movie", result.getContent().get(0).getName());
-//
-//          
-//            verify(eventRepository).findAll(mockSpec, PageRequest.of(page, size));
-//        }
-//    }
+
 
     @Test
     void testSearchEventNames_WithEventTypes() {

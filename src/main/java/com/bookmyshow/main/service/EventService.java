@@ -43,20 +43,7 @@ public interface EventService {
 
 	
 	
-//	Page<EventResponseDtoCard> filterEvents(
-//		    String type,
-//		    List<Integer> languages,
-//		    List<Integer> genres,
-//		    List<Integer> formats,
-//		    List<Integer> tags,
-//		    List<Integer> categories,
-//		    List<Integer> price,
-//		    List<Integer> moreFilters,
-//		    List<Integer> releaseMonths,
-//		    List<Integer> dateFilters,
-//		    int page, 
-//		    int size  
-//		);
+
 	
 	Page<EventResponseDtoCard> filterEvents(
 		    String type,

@@ -908,40 +908,7 @@ if (events == null || events.isEmpty())
 
 
 
-//	public Page<EventResponseDtoCard> filterEvents(
-//	        String type,
-//	        List<Integer> languages,
-//	        List<Integer> genres,
-//	        List<Integer> formats,
-//	        List<Integer> tags,
-//	        List<Integer> categories,
-//	        List<Integer> price,
-//	        List<Integer> moreFilters,
-//	        List<Integer> releaseMonths,
-//	        List<Integer> dateFilters,
-//	        int page, 
-//	        int size  
-//	) {
-//	    
-//	    Pageable pageable = PageRequest.of(page, size);
-//	   
-//	  
-//	    Specification<Event> spec = EventSpecification.filterEvents(
-//	            type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters
-//	    );
-//
-//	 
-//	    Page<Event> eventPage = eventRepository.findAll(spec, pageable);
-//
-//	 
-//	    List<EventResponseDtoCard> eventDtoList = eventPage.getContent().stream()
-//	            .filter(event -> !event.getDeleted()) 
-//	            .map(this::mapToResponseDto) 
-//	            .collect(Collectors.toList());
-//
-//	   
-//	    return new PageImpl<>(eventDtoList, pageable, eventPage.getTotalElements());
-//	}
+
 
 	
 	
