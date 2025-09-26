@@ -68,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			 * response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			 * response.getWriter().write("Token has expired."); return; }
 			 **/
-			
+
 			// If token is valid and not expired, proceed with user authentication
 			if (jwtService.isTokenValid(token, userDetails)) {
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
