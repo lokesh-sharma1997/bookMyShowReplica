@@ -49,6 +49,7 @@ import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.exception.EventCustomException;
+import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.service.EventService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +61,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
  
 import static org.mockito.Mockito.verify;
@@ -174,65 +176,72 @@ class EventControllerTest {
  
  
  
-//    @Test
-//    void testFilterEvents() throws Exception {
-//
-//        EventFilterRequest filterRequest = new EventFilterRequest();
-//        filterRequest.setType("Movie");
-//        filterRequest.setLanguages(Arrays.asList(1, 2));
-//        filterRequest.setGenres(Arrays.asList(3, 4));
-//        filterRequest.setFormats(Arrays.asList(5, 6));
-//        filterRequest.setTags(Arrays.asList(7, 8));
-//        filterRequest.setCategories(Arrays.asList(9, 10));
-//        filterRequest.setPrice(Arrays.asList(100, 200));
-//        filterRequest.setMorefilter(Arrays.asList(11, 12));
-//        filterRequest.setReleaseMonths(Arrays.asList(1, 2));
-//        filterRequest.setDateFilters(Arrays.asList(13, 14));
-//
-//       
-//        int page = 0;  
-//        int size = 10; 
-//
-//      
-//        EventResponseDtoCard event = new EventResponseDtoCard();
-//        event.setEventId(1L);
-//        event.setName("Sample Movie");
-//
-//        List<EventResponseDtoCard> mockResponse = Arrays.asList(event);
-//
-//      
-//        Page<EventResponseDtoCard> pageResponse = new PageImpl<>(mockResponse, PageRequest.of(page, size), mockResponse.size());
-//
-//      
-//        when(eventService.filterEvents(
-//                eq("Movie"),
-//                eq(Arrays.asList(1, 2)),
-//                eq(Arrays.asList(3, 4)),
-//                eq(Arrays.asList(5, 6)),
-//                eq(Arrays.asList(7, 8)),
-//                eq(Arrays.asList(9, 10)),
-//                eq(Arrays.asList(100, 200)),
-//                eq(Arrays.asList(11, 12)),
-//                eq(Arrays.asList(1, 2)),
-//                eq(Arrays.asList(13, 14)),
-//                eq(page), 
-//                eq(size) 
-//        )).thenReturn(pageResponse);
-//
-//        
-//        mockMvc.perform(post("/api/events/filter")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(filterRequest))
-//                .param("page", String.valueOf(page))  
-//                .param("size", String.valueOf(size))) 
-//            .andExpect(status().isOk())
-//            .andExpect(jsonPath("$.statusCode").value(200))
-//            .andExpect(jsonPath("$.message").value("Events filtered successfully"))
-//            .andExpect(jsonPath("$.success").value(true));
-//
-//    }
+
     
     
+    @Test
+    public void testFilterEvents_ReturnsEvents() throws Exception {
+        
+        EventFilterRequest filterRequest = new EventFilterRequest();
+        filterRequest.setType("Movie");
+        filterRequest.setLanguages(List.of(1, 2));
+        filterRequest.setGenres(List.of(1));
+        filterRequest.setFormats(List.of(1));
+        filterRequest.setTags(List.of(1));
+        filterRequest.setCategories(List.of(1));
+        filterRequest.setPrice(List.of(1));
+        filterRequest.setMorefilter(List.of(1));
+        filterRequest.setReleaseMonths(List.of(1));
+        filterRequest.setDateFilters(List.of(1));
+
+        
+        EventResponseDtoCard eventDto = new EventResponseDtoCard();
+        eventDto.setEventId(1L);
+        eventDto.setName("Sample Event");
+        List<EventResponseDtoCard> eventList = List.of(eventDto);
+
+        Page<EventResponseDtoCard> eventPage = new PageImpl<>(eventList, PageRequest.of(0, 10), 1);
+
+       
+        when(eventService.filterEvents(
+                anyString(),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyList(),
+                anyList(),
+                eq(0),
+                eq(10)
+                ,eq(true)))
+            .thenReturn(eventPage);
+
+      
+        Event event = new Event();
+        event.setDeleted(false);
+        event.setCurrentlyPlaying(true);
+        when(eventRepository.findAll(any(Specification.class))).thenReturn(List.of(event));
+
+      
+        mockMvc.perform(post("/api/events/filter")  
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(filterRequest)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.message").value("Events filtered successfully"))
+            .andExpect(jsonPath("$.data.content[0].eventId").value(1))
+            .andExpect(jsonPath("$.data.count").value(1));
+    }
+
+
+
+
+
     
  
 
@@ -426,30 +435,7 @@ class EventControllerTest {
             .andExpect(jsonPath("$.data[0].releaseMonthName").value("January"));
     }
  
-//    @Test
-//    void testUpdateEventWithBlankName_shouldThrowException() throws Exception {
-//        Long eventId = 1L;
-//
-//        EventDTO eventDto = new EventDTO();
-//        eventDto.setName(""); // blank name
-//
-//        String eventJson = new ObjectMapper().writeValueAsString(eventDto);
-//
-//        MockMultipartFile eventJsonPart = new MockMultipartFile(
-//                "Event", "", "application/json", eventJson.getBytes()
-//        );
-//
-//        mockMvc.perform(multipart("/api/events/update/{id}", eventId)
-//                    .file(eventJsonPart)
-//                    .with(request -> {
-//                        request.setMethod("PUT");
-//                        return request;
-//                    })
-//                    .contentType(MediaType.MULTIPART_FORM_DATA))
-//                .andExpect(status().isBadRequest()); // depends on @ControllerAdvice mapping
-//
-//        verify(eventService, never()).updateEvent(anyLong(), any(), any(), anyList(), anyList());
-//    }
+
  
     
     @Test
