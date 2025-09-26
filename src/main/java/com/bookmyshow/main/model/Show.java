@@ -46,7 +46,7 @@ private List<ShowTimeDate> showstimedate;
 
 @ManyToOne
 @JoinColumn(name = "event_id", referencedColumnName = "event_id")
-//@JsonBackReference
+@JsonBackReference
 private Event event;
 
 
