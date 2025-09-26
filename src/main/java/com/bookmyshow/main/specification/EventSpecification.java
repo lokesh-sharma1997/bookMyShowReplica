@@ -68,9 +68,33 @@ public class EventSpecification {
 	        }
 
 	  
+	        
+	        
 	        if (price != null && !price.isEmpty()) {
-	        	Join<Event, ?> priceJoin = root.join("price");
-	            predicates.add(priceJoin.get("priceId").in(price));
+	            Join<Event, Show> showJoin = root.join("shows", JoinType.INNER);
+
+	            List<Predicate> pricePredicates = new ArrayList<>();
+
+	            for (Integer id : price) {
+	                switch (id) {
+	                    case 1: // Free
+	                        pricePredicates.add(builder.equal(showJoin.get("showPrice"), 0));
+	                        break;
+	                    case 2: // 0-500
+	                        pricePredicates.add(builder.between(showJoin.get("showPrice"), 1, 500));
+	                        break;
+	                    case 3: // 501-2000
+	                        pricePredicates.add(builder.between(showJoin.get("showPrice"), 501, 2000));
+	                        break;
+	                    case 4: // Above 2000
+	                        pricePredicates.add(builder.greaterThan(showJoin.get("showPrice"), 2000));
+	                        break;
+	                }
+	            }
+
+	            if (!pricePredicates.isEmpty()) {
+	                predicates.add(builder.or(pricePredicates.toArray(new Predicate[0])));
+	            }
 	        }
 
 	     
