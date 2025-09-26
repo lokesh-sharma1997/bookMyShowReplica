@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -166,10 +168,12 @@ public class Event {
 	      joinColumns = @JoinColumn(name = "event_id"), 
 	      inverseJoinColumns = @JoinColumn(name = "venue_id"))
 	    private List<Venue> venues;
-	
-	  
-	  @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+	 
+	  @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+	  @JsonManagedReference
 	  private List<Show> shows;
+
+
 	
 	
 }

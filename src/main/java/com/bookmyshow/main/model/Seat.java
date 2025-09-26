@@ -42,4 +42,8 @@ public class Seat {
     @ManyToOne
     @JoinColumn(name = "show_category_id")
     private ShowCategory showCategory;
+    
+    
+   
+
 }

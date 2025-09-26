@@ -1,9 +1,16 @@
 package com.bookmyshow.main.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +42,11 @@ import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.exception.EventCustomException;
+import com.bookmyshow.main.model.Event;
+import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.service.EventService;
+import com.bookmyshow.main.specification.EventSpecification;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -56,6 +66,8 @@ public class EventController {
 
     @Autowired
     private EventService eventService;
+    @Autowired 
+    private EventRepository eventRepository;
 
     @Operation(summary = "${event.createEvent}")
     @PostMapping(
@@ -209,32 +221,76 @@ boolean flag;
     }
 
 
-    @Operation(summary = "event filter")
+
+    
+    
+    
+
+    
+    @Operation(summary = "Event filter with pagination")
     @PostMapping("/filter")
-    public ResponseEntity<ApiResponse<List<EventResponseDtoCard>>> filterEvents(@RequestBody EventFilterRequest filterRequest) {
-        List<EventResponseDtoCard> events = eventService.filterEvents(
-            filterRequest.getType(),
-            filterRequest.getLanguages(),
-            filterRequest.getGenres(),
-            filterRequest.getFormats(),
-            filterRequest.getTags(),
-            filterRequest.getCategories(),
-            filterRequest.getPrice(),
-            filterRequest.getMorefilter(),
-            filterRequest.getReleaseMonths(),
-            filterRequest.getDateFilters()
-            
+    public ResponseEntity<ApiResponse<Map<String, Object>>> filterEvents(
+            @RequestBody EventFilterRequest filterRequest,
+            @RequestParam int page, 
+            @RequestParam int size) {
+    	
+    	
+    	
+    	 Specification<Event> spec = EventSpecification.filterEvents(
+    			 filterRequest.getType(),
+                 filterRequest.getLanguages(),
+                 filterRequest.getGenres(),
+                 filterRequest.getFormats(),
+                 filterRequest.getTags(),
+                 filterRequest.getCategories(),
+                 filterRequest.getPrice(),
+                 filterRequest.getMorefilter(),
+                 filterRequest.getReleaseMonths(),
+                 filterRequest.getDateFilters()
+ 	    );
+
+ 	    Long count = eventRepository.findAll(spec).stream()
+ 	            .filter(event -> !event.getDeleted())
+ 	            .count();
+ 	           
+
+
+      
+        Page<EventResponseDtoCard> eventsPage = eventService.filterEvents(
+                filterRequest.getType(),
+                filterRequest.getLanguages(),
+                filterRequest.getGenres(),
+                filterRequest.getFormats(),
+                filterRequest.getTags(),
+                filterRequest.getCategories(),
+                filterRequest.getPrice(),
+                filterRequest.getMorefilter(),
+                filterRequest.getReleaseMonths(),
+                filterRequest.getDateFilters(),
+                page, 
+                size
         );
 
-        ApiResponse<List<EventResponseDtoCard>> response = new ApiResponse<>(
-            HttpStatus.OK.value(),
-            "Events filtered successfully",
-            true,
-            events
+       
+        Map<String, Object> data = new HashMap<>();
+        data.put("content", eventsPage.getContent());  
+        data.put("count", count);  
+
+      
+        ApiResponse<Map<String, Object>> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                eventsPage.isEmpty() ? "No events found for the given filters." : "Events filtered successfully",
+                !eventsPage.isEmpty(),
+                data
         );
 
+     
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+    
+    
+    
+
 
     
     @Operation(summary = "Get All languages")

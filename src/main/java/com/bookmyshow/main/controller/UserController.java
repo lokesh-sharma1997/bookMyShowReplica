@@ -2,6 +2,7 @@ package com.bookmyshow.main.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,13 +47,19 @@ public class UserController {
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "${user.getAllUsers}")
-	public ResponseEntity<ApiResponse<UsersResponse>> getAllUsers() {
-		List<UserDTO> users = userService.getAllUsers();
-		if (users.isEmpty()) {
+	public ResponseEntity<ApiResponse<UsersResponse>> getAllUsers(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+
+		Page<UserDTO> usersPage = userService.getAllUsers(page, size);
+
+		if (usersPage.isEmpty()) {
 			throw new UserNotFoundException("No users found");
 		}
-		UsersResponse usersResponse = new UsersResponse(users);
-		return ResponseEntity.ok(new ApiResponse<>(200, "All users retrieved", true, usersResponse));
+
+		UsersResponse usersResponse = new UsersResponse(usersPage.getContent(), size);
+		usersResponse.setTotalEntries((int) usersPage.getTotalElements());
+
+		return ResponseEntity.ok(new ApiResponse<>(200, "Users retrieved", true, usersResponse));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
@@ -69,18 +76,24 @@ public class UserController {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ApiResponse<UsersResponse>> globalSearchUser(@RequestParam(required = false) String value) {
+	public ResponseEntity<ApiResponse<UsersResponse>> globalSearchUser(@RequestParam String value,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
 		if (value == null || value.trim().isEmpty()) {
 			return ResponseEntity.badRequest()
 					.body(new ApiResponse<>(400, "Search keyword must be provided", false, null));
 		}
 
-		List<UserDTO> users = userService.searchUser(value.trim());
-		UsersResponse usersResponse = new UsersResponse(users);
+		Page<UserDTO> usersPage = userService.searchUser(value.trim(), page, size);
 
-		return ResponseEntity
-				.ok(new ApiResponse<>(200, users.isEmpty() ? "No user found" : "Users found", true, usersResponse));
+		if (usersPage.isEmpty()) {
+			return ResponseEntity.ok(new ApiResponse<>(200, "No user found", true, null));
+		}
+
+		UsersResponse usersResponse = new UsersResponse(usersPage.getContent(), size);
+		usersResponse.setTotalEntries((int) usersPage.getTotalElements());
+
+		return ResponseEntity.ok(new ApiResponse<>(200, "Users found", true, usersResponse));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
@@ -110,6 +123,7 @@ public class UserController {
 
 		ApiResponse<UserDTO> response = new ApiResponse<>();
 		response.setSuccess(true);
+		response.setStatusCode(200);
 		response.setMessage("User role updated to Admin");
 		response.setData(updatedUser);
 

@@ -6,17 +6,15 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.bookmyshow.main.dto.ShowRequestDTO;
-import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Show;
-import com.bookmyshow.main.model.Venue;
 
 public interface ShowRepository extends JpaRepository<Show, Long> {
 
-	Long save(ShowRequestDTO showDTO);
+	List<Show> findByVenueId(Long venueId);
 
+//	List<Show> findByVenueIdAndShowDate(Long venueId, Long screenId);
 
-	List<Show> findByEventEventIdAndEventTypeAndCityAndDate(Long eventId, String eventType, String city, LocalDate showDate);
-	
+	Optional<Show> findByVenueIdAndScreenId(Long venueId, Long screenId);
+
 
 }

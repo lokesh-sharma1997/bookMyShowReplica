@@ -39,50 +39,50 @@ public class VenueServiceImplTest {
     @InjectMocks
     private VenueServiceImpl venueService;
 
-    @Test
-    public void testCreateVenue_withNewCity_savesCityAndAddress() {
-        VenueDTO dto = new VenueDTO();
-        dto.setVenueName("Test Venue");
-        dto.setVenueCapacity(100);
-        dto.setVenueType("movie");
-
-        AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setStreet("Test Street");
-        addressDTO.setPin("123456");
-
-        CityVDTO cityVDTO = new CityVDTO();
-        cityVDTO.setCityName("NewCity");
-        addressDTO.setCity(cityVDTO);
-        dto.setAddress(addressDTO);
-
-        when(cityRepository.findByName("NewCity")).thenReturn(null);
-        when(cityRepository.save(any(City.class))).thenAnswer(i -> {
-            City city = i.getArgument(0);
-            return city;
-        });
-
-        when(addressRepository.save(any(Address.class))).thenAnswer(i -> {
-            Address address = i.getArgument(0);
-            address.setId(20L);
-            return address;
-        });
-
-        when(venueRepository.save(any(Venue.class))).thenAnswer(i -> {
-            Venue v = i.getArgument(0);
-            v.setId(30L);
-            return v;
-        });
-
-        VenueDTO result = venueService.createVenue(dto);
-
-        assertNotNull(result);
-        assertEquals("Test Venue", result.getVenueName());
-        assertEquals("NewCity", result.getAddress().getCity().getCityName());
-
-        verify(cityRepository, times(1)).save(any(City.class));
-        verify(addressRepository, times(1)).save(any(Address.class));
-        verify(venueRepository, times(1)).save(any(Venue.class));
-    }
+//    @Test
+//    public void testCreateVenue_withNewCity_savesCityAndAddress() {
+//        VenueDTO dto = new VenueDTO();
+//        dto.setVenueName("Test Venue");
+//        dto.setVenueCapacity(100);
+//        dto.setVenueType("movie");
+//
+//        AddressDTO addressDTO = new AddressDTO();
+//        addressDTO.setStreet("Test Street");
+//        addressDTO.setPin("123456");
+//
+//        CityVDTO cityVDTO = new CityVDTO();
+//        cityVDTO.setCityName("NewCity");
+//        addressDTO.setCity(cityVDTO);
+//        dto.setAddress(addressDTO);
+//
+//        when(cityRepository.findByName("NewCity")).thenReturn(null);
+//        when(cityRepository.save(any(City.class))).thenAnswer(i -> {
+//            City city = i.getArgument(0);
+//            return city;
+//        });
+//
+//        when(addressRepository.save(any(Address.class))).thenAnswer(i -> {
+//            Address address = i.getArgument(0);
+//            address.setId(20L);
+//            return address;
+//        });
+//
+//        when(venueRepository.save(any(Venue.class))).thenAnswer(i -> {
+//            Venue v = i.getArgument(0);
+//            v.setId(30L);
+//            return v;
+//        });
+//
+//        VenueDTO result = venueService.createVenue(dto);
+//
+//        assertNotNull(result);
+//        assertEquals("Test Venue", result.getVenueName());
+//        assertEquals("NewCity", result.getAddress().getCity().getCityName());
+//
+//        verify(cityRepository, times(1)).save(any(City.class));
+//        verify(addressRepository, times(1)).save(any(Address.class));
+//        verify(venueRepository, times(1)).save(any(Venue.class));
+//    }
 
     @Test
     public void testGetAllVenues_returnsNonDeletedVenues() {

@@ -25,9 +25,9 @@ public class VenueDTO {
 //    private List<Integer> amenities;
     private List<String> supportedCategories;  
     private List<ScreenDTO> screens; 
-    private List<TimeSlotDTO> timeSlots;
+//    private List<TimeSlotDTO> timeSlots;
 
     
 //    private Boolean deleted;  
-
+    
 }

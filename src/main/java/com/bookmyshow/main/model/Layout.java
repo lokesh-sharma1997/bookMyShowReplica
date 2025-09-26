@@ -34,11 +34,13 @@ public class Layout {
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL) 
     private List<LayoutRow> layoutRows;
 
+	@OneToMany(mappedBy = "layout", cascade = CascadeType.PERSIST)
+    private List<Show> shows;
+	
+
+
     private int cols;
 
-    @ManyToOne
-    @JoinColumn(name = "show_id")
-    private Show show;
-
+   
 }
 

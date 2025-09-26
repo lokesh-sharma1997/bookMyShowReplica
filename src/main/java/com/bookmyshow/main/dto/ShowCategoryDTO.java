@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ShowCategoryDTO {
 	private String layoutName;
-    private List<String> rows;
-    private Integer cols;
+//    private List<String> rows;
+//    private Integer cols;
     private Integer price;
-    private List<ReserveSeatDTO> reservedSeats;
+//    private List<ReserveSeatDTO> reservedSeats;
 }

@@ -16,9 +16,9 @@ import io.jsonwebtoken.Claims;
 public class JwtService {
 
 	@Value("${app.jwt.secret}")
-	String secret;
+	public String secret;
 	@Value("${app.jwt.expiration-ms}")
-	long expirationMs;
+	public long expirationMs;
 
 	private SecretKey getSigningKey() {
 		return Keys.hmacShaKeyFor(secret.getBytes());

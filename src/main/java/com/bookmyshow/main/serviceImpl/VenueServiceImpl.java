@@ -1,5 +1,6 @@
 package com.bookmyshow.main.serviceImpl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,11 +8,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.AddressDTO;
 import com.bookmyshow.main.dto.CityVDTO;
 import com.bookmyshow.main.dto.LayoutDTO;
+import com.bookmyshow.main.dto.LayoutRowDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
 import com.bookmyshow.main.dto.TimeSlotDTO;
 import com.bookmyshow.main.dto.VenueDTO;
@@ -22,14 +25,27 @@ import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.LayoutRow;
 import com.bookmyshow.main.model.Screen;
+import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.model.ShowTime;
+import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.SupportedCategory;
 import com.bookmyshow.main.model.TimeSlot;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.AddressRepository;
 import com.bookmyshow.main.repository.AmenityRepository;
 import com.bookmyshow.main.repository.CityRepository;
+import com.bookmyshow.main.repository.LayoutRepository;
+import com.bookmyshow.main.repository.LayoutRowRepository;
+import com.bookmyshow.main.repository.ScreenRepository;
+import com.bookmyshow.main.repository.ShowRepository;
+import com.bookmyshow.main.repository.ShowtimedateRepository;
+import com.bookmyshow.main.repository.TimeSlotRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
+
+import jakarta.transaction.Transactional;
+
+import com.bookmyshow.main.events.NotificationEvent;
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -44,7 +60,29 @@ public class VenueServiceImpl implements VenueService {
     private AddressRepository addressRepository;
     
     @Autowired
+    private ShowRepository showRepository;
+    
+    @Autowired
+    private ShowtimedateRepository showtimedateRepository;
+
+    
+    @Autowired
     private CityRepository cityRepository;
+    
+    @Autowired
+    private LayoutRepository layoutRepository;
+    
+    @Autowired
+    private ScreenRepository screenRepository;
+    
+    @Autowired
+    private LayoutRowRepository layoutRowRepository;
+    
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
+    
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     // Convert entity to DTO
     private VenueDTO entityToDto(Venue entity) {
@@ -80,17 +118,6 @@ public class VenueServiceImpl implements VenueService {
                     .map(Amenity::getAmenityName)
                     .collect(Collectors.toList());
             dto.setAmenities(amenityNames); 
-        }
-        
-        if (entity.getTimeSlots() != null) {
-            List<TimeSlotDTO> timeSlotDTOs = entity.getTimeSlots().stream().map(ts -> {
-                TimeSlotDTO tsDto = new TimeSlotDTO();
-                tsDto.setStartTime(ts.getStartTime());
-                tsDto.setEndTime(ts.getEndTime());
-
-                return tsDto;
-            }).collect(Collectors.toList());
-            dto.setTimeSlots(timeSlotDTOs);
         }
 
         
@@ -170,18 +197,7 @@ public class VenueServiceImpl implements VenueService {
             entity.setSupportedCategories(supportedCategories);
         }
         
-        if (dto.getTimeSlots() != null) {
-            List<TimeSlot> timeSlots = dto.getTimeSlots().stream().map(tsDto -> {
-                TimeSlot ts = new TimeSlot();
-                ts.setStartTime(tsDto.getStartTime());
-                ts.setEndTime(tsDto.getEndTime());
-                ts.setVenue(entity);  
-                return ts;
-            }).collect(Collectors.toList());
-            entity.setTimeSlots(timeSlots);
-        } else {
-            entity.setTimeSlots(new ArrayList<>());
-        }
+        
         if (dto.getAddress() != null) {
             Address address = new Address();
             address.setStreet(dto.getAddress().getStreet());
@@ -293,6 +309,13 @@ public class VenueServiceImpl implements VenueService {
         }
 
         Venue saved = venueRepository.save(entity);
+        
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                "New "+saved.getVenueType()+" Added",
+                saved.getVenueName() + " is now available!",
+                "VENUE"
+        ));
         return entityToDto(saved);
     }
 
@@ -329,4 +352,142 @@ public class VenueServiceImpl implements VenueService {
     }
     
     
+    
+    @Override
+    public List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date) {
+        Venue venue = venueRepository.findById(venueId)
+            .orElseThrow(() -> new RuntimeException("Venue not found"));
+
+        if ("movie".equalsIgnoreCase(venue.getVenueType())) {
+            if (screenId == null) {
+                throw new IllegalArgumentException("ScreenId is required for movie venues");
+            }
+            Show show = showRepository.findByVenueIdAndScreenId(venueId, screenId)
+                .orElseThrow(() -> new RuntimeException("Show not found for venue and screen"));
+            return getAvailableSlotsForShow(show, date);
+        } else {
+            List<Show> shows = showRepository.findByVenueId(venueId);
+            if (shows.isEmpty()) {
+                throw new RuntimeException("No shows found for venue");
+            }
+
+            List<TimeSlotDTO> availableSlots = new ArrayList<>();
+            for (Show show : shows) {
+                availableSlots.addAll(getAvailableSlotsForShow(show, date));
+            }
+            return availableSlots;
+        }
+    }
+
+    private List<TimeSlotDTO> getAvailableSlotsForShow(Show show, LocalDate date) {
+        Optional<ShowTimeDate> showTimeDateOpt = show.getShowstimedate().stream()
+            .filter(std -> std.getShowDate().equals(date))
+            .findFirst();
+
+        if (showTimeDateOpt.isEmpty()) return Collections.emptyList();
+
+        ShowTimeDate showTimeDate = showTimeDateOpt.get();
+
+        List<ShowTime> allShowTimes = showTimeDate.getShowTimes();
+
+        List<ShowTime> bookedShowTimeIds = showtimedateRepository.findBookedShowTimes(showTimeDate.getId());
+
+        return allShowTimes.stream()
+            .filter(st -> !bookedShowTimeIds.contains(st.getId()))
+            .map(st -> {
+                TimeSlotDTO dto = new TimeSlotDTO();
+                dto.setStartTime(st.getShowTime());
+                dto.setEndTime(st.getShowTime().plusHours(2));  
+                return dto;
+            })
+            .collect(Collectors.toList());
+    }
+    @Override
+    public VenueDTO updateVenue(Long venueId, VenueDTO dto) {
+        Venue existingVenue = venueRepository.findById(venueId)
+                .orElseThrow(() -> new RuntimeException("Venue not found:"));
+
+        existingVenue.setVenueName(dto.getVenueName());
+        existingVenue.setVenueType(dto.getVenueType());
+
+        if (dto.getAddress() != null) {
+            Address address = existingVenue.getAddress();
+            if (address == null) {
+                address = new Address();
+            }
+            address.setStreet(dto.getAddress().getStreet());
+            address.setPin(dto.getAddress().getPin());
+
+            if (dto.getAddress().getCity() != null) {
+                String cityName = dto.getAddress().getCity().getCityName();
+                City city = cityRepository.findByName(cityName);
+                if (city == null) {
+                    city = new City();
+                    city.setName(cityName);
+                    city = cityRepository.save(city);
+                }
+                address.setCity(city);
+            }
+
+            Address savedAddress = addressRepository.save(address);
+            existingVenue.setAddress(savedAddress);
+        }
+
+        if ("movie".equalsIgnoreCase(existingVenue.getVenueType())) {
+            if (dto.getScreens() != null) {
+                List<Screen> updatedScreens = new ArrayList<>();
+                for (ScreenDTO screenDto : dto.getScreens()) {
+                    Screen screen = screenDto.getId() != null ? 
+                            screenRepository.findById(screenDto.getId()).orElse(new Screen()) : new Screen();
+
+                    screen.setVenue(existingVenue);
+
+                    if (screenDto.getLayouts() != null) {
+                        List<Layout> updatedLayouts = new ArrayList<>();
+                        for (LayoutDTO layoutDto : screenDto.getLayouts()) {
+                            Layout layout;
+                            if (layoutDto.getId() != null) {
+                                layout = layoutRepository.findById(layoutDto.getId())
+                                        .orElse(new Layout());
+                            } else {
+                                layout = new Layout();
+                            }
+                            layout.setScreen(screen);
+                            
+                            if (layoutDto.getRows() != null) {
+                                List<LayoutRow> updatedRows = new ArrayList<>();
+                                for (String rowName : layoutDto.getRows()) {
+                                    LayoutRow row = new LayoutRow();
+                                    row.setLayout(layout);
+                                    row.setRowName(rowName);  
+                                    updatedRows.add(row);
+                                }
+                                layout.setLayoutRows(updatedRows);
+                            }
+                            updatedLayouts.add(layout);
+                        }
+                        screen.setLayouts(updatedLayouts);
+                    }
+                    updatedScreens.add(screen);
+                }
+                existingVenue.setScreens(updatedScreens);
+            } else {
+                existingVenue.setScreens(new ArrayList<>());
+            }
+        } else {
+            existingVenue.setScreens(new ArrayList<>());
+        }
+
+        Venue saved = venueRepository.save(existingVenue);
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                "Venue Updated",
+                saved.getVenueName() + " has been updated.",
+                "VENUE"
+        ));
+
+        return entityToDto(saved);
+    }
+
 }
