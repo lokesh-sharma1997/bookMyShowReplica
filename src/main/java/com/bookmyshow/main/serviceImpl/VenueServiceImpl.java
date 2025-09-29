@@ -38,8 +38,7 @@ import com.bookmyshow.main.repository.LayoutRepository;
 import com.bookmyshow.main.repository.LayoutRowRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.ShowtimedateRepository;
-import com.bookmyshow.main.repository.TimeSlotRepository;
+import com.bookmyshow.main.repository.ShowTimeDateRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
 
@@ -63,7 +62,7 @@ public class VenueServiceImpl implements VenueService {
     private ShowRepository showRepository;
     
     @Autowired
-    private ShowtimedateRepository showtimedateRepository;
+    private ShowTimeDateRepository showtimedateRepository;
 
     
     @Autowired
@@ -78,8 +77,7 @@ public class VenueServiceImpl implements VenueService {
     @Autowired
     private LayoutRowRepository layoutRowRepository;
     
-    @Autowired
-    private TimeSlotRepository timeSlotRepository;
+   
     
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -301,12 +299,12 @@ public class VenueServiceImpl implements VenueService {
         } else {
             entity.setScreens(new ArrayList<>());
         }
-        
-        if (entity.getTimeSlots() != null) {
-            for (TimeSlot ts : entity.getTimeSlots()) {
-                ts.setVenue(entity);
-            }
-        }
+//        
+//        if (entity.getTimeSlots() != null) {
+//            for (TimeSlot ts : entity.getTimeSlots()) {
+//                ts.setVenue(entity);
+//            }
+//        }
 
         Venue saved = venueRepository.save(entity);
         

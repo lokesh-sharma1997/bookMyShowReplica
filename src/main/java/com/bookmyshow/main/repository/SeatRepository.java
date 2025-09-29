@@ -24,10 +24,11 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
 
 
-	List<Seat> findBySeatNumberInAndScreenAndShow(List<String> seatNumbers, Screen screen, Show show);
+//	List<Seat> findBySeatNumberInAndScreenAndShow(List<String> seatNumbers, Screen screen, Show show);
 
 
 
+	List<Seat> findByShowIdAndScreenId(Long id, Long id2);
 
 
 

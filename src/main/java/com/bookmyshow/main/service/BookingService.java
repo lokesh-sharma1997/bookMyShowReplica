@@ -1,5 +1,8 @@
 package com.bookmyshow.main.service;
 
-public class BookingService {
-  
+
+import com.bookmyshow.main.dto.BookTicketRequestDTO;
+
+public interface BookingService {
+    void bookTickets(BookTicketRequestDTO dto);
 }

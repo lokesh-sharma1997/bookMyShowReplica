@@ -17,9 +17,8 @@ public interface VenueService {
 
     boolean softDeleteVenue(Long id);
 
+    VenueDTO updateVenue(Long venueId, VenueDTO dto);
 
-    List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date);
-
-	VenueDTO updateVenue(Long venueId, VenueDTO dto);
+	List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date);
     
 }

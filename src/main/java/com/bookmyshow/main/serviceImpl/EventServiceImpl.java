@@ -79,7 +79,7 @@ import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.ShowtimedateRepository;
+import com.bookmyshow.main.repository.ShowTimeDateRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import java.util.Objects;
@@ -125,7 +125,7 @@ public class EventServiceImpl implements EventService {
 	@Autowired 
 	 private ShowRepository showRepository;
 	@Autowired 
-	 private ShowtimedateRepository showtimedateRepository;
+	 private ShowTimeDateRepository showtimedateRepository;
 
 	@Autowired
 	private ModelMapper mapper;

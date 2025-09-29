@@ -34,4 +34,5 @@ public class TimeSlot {
 	    @ManyToOne
 	    @JoinColumn(name = "venue_id")
 	    private Venue venue;
+
 }
