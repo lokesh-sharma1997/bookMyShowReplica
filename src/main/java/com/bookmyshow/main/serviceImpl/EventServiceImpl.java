@@ -81,6 +81,7 @@ import com.bookmyshow.main.repository.ReleaseMonthRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.ShowtimedateRepository;
+import com.bookmyshow.main.repository.TagRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import java.util.Objects;
