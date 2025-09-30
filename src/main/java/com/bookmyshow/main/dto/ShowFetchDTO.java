@@ -7,12 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ShowFetchDTO {
-
-	private Long eventId;
-	private String eventType;
-	private String city;
-	private String date;
+	 private String time;
+	    private List<ShowCategoryDTO> availableCategories;
 }

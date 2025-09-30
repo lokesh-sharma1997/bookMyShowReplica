@@ -13,7 +13,7 @@ public class AddressDTO {
 	@JsonIgnore
     private Long id;
     private String street;
-    private String city;
+    private CityVDTO city;
     private String pin;
 	
 

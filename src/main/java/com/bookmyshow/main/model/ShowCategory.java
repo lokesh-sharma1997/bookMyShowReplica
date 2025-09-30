@@ -27,7 +27,7 @@ public class ShowCategory {
     private Show show;
 
     @ManyToOne
-//    @JoinColumn(name = "layout_id")
+    @JoinColumn(name = "layout_id")
     private Layout layout;
 
     private Integer price;

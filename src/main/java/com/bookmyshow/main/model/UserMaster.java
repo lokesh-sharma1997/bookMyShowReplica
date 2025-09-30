@@ -88,4 +88,8 @@ public class UserMaster {
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<Booking> bookings;
+
 }
