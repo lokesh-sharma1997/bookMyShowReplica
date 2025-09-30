@@ -225,8 +225,7 @@ class EventControllerTest {
 
 
     
- 
-
+    
  
     @Test
     void testDeleteEvent() throws Exception {
