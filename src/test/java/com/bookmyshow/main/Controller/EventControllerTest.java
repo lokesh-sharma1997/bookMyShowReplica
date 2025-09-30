@@ -71,7 +71,7 @@ import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
- 
+import java.nio.charset.StandardCharsets;
 @ExtendWith(MockitoExtension.class)
 class EventControllerTest {
  
@@ -173,9 +173,6 @@ class EventControllerTest {
             .andExpect(jsonPath("$.data.eventId").value(1));
     }
     
- 
- 
- 
 
     
     
