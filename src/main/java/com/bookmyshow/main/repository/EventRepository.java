@@ -1,6 +1,5 @@
 package com.bookmyshow.main.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +35,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 	
 	Page<Event> findAll(Specification<Event> spec, Pageable pageable);
 
+
+
+	
 
 
 

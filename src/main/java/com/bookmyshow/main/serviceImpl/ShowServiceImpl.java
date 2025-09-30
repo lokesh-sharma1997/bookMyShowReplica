@@ -31,17 +31,14 @@ public class ShowServiceImpl implements ShowService {
     public ShowResponseDTO getShows(ShowRequestDTO request) {
         LocalDate date = LocalDate.parse(request.getDate());
 
-        // fetch shows
         List<Show> shows = showRepository.findByEventIdAndShowDate(request.getEventId(), date);
 
-        // map shows → VenueShowDTO
         List<VenueShowDTO> venueShows = shows.stream().map(show -> {
             Venue venue = show.getVenue();
             Screen screen = show.getScreen();
             Layout layout = show.getLayout();
             Event event = show.getEvent();
 
-            // showtimes
             List<ShowFetchDTO> showDtos = show.getShowstimedate().stream()
                 .filter(std -> std.getShowDate().equals(date)) // only selected date
                 .flatMap(std -> std.getShowTimes().stream())
@@ -49,7 +46,6 @@ public class ShowServiceImpl implements ShowService {
                     ShowFetchDTO dto = new ShowFetchDTO();
                     dto.setTime(st.getShowTime().toString());
 
-                    // categories
                     List<ShowCategoryDTO> categories = layout.getLayoutRows().stream()
                         .map(row -> {
                             boolean anyReserved = row.getSeats().stream().anyMatch(Seat::isReserved);
@@ -68,7 +64,6 @@ public class ShowServiceImpl implements ShowService {
                 })
                 .toList();
 
-            // screenId include only if event is movie
             String screenId = null;
             if ("MOVIE".equalsIgnoreCase(event.getEventType())) {
                 screenId = String.valueOf(screen.getId());

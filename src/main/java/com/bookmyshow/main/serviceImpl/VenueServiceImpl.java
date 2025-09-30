@@ -43,7 +43,7 @@ import com.bookmyshow.main.repository.LayoutRepository;
 import com.bookmyshow.main.repository.LayoutRowRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.ShowTimeDateRepository;
+import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.ShowTimeRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
@@ -68,7 +68,7 @@ public class VenueServiceImpl implements VenueService {
     private ShowRepository showRepository;
     
     @Autowired
-    private ShowTimeDateRepository showtimedateRepository;
+    private ShowtimedateRepository showtimedateRepository;
 
     
     @Autowired

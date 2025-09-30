@@ -232,7 +232,8 @@ boolean flag;
     public ResponseEntity<ApiResponse<Map<String, Object>>> filterEvents(
             @RequestBody EventFilterRequest filterRequest,
             @RequestParam int page, 
-            @RequestParam int size) {
+            @RequestParam int size
+            ,@RequestParam(required = false, defaultValue = "true") boolean upcomingMovie) {
     	
     	
     	
@@ -248,10 +249,29 @@ boolean flag;
                  filterRequest.getReleaseMonths(),
                  filterRequest.getDateFilters()
  	    );
-
- 	    Long count = eventRepository.findAll(spec).stream()
- 	            .filter(event -> !event.getDeleted())
+    	  
+    	 Long count;
+    	 
+    	 if ("Movie".equalsIgnoreCase(filterRequest.getType()) && !upcomingMovie)
+    	 {
+ 	    count = eventRepository.findAll(spec).stream()
+ 	            .filter(event -> !event.getDeleted() && !event.getCurrentlyPlaying())
  	            .count();
+    	 }else if("Movie".equalsIgnoreCase(filterRequest.getType())) 
+    	 {
+    		 count = eventRepository.findAll(spec).stream()
+    	 	            .filter(event -> !event.getDeleted() && event.getCurrentlyPlaying())
+    	 	            .count();
+    	 }
+    	 
+    	 
+    	 
+    	 else{
+			
+    		 count = eventRepository.findAll(spec).stream()
+    	 	            .filter(event -> !event.getDeleted())
+    	 	            .count();
+		}
  	           
 
 
@@ -268,7 +288,8 @@ boolean flag;
                 filterRequest.getReleaseMonths(),
                 filterRequest.getDateFilters(),
                 page, 
-                size
+                size,
+                upcomingMovie
         );
 
        
@@ -287,6 +308,8 @@ boolean flag;
      
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+    
+    
     
     
     

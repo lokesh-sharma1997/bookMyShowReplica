@@ -32,6 +32,7 @@ public class EventSpecification {
 
 	       
 	        query.distinct(true);
+	        predicates.add(builder.isFalse(root.get("deleted")));
 
 	      
 	        if (type != null && !type.isEmpty()) {

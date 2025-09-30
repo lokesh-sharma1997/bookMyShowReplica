@@ -43,6 +43,8 @@ public interface EventService {
 
 	
 	
+
+	
 	Page<EventResponseDtoCard> filterEvents(
 		    String type,
 		    List<Integer> languages,
@@ -54,8 +56,9 @@ public interface EventService {
 		    List<Integer> moreFilters,
 		    List<Integer> releaseMonths,
 		    List<Integer> dateFilters,
-		    int page, 
-		    int size  
+		    int page,
+		    int size,
+		    boolean includeCurrentlyPlaying  // new param
 		);
 	
 	List<LanguagesDTO> getAllLanguages(String eventType);

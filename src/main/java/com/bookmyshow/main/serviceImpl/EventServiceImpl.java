@@ -50,6 +50,7 @@ import com.bookmyshow.main.model.Categories;
 import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.model.Crew;
 import com.bookmyshow.main.model.DateFilter;
+
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
 import com.bookmyshow.main.model.Genres;
@@ -79,7 +80,8 @@ import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.ShowTimeDateRepository;
+import com.bookmyshow.main.repository.ShowtimedateRepository;
+import com.bookmyshow.main.repository.TagRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import java.util.Objects;
@@ -125,7 +127,7 @@ public class EventServiceImpl implements EventService {
 	@Autowired 
 	 private ShowRepository showRepository;
 	@Autowired 
-	 private ShowTimeDateRepository showtimedateRepository;
+	 private ShowtimedateRepository showtimedateRepository;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -907,6 +909,10 @@ if (events == null || events.isEmpty())
 
 
 
+
+
+	
+	
 	public Page<EventResponseDtoCard> filterEvents(
 	        String type,
 	        List<Integer> languages,
@@ -918,30 +924,34 @@ if (events == null || events.isEmpty())
 	        List<Integer> moreFilters,
 	        List<Integer> releaseMonths,
 	        List<Integer> dateFilters,
-	        int page, 
-	        int size  
+	        int page,
+	        int size,
+	        boolean includeCurrentlyPlaying
 	) {
-	    
 	    Pageable pageable = PageRequest.of(page, size);
 
-	  
 	    Specification<Event> spec = EventSpecification.filterEvents(
-	            type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters
+	        type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters
 	    );
 
-	 
-	    Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+	    if ("Movie".equalsIgnoreCase(type) && !includeCurrentlyPlaying) {
+	        // Add condition to specification that currentlyPlaying must be true
+	        Specification<Event> currentlyPlayingSpec = (root, query, criteriaBuilder) ->
+	            criteriaBuilder.isFalse(root.get("currentlyPlaying"));
+	        spec = spec.and(currentlyPlayingSpec);
+	    }
 
-	 
+	    Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+System.out.print(eventPage);
 	    List<EventResponseDtoCard> eventDtoList = eventPage.getContent().stream()
-	            .filter(event -> !event.getDeleted()) 
-	            .map(this::mapToResponseDto) 
+	            .filter(event -> !event.getDeleted())
+	            .map(this::mapToResponseDto)
 	            .collect(Collectors.toList());
 
-	   
 	    return new PageImpl<>(eventDtoList, pageable, eventPage.getTotalElements());
 	}
 
+	
 	
 	
 	

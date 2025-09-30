@@ -22,7 +22,8 @@ import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.SeatRepository;
 import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.ShowTimeDateRepository;
+
+import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.BookingService;
@@ -38,7 +39,7 @@ public class BookingServiceImpl implements BookingService{
     @Autowired private ScreenRepository screenRepository;
     @Autowired private VenueRepository venueRepository;
     @Autowired private EventRepository eventRepository;
-    @Autowired private ShowTimeDateRepository showTimeDateRepository;
+    @Autowired private ShowtimedateRepository showTimeDateRepository;
     @Autowired private BookingRepository bookingRepository;
 
     

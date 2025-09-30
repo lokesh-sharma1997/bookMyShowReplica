@@ -1,18 +1,17 @@
 package com.bookmyshow.main.Security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bookmyshow.main.security.JwtService;
-
-import javax.crypto.SecretKey;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class JwtServiceTest {
 
@@ -44,7 +43,7 @@ class JwtServiceTest {
         Long extractedUserId = jwtService.extractUserId(token);
         assertEquals(userId, extractedUserId);
     }
-
+ 
     @Test
     void testIsTokenValid_ValidToken() {
         String username = "validuser";

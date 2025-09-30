@@ -20,15 +20,15 @@ public class AESUtil {
 		return new String(decryptedBytes, "UTF-8");
 	}
 
-	public static String encrypt(String plainText, String secretKey) throws Exception {
-	    byte[] keyBytes = Base64.getDecoder().decode(secretKey); // FIXED
-	    SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
-
-	    Cipher cipher = Cipher.getInstance(ALGORITHM);
-	    cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-
-	    byte[] encryptedBytes = cipher.doFinal(plainText.getBytes("UTF-8"));
-	    return Base64.getEncoder().encodeToString(encryptedBytes);
-	}
+//	public static String encrypt(String plainText, String secretKey) throws Exception {
+//	    byte[] keyBytes = Base64.getDecoder().decode(secretKey); // FIXED
+//	    SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+//
+//	    Cipher cipher = Cipher.getInstance(ALGORITHM);
+//	    cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+//
+//	    byte[] encryptedBytes = cipher.doFinal(plainText.getBytes("UTF-8"));
+//	    return Base64.getEncoder().encodeToString(encryptedBytes);
+//	}
 
 }

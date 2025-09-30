@@ -78,7 +78,7 @@ public class NotificationServiceImpl implements NotificationService {
             return "Notification is already read by user";
         } else {
             notification.setRead(true);
-            notificationRepository.save(notification);
+            notificationRepository.updateReadStatus(notificationId, userId, true);
 
             return "Notification marked as read successfully";
         }
