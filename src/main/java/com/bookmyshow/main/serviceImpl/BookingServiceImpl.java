@@ -120,4 +120,14 @@ public class BookingServiceImpl implements BookingService{
 
         bookingRepository.save(booking);
     }
+    
+    @Override
+    public List<String> getBookedSeats(Long showId) {
+        return bookingRepository.findByShowId(showId) 
+                .stream()
+                .flatMap(booking -> booking.getSeats().stream()) 
+                .map(Seat::getSeatNumber) 
+                .toList();
+    }
+
 }

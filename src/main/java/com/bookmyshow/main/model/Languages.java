@@ -26,8 +26,6 @@ public class Languages {
 	@ManyToMany(mappedBy = "languages")
 	private List<Event> events;
 	
-	@ManyToOne
-	private Show show;
 
 
 }

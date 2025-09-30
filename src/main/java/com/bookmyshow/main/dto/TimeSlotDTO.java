@@ -15,5 +15,4 @@ public class TimeSlotDTO {
 	
     private LocalTime startTime;
     private LocalTime endTime;
-
 }

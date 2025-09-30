@@ -28,4 +28,13 @@ public class BookingController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Booking failed: " + e.getMessage());
         }
     }
+    @GetMapping("/booked-seats")
+    public ResponseEntity<List<String>> getBookedSeats(@RequestParam Long showId) {
+        return ResponseEntity.ok(bookingService.getBookedSeats(showId));
+    }
+
+
+    
+    
+    
 }

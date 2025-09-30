@@ -1,11 +1,16 @@
 package com.bookmyshow.main.serviceImpl;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.time.Duration;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,16 +34,17 @@ import com.bookmyshow.main.model.Show;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.SupportedCategory;
-import com.bookmyshow.main.model.TimeSlot;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.AddressRepository;
 import com.bookmyshow.main.repository.AmenityRepository;
+import com.bookmyshow.main.repository.BookingRepository;
 import com.bookmyshow.main.repository.CityRepository;
 import com.bookmyshow.main.repository.LayoutRepository;
 import com.bookmyshow.main.repository.LayoutRowRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.ShowTimeDateRepository;
+import com.bookmyshow.main.repository.ShowTimeRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
 
@@ -77,11 +83,16 @@ public class VenueServiceImpl implements VenueService {
     @Autowired
     private LayoutRowRepository layoutRowRepository;
     
-   
+   @Autowired
+   private BookingRepository bookingRepository;
     
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private ShowTimeRepository showTimeRepository;
+
+    
     // Convert entity to DTO
     private VenueDTO entityToDto(Venue entity) {
         if (entity == null) {
@@ -299,12 +310,6 @@ public class VenueServiceImpl implements VenueService {
         } else {
             entity.setScreens(new ArrayList<>());
         }
-//        
-//        if (entity.getTimeSlots() != null) {
-//            for (TimeSlot ts : entity.getTimeSlots()) {
-//                ts.setVenue(entity);
-//            }
-//        }
 
         Venue saved = venueRepository.save(entity);
         
@@ -376,7 +381,6 @@ public class VenueServiceImpl implements VenueService {
             return availableSlots;
         }
     }
-
     private List<TimeSlotDTO> getAvailableSlotsForShow(Show show, LocalDate date) {
         Optional<ShowTimeDate> showTimeDateOpt = show.getShowstimedate().stream()
             .filter(std -> std.getShowDate().equals(date))
@@ -386,20 +390,46 @@ public class VenueServiceImpl implements VenueService {
 
         ShowTimeDate showTimeDate = showTimeDateOpt.get();
 
-        List<ShowTime> allShowTimes = showTimeDate.getShowTimes();
+        List<ShowTime> allShowTimes = new ArrayList<>(showTimeDate.getShowTimes());
+        allShowTimes.sort(Comparator.comparing(ShowTime::getShowTime));
 
-        List<ShowTime> bookedShowTimeIds = showtimedateRepository.findBookedShowTimes(showTimeDate.getId());
+        List<Long> bookedShowTimeIds = showTimeRepository.findBookedShowTimes(showTimeDate.getId());
 
-        return allShowTimes.stream()
-            .filter(st -> !bookedShowTimeIds.contains(st.getId()))
-            .map(st -> {
-                TimeSlotDTO dto = new TimeSlotDTO();
-                dto.setStartTime(st.getShowTime());
-                dto.setEndTime(st.getShowTime().plusHours(2));  
-                return dto;
-            })
-            .collect(Collectors.toList());
+        int duration = parseRuntimeToMinutes(show.getEvent().getRunTime());
+        int buffer = 30;
+
+        List<TimeSlotDTO> freeSlots = new ArrayList<>();
+        LocalTime prevEnd = LocalTime.of(0, 0); // day start
+
+        for (ShowTime current : allShowTimes) {
+            LocalTime currentStart = current.getShowTime();
+
+            if (prevEnd.isBefore(currentStart)) {
+                long freeMinutes = Duration.between(prevEnd, currentStart).toMinutes();
+                if (freeMinutes >= duration) {
+                    TimeSlotDTO dto = new TimeSlotDTO();
+                    dto.setStartTime(prevEnd);
+                    dto.setEndTime(currentStart);
+                    freeSlots.add(dto);
+                }
+            }
+
+            if (bookedShowTimeIds.contains(current.getId())) {
+                LocalTime busyEnd = currentStart.plusMinutes(duration + buffer);
+                if (busyEnd.isAfter(LocalTime.of(23, 59))) {
+                    busyEnd = LocalTime.of(23, 59);
+                }
+                prevEnd = busyEnd;
+            } else {
+                prevEnd = currentStart;
+            }
+        }
+
+        return freeSlots;
     }
+
+
+
     @Override
     public VenueDTO updateVenue(Long venueId, VenueDTO dto) {
         Venue existingVenue = venueRepository.findById(venueId)
@@ -487,5 +517,30 @@ public class VenueServiceImpl implements VenueService {
 
         return entityToDto(saved);
     }
+    private int parseRuntimeToMinutes(String runTime) {
+        if (runTime == null || runTime.isBlank()) return 120; 
+
+        runTime = runTime.toLowerCase().trim();
+
+        int hours = 0, minutes = 0;
+
+        if (runTime.contains("h")) {
+            String hrPart = runTime.split("h")[0].trim();
+            if (!hrPart.isEmpty()) {
+                hours = Integer.parseInt(hrPart);
+            }
+            runTime = runTime.substring(runTime.indexOf("h") + 1).trim(); 
+        }
+
+        if (runTime.contains("m")) {
+            String minPart = runTime.replace("m", "").trim();
+            if (!minPart.isEmpty()) {
+                minutes = Integer.parseInt(minPart);
+            }
+        }
+
+        return hours * 60 + minutes;
+    }
+
 
 }

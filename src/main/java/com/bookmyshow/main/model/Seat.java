@@ -48,6 +48,11 @@ public class Seat {
     
     @ManyToMany(mappedBy = "seats")
     private List<Booking> bookings;
+    
+    @ManyToOne
+    @JoinColumn(name = "layout_row_id")
+    private LayoutRow layoutRow;
+
 
    
 

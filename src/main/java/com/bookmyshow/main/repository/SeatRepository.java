@@ -14,7 +14,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 	
 
 	static List<Seat> findByShowCategoryId(Long id) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -24,7 +23,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
 
 
-//	List<Seat> findBySeatNumberInAndScreenAndShow(List<String> seatNumbers, Screen screen, Show show);
 
 
 

@@ -15,12 +15,12 @@ public interface ShowTimeDateRepository extends JpaRepository<ShowTimeDate, Long
 
     @Query("SELECT st FROM ShowTime st WHERE st.showTimeDate.id = :showTimeDateId AND st.isBooked = true")
     List<ShowTime> findBookedShowTimes(@Param("showTimeDateId") Long showTimeDateId);
-    
-//    @Query("SELECT st.id FROM ShowTime st WHERE st.showTimeDate.venue.id = :venueId AND st.showTimeDate.showDate = :date AND st.isBooked = true")
-//    List<Long> findBookedTimeSlotsForVenueAndDate(
-//            @Param("venueId") Long venueId,
-//            @Param("date") LocalDate date
-//    );
-//  
+
+    List<ShowTimeDate> findByShow_Venue_IdAndShow_Screen_IdAndShowDate(
+            Long venueId,
+            Long screenId,
+            LocalDate showDate
+    );    
+
 }
 	
