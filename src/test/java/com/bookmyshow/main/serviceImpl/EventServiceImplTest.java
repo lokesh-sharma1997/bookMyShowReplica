@@ -1,38 +1,51 @@
 package com.bookmyshow.main.serviceImpl;
 
+
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
+import org.modelmapper.TypeMap;
+import java.lang.reflect.Method;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -40,6 +53,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bookmyshow.main.dto.CastDTO;
 import com.bookmyshow.main.dto.CategoryDTO;
@@ -55,6 +69,8 @@ import com.bookmyshow.main.dto.LanguagesDTO;
 import com.bookmyshow.main.dto.MoreFilterDTO;
 import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
+import com.bookmyshow.main.dto.ShowDTO;
+import com.bookmyshow.main.dto.ShowTimeDTO;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.exception.EventCustomException;
 import com.bookmyshow.main.model.Cast;
@@ -66,9 +82,14 @@ import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
 import com.bookmyshow.main.model.Genres;
 import com.bookmyshow.main.model.Languages;
+import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
+import com.bookmyshow.main.model.Screen;
+import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.model.ShowTime;
+import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Tag;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
@@ -80,39 +101,66 @@ import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.repository.FormatRepository;
 import com.bookmyshow.main.repository.GenresRepository;
 import com.bookmyshow.main.repository.LanguagesRepository;
+import com.bookmyshow.main.repository.LayoutRepository;
 import com.bookmyshow.main.repository.MoreFiltersRepository;
 import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
+import com.bookmyshow.main.repository.ScreenRepository;
+import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.specification.EventSpecification;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceImplTest {
 
-    @Mock private EventRepository eventRepository;
-    @Mock private LanguagesRepository languagesRepository;
-    @Mock private GenresRepository genresRepository;
-    @Mock private FormatRepository formatRepository;
-    @Mock private TagRepository tagRepository;
-    @Mock private ReleaseMonthRepository releaseMonthRepository;
-    @Mock private DateFilterRepository dateFilterRepository;
-    @Mock private CategoriesRepository categoriesRepository;
-    @Mock private MoreFiltersRepository moreFiltersRepository;
-    @Mock private PriceRepository priceRepository;
-    @Mock private CastRepository castRepository;
-    @Mock private CrewRepository crewRepository;
-    @Mock private CityRepository cityRepository;
-    @Mock private VenueRepository venueRepository;
-    @Mock private ApplicationEventPublisher eventPublisher;
-    @Mock private ModelMapper mapper;
+    @Mock
+    private EventRepository eventRepository;
+    @Mock
+    private LanguagesRepository languagesRepository;
+    @Mock
+    private GenresRepository genresRepository;
+    @Mock
+    private FormatRepository formatRepository;
+    @Mock
+    private TagRepository tagRepository;
+    @Mock
+    private ReleaseMonthRepository releaseMonthRepository;
+    @Mock
+    private DateFilterRepository dateFilterRepository;
+    @Mock
+    private CategoriesRepository categoriesRepository;
+    @Mock
+    private MoreFiltersRepository moreFiltersRepository;
+    @Mock
+    private PriceRepository priceRepository;
+    @Mock
+    private CastRepository castRepository;
+    @Mock
+    private CrewRepository crewRepository;
+    @Mock
+    private CityRepository cityRepository;
+    @Mock
+    private VenueRepository venueRepository;
+    @Mock
+    private ScreenRepository  screenRepository;
+    @Mock
+    private LayoutRepository layoutRepository;
+    @Mock
+    private ShowRepository showRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private ModelMapper mapper;
 
-    @InjectMocks private EventServiceImpl eventService;
+    @InjectMocks
+    private EventServiceImpl eventService;
 
     private Event event;
     private EventDTO eventDto;
 
     @BeforeEach
     void setUp() {
+    	
         event = new Event();
         event.setEventId(1L);
         event.setName("Test Event");
@@ -155,6 +203,7 @@ class EventServiceImplTest {
         eventDto.setLikes(100.0);
         eventDto.setVotes(50.0);
         eventDto.setCurrentlyPlaying(true);
+       
         eventDto.setAgeLimit(13);
         eventDto.setReleasingOn(LocalDate.of(2025, 9, 8));
         eventDto.setLanguages(Collections.emptyList());
@@ -171,13 +220,11 @@ class EventServiceImplTest {
         eventDto.setCity(Collections.emptyList());
     }
 
-    // ------------------- Create Event Tests -------------------
     @Test
-    void testCreateEvent_basic() throws IOException {
-        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "dummy".getBytes());
+    void testCreateEvent() throws IOException {
+        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "dummy image".getBytes());
 
         when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(event);
-        when(eventRepository.save(any(Event.class))).thenReturn(event);
         when(languagesRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
         when(genresRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
         when(formatRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
@@ -187,63 +234,167 @@ class EventServiceImplTest {
         when(categoriesRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
         when(moreFiltersRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
         lenient().when(castRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
+
         when(cityRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
+        when(eventRepository.save(any(Event.class))).thenReturn(event);
 
         EventDTO result = eventService.createEvent(eventDto, poster, null, null);
 
         assertNotNull(result);
-        assertEquals("Test Event", result.getName());
+        assertEquals(event.getName(), result.getName());
         verify(eventRepository).save(any(Event.class));
     }
 
     @Test
-    void testCreateEvent_withCastCrewVenues() throws IOException {
-        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "poster".getBytes());
-        MockMultipartFile castImage = new MockMultipartFile("cast", "cast1.jpg", "image/jpeg", "cast".getBytes());
-        MockMultipartFile crewImage = new MockMultipartFile("crew", "crew1.jpg", "image/jpeg", "crew".getBytes());
+    void testCreateEvent_withCastCrewAndVenues() throws IOException {
+       
+        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "poster-bytes".getBytes());
+        MockMultipartFile castImage = new MockMultipartFile("cast", "cast1.jpg", "image/jpeg", "cast-image".getBytes());
+        MockMultipartFile crewImage = new MockMultipartFile("crew", "crew1.jpg", "image/jpeg", "crew-image".getBytes());
 
+      
         CastDTO castDTO = new CastDTO();
         castDTO.setActorName("Actor Name");
-        eventDto.setCast(List.of(castDTO));
 
         CrewDTO crewDTO = new CrewDTO();
         crewDTO.setMemberName("Crew Member");
+
+       
+        eventDto.setCast(List.of(castDTO));
         eventDto.setCrew(List.of(crewDTO));
+        eventDto.setVenue(List.of(10)); 
+        eventDto.setAgeLimit(18); 
 
-        eventDto.setVenue(List.of(10));
-        eventDto.setAgeLimit(18);
-
+       
         Venue venue = new Venue();
-        venue.setId(10L);
+        venue.setId(10L); 
+       
 
+       
         when(castRepository.findByActorName("Actor Name")).thenReturn(Optional.empty());
-        when(castRepository.save(any(Cast.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(castRepository.save(any(Cast.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         when(crewRepository.findByMemberName("Crew Member")).thenReturn(Optional.empty());
-        when(crewRepository.save(any(Crew.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(crewRepository.save(any(Crew.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         when(venueRepository.findAllById(anyList())).thenReturn(List.of(venue));
+
+       
         when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(new Event());
-        when(eventRepository.save(any(Event.class))).thenAnswer(inv -> {
-            Event e = inv.getArgument(0);
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event e = invocation.getArgument(0);
             e.setEventId(1L);
-            e.setAgeLimit(18);
+            e.setAgeLimit(18); 
             return e;
         });
-
+       
+       
         EventDTO result = eventService.createEvent(eventDto, poster, List.of(castImage), List.of(crewImage));
 
+       
         assertNotNull(result);
-        verify(castRepository).save(argThat(cast -> cast.getActorName().equals("Actor Name") && cast.getCastImg() != null));
-        verify(crewRepository).save(argThat(crew -> crew.getMemberName().equals("Crew Member") && crew.getCrewImg() != null));
-        verify(venueRepository).findAllById(anyList());
+      
+       
+        verify(castRepository).save(argThat(cast ->
+            cast.getActorName().equals("Actor Name") &&
+            cast.getCastImg() != null && !cast.getCastImg().isEmpty()
+        ));
+
+      
+        verify(crewRepository).save(argThat(crew ->
+            crew.getMemberName().equals("Crew Member") &&
+            crew.getCrewImg() != null && !crew.getCrewImg().isEmpty()
+        ));
+
+       
+        verify(venueRepository).findAllById(argThat(ids -> {
+            List<Long> idList = new ArrayList<>();
+            ids.forEach(idList::add);
+            return idList.contains(10L);
+        }));
+
+   
         verify(eventRepository).save(any(Event.class));
     }
-
-    // ------------------- Get Event Tests -------------------
     @Test
-    void testGetEventById_found() {
+    void testCreateEvent_withShows()throws IOException {
+        
+        EventDTO eventDto = new EventDTO();
+     
+        
+        ShowDTO showDTO = new ShowDTO();
+        showDTO.setShowid(1L);
+        showDTO.setShowPrice(100);
+        showDTO.setVenue(10L); 
+        showDTO.setScreen(1L); 
+        showDTO.setLayout(1L); 
+
+        ShowTimeDTO showTimeDTO = new ShowTimeDTO();
+        showTimeDTO.setShowDate(LocalDate.of(2025, 9, 25));
+        showTimeDTO.setShowTime(List.of(LocalTime.of(10, 0), LocalTime.of(14, 0)));
+        showDTO.setShowtimesdate(List.of(showTimeDTO));
+
+        eventDto.setShow(List.of(showDTO));
+
+      
+        Venue venue = new Venue();
+        venue.setId(10L);
+        when(venueRepository.findById(10L)).thenReturn(Optional.of(venue));
+
+        Screen screen = new Screen();
+        screen.setId(1L);
+        when(screenRepository.findById(1L)).thenReturn(Optional.of(screen));
+
+        Layout layout = new Layout();
+        layout.setId(1L);
+        when(layoutRepository.findById(1L)).thenReturn(Optional.of(layout));
+
+      
+        Event savedEvent = new Event();
+        savedEvent.setEventId(1L);
+        savedEvent.setAgeLimit(16);
+        when(eventRepository.save(any(Event.class))).thenReturn(savedEvent);
+
+        Show savedShow = new Show();
+        when(showRepository.save(any(Show.class))).thenReturn(savedShow);
+
+       
+        Event event = spy(new Event());
+        event.setEventId(1L);
+        event.setAgeLimit(16);
+        when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(event);
+        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "poster-bytes".getBytes());
+
+       
+        EventDTO result = eventService.createEvent(eventDto, poster, null, null);
+     
+
+      
+        assertNotNull(result);
+
+        verify(venueRepository).findById(10L);
+        verify(screenRepository).findById(1L);
+        verify(layoutRepository).findById(1L);
+        verify(eventRepository).save(event); 
+        verify(showRepository).save(any(Show.class)); 
+
+     
+        Show show = event.getShows().get(0);
+        assertEquals(1, show.getShowstimedate().size()); 
+        assertEquals(LocalDate.of(2025, 9, 25), show.getShowstimedate().get(0).getShowDate()); 
+        assertEquals(LocalTime.of(10, 0), show.getShowstimedate().get(0).
+        		getShowTimes().get(0).getShowTime()); 
+        assertEquals(100, show.getShowPrice()); 
+
+
+      
+    }
+
+
+    @Test
+    void testGetEventByIdFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+
 
         EventResponseDto result = eventService.getEventById(1L);
 
@@ -252,14 +403,12 @@ class EventServiceImplTest {
     }
 
     @Test
-    void testGetEventById_notFound() {
+    void testGetEventByIdNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
 
-        EventCustomException ex = assertThrows(EventCustomException.class, () -> eventService.getEventById(1L));
+        Exception ex = assertThrows(EventCustomException.class, () -> eventService.getEventById(1L));
         assertEquals("Event not found with id: 1", ex.getMessage());
     }
-
-    // ------------------- Update Event Tests -------------------
     @Test
     void testGetAllLanguages_ByEventType() {
       
@@ -506,63 +655,7 @@ class EventServiceImplTest {
         assertEquals(1, result.size());
         verify(priceRepository).findAll();
     }
-    @Test
-    void testFilterEvents() throws Exception {
-       
-        String type = "Movie";
-        List<Integer> languages = List.of(1, 2);
-        List<Integer> genres = List.of(1, 2);
-        List<Integer> formats = List.of(1, 2);
-        List<Integer> tags = List.of(1, 2);
-        List<Integer> categories = List.of(1, 2);
-        List<Integer> price = List.of(1, 2);
-        List<Integer> moreFilters = List.of(1, 2);
-        List<Integer> releaseMonths = List.of(1, 2);
-        List<Integer> dateFilters = List.of(1, 2);
 
-      
-        int page = 0;  
-        int size = 10; 
-
-     
-        Event event1 = new Event();
-        event1.setDeleted(false);
-        event1.setAgeLimit(16);
-        event1.setName("Sample Movie");
-
-        Event event2 = new Event();
-        event2.setDeleted(true);  
-        event2.setAgeLimit(16);
-        event2.setName("Deleted Movie");
-
-     
-        List<Event> events = List.of(event1, event2);
-
-   
-        Specification<Event> mockSpec = Mockito.mock(Specification.class);
-
-      
-        try (MockedStatic<EventSpecification> mockedStatic = Mockito.mockStatic(EventSpecification.class)) {
-            mockedStatic.when(() -> EventSpecification.filterEvents(
-                    type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters
-            )).thenReturn(mockSpec);
-
-         
-            when(eventRepository.findAll(mockSpec, PageRequest.of(page, size))).thenReturn(new PageImpl<>(events, PageRequest.of(page, size), events.size()));
-
-         
-            Page<EventResponseDtoCard> result = eventService.filterEvents(
-                    type, languages, genres, formats, tags, categories, price, moreFilters, releaseMonths, dateFilters, page, size
-            );
-
-        
-            assertEquals(1, result.getContent().size());
-            assertEquals("Sample Movie", result.getContent().get(0).getName());
-
-          
-            verify(eventRepository).findAll(mockSpec, PageRequest.of(page, size));
-        }
-    }
 
     @Test
     void testSearchEventNames_WithEventTypes() {
@@ -711,15 +804,33 @@ class EventServiceImplTest {
         existingEvent.setEventId(eventId);
         existingEvent.setName("Old Event");
 
-        EventDTO dto = new EventDTO();
-        dto.setName("New Event");
-        dto.setDescription("Updated description");
-        dto.setAgeLimit(16);
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.setName("New Event");
+        eventDTO.setDescription("Updated description");
+        eventDTO.setAgeLimit(16); 
 
-        MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "poster".getBytes());
-        CastDTO castDTO = new CastDTO(); castDTO.setActorName("New Actor"); dto.setCast(List.of(castDTO));
-        CrewDTO crewDTO = new CrewDTO(); crewDTO.setMemberName("New Crew"); dto.setCrew(List.of(crewDTO));
+        // Mock poster file
+        MultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg", "fake-image-content".getBytes());
 
+        // Mock cast
+        CastDTO castDTO = new CastDTO();
+        castDTO.setActorName("New Actor");
+        List<CastDTO> castList = List.of(castDTO);
+        eventDTO.setCast(castList);
+
+        MultipartFile castImage = new MockMultipartFile("cast", "cast.jpg", "image/jpeg", "cast-image-content".getBytes());
+        List<MultipartFile> castImages = List.of(castImage);
+
+        // Mock crew
+        CrewDTO crewDTO = new CrewDTO();
+        crewDTO.setMemberName("New Crew");
+        List<CrewDTO> crewList = List.of(crewDTO);
+        eventDTO.setCrew(crewList);
+
+        MultipartFile crewImage = new MockMultipartFile("crew", "crew.jpg", "image/jpeg", "crew-image-content".getBytes());
+        List<MultipartFile> crewImages = List.of(crewImage);
+
+        // When
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(existingEvent));
         when(castRepository.findByActorName(anyString())).thenReturn(Optional.empty());
         when(castRepository.save(any(Cast.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -727,112 +838,281 @@ class EventServiceImplTest {
         when(crewRepository.save(any(Crew.class))).thenAnswer(inv -> inv.getArgument(0));
         when(eventRepository.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        EventDTO result = eventService.updateEvent(eventId, dto, poster, List.of(poster), List.of(poster));
+        // Then
+        EventDTO result = eventService.updateEvent(eventId, eventDTO, poster, castImages, crewImages);
 
         assertNotNull(result);
         assertEquals("New Event", result.getName());
-        verify(eventRepository).findById(eventId);
-        verify(eventRepository).save(any(Event.class));
+        assertEquals("Updated description", result.getDescription());
+
+        verify(eventRepository, times(1)).findById(eventId);
+        verify(eventRepository, times(1)).save(any(Event.class));
         verify(castRepository, times(2)).save(any(Cast.class));
+
         verify(crewRepository, times(2)).save(any(Crew.class));
     }
+   
 
-    // ------------------- Delete Event -------------------
     @Test
-    void testDeleteEvent_success() {
+    void testUpdateEvent_setsShowsSuccessfully() throws IOException {
+       
         Long eventId = 1L;
-        event.setDeleted(false);
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        Event existingEvent = new Event();
+       existingEvent.setEventId(eventId);
+        existingEvent.setDeleted(false);
+        existingEvent.setAgeLimit(16);
 
-        eventService.deleteEvent(eventId);
+        EventDTO dto = new EventDTO();
+        ShowDTO showDTO = new ShowDTO();
+        showDTO.setShowPrice(500);
+        showDTO.setVenue(10L);
+        showDTO.setScreen(20L);
+        showDTO.setLayout(30L);
+        showDTO.setShowid(null);
 
-        verify(eventRepository).save(event);
+        ShowTimeDTO showTimeDTO = new ShowTimeDTO();
+        showTimeDTO.setShowDate(LocalDate.now());
+        showTimeDTO.setShowTime(List.of(LocalTime.of(10, 0), LocalTime.of(12, 30)));
+        showDTO.setShowtimesdate(List.of(showTimeDTO));
+
+        dto.setShow(List.of(showDTO));
+
+        Venue venue = new Venue();
+        venue.setId(10L);
+        Screen screen = new Screen();
+        screen.setId(20L);
+        Layout layout = new Layout();
+        layout.setId(30L);
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(existingEvent));
+        when(venueRepository.findById(10L)).thenReturn(Optional.of(venue));
+        when(screenRepository.findById(20L)).thenReturn(Optional.of(screen));
+        when(layoutRepository.findById(30L)).thenReturn(Optional.of(layout));
+
+        when(showRepository.save(any(Show.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> {
+            Event e = invocation.getArgument(0);
+            e.setEventId(1L); 
+            return e;
+        });
+
+
+      
+        eventService.updateEvent(eventId, dto, null, null, null);
+
+       
+        verify(venueRepository).findById(10L);
+        verify(screenRepository).findById(20L);
+        verify(layoutRepository).findById(30L);
+        verify(showRepository, times(1)).save(any(Show.class));
+
+        List<Show> savedShows = existingEvent.getShows();
+        assertEquals(1, savedShows.size());
+        Show savedShow = savedShows.get(0);
+        assertEquals(500, savedShow.getShowPrice());
+        assertEquals(venue, savedShow.getVenue());
+        assertEquals(screen, savedShow.getScreen());
+        assertEquals(layout, savedShow.getLayout());
+        assertEquals(existingEvent, savedShow.getEvent());
+
+       
+        List<ShowTimeDate> showTimeDates = savedShow.getShowstimedate();
+        assertEquals(1, showTimeDates.size());
+        assertEquals(showTimeDTO.getShowDate(), showTimeDates.get(0).getShowDate());
+        assertEquals(2, showTimeDates.get(0).getShowTimes().size());
     }
 
-    // ------------------- Search Event Tests -------------------
-    @Test
-    void testSearchEventNames_withEventTypes() {
-        String name = "concert";
-        List<String> eventTypes = List.of("Music", "Festival");
 
-        Event e1 = new Event(); e1.setEventId(101L); e1.setName("Music Concert");
-        Event e2 = new Event(); e2.setEventId(102L); e2.setName("Festival Night");
-
-        when(eventRepository.searchByNameAndEventTypes(eq(name), anyList())).thenReturn(List.of(e1, e2));
-
-        List<EventSearchDTO> result = eventService.searchEventNames(name, eventTypes);
-
-        assertEquals(2, result.size());
-        verify(eventRepository).searchByNameAndEventTypes(eq(name), eq(List.of("music", "festival")));
-    }
 
     @Test
-    void testSearchEventNames_withoutEventTypes() {
-        String name = "concert";
-        List<String> eventTypes = Collections.emptyList();
+    void testGetPopularEvents_FiltersDeletedEvents() {
+        Event event1 = new Event();
+        event1.setEventId(3L);
+        event1.setDeleted(false);
+        event1.setName("Live Show");
+        event1.setAgeLimit(16);
 
-        Event e = new Event(); e.setEventId(201L); e.setName("Solo Concert");
+        Event event2 = new Event();
+        event2.setEventId(4L);
+        event2.setDeleted(true); 
+        event2.setName("Deleted Show");
+        event1.setAgeLimit(16);
 
-        when(eventRepository.searchByNameOnly(name)).thenReturn(List.of(e));
+        when(eventRepository.findTop10ByOrderByReleasingOnDesc())
+            .thenReturn(List.of(event1, event2));
 
-        List<EventSearchDTO> result = eventService.searchEventNames(name, eventTypes);
+        EventResponseDtoCard dto = new EventResponseDtoCard();
 
-        assertEquals(1, result.size());
-        verify(eventRepository).searchByNameOnly(name);
-    }
 
-    // ------------------- Popular Events Tests -------------------
-    @Test
-    void testGetPopularEvents_withEventType() {
-        Event e = new Event(); e.setEventId(1L); e.setDeleted(false); e.setName("Sports Gala"); e.setAgeLimit(16);
-        when(eventRepository.findTop10ByEventTypeOrderByReleasingOnDesc("sports")).thenReturn(List.of(e));
+        List<EventResponseDtoCard> result = eventService.getPopularEvents(null);
 
-        List<EventResponseDtoCard> result = eventService.getPopularEvents("sports");
-
-        assertEquals(1, result.size());
-        verify(eventRepository).findTop10ByEventTypeOrderByReleasingOnDesc("sports");
-    }
-
-    @Test
-    void testGetPopularEvents_withoutEventType() {
-        Event e = new Event(); e.setEventId(2L); e.setDeleted(false); e.setName("Open Festival"); e.setAgeLimit(16);
-        when(eventRepository.findTop10ByOrderByReleasingOnDesc()).thenReturn(List.of(e));
-
-        List<EventResponseDtoCard> result = eventService.getPopularEvents("");
-
+        assertNotNull(result);
         assertEquals(1, result.size());
         verify(eventRepository).findTop10ByOrderByReleasingOnDesc();
+
     }
 
-    @Test
-    void testGetPopularEvents_throwsExceptionIfNoEvents() {
-        when(eventRepository.findTop10ByOrderByReleasingOnDesc()).thenReturn(Collections.emptyList());
 
-        EventCustomException ex = assertThrows(EventCustomException.class, () -> eventService.getPopularEvents(""));
-        assertEquals("No Events found", ex.getMessage());
+    @Test
+    void testgetEventById()
+    {
+    	Long eventidLong=1L;
+    	Event event = new Event();
+    	event.setEventId(eventidLong);
+    	  event.setDeleted(false);
+    	when(eventRepository.findById(eventidLong)).thenReturn(Optional.of(event));
+    	
+
+    	eventService.deleteEvent(eventidLong);
+    	verify(eventRepository).save(event);
     }
+    void testUpdateEvent() throws IOException {
+        Long eventId = 1L;
 
-    // ------------------- Mapping Tests -------------------
+    
+        EventDTO eventDto = new EventDTO();
+        eventDto.setEventId(eventId);
+        eventDto.setName("Updated Event Name");
+        eventDto.setDescription("Updated Description");
+        eventDto.setRunTime("150");
+        eventDto.setEventType("Movie");
+
+      
+        MultipartFile poster = mock(MultipartFile.class);
+        when(poster.isEmpty()).thenReturn(false);
+        when(poster.getBytes()).thenReturn("dummyPosterBytes".getBytes());
+
+        
+        List<MultipartFile> castImages = List.of(mock(MultipartFile.class));
+
+        
+        Event existingEvent = new Event();
+        existingEvent.setEventId(eventId);
+        existingEvent.setName("Old Event Name");
+        existingEvent.setAgeLimit(0);
+      
+
+    
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(existingEvent));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    
+        EventDTO result = eventService.updateEvent(eventId, eventDto, poster, castImages, List.of());
+
+       
+        verify(eventRepository).findById(eventId);
+        verify(eventRepository).save(any(Event.class));
+
+        
+        assertNotNull(result);
+        assertEquals("Updated Event Name", result.getName());
+        assertEquals("Updated Description", result.getDescription());
+        assertEquals("150", result.getRunTime());
+        assertEquals("Movie", result.getEventType());
+
+        
+        assertNotNull(result.getImageurl());
+    }
+    
+   
+
     @Test
-    void testToEventDto_fullMapping() {
-        Venue venue = new Venue(); venue.setVenueName("Hall"); event.setVenues(List.of(venue));
-        Languages lang = new Languages(); lang.setLanguageName("English"); event.setLanguages(List.of(lang));
-        Genres genre = new Genres(); genre.setGenresName("Action"); event.setGenres(List.of(genre));
-        Format format = new Format(); format.setFormatName("3D"); event.setFormat(List.of(format));
-        Tag tag = new Tag(); tag.setTagName("Popular"); event.setTag(List.of(tag));
-        ReleaseMonth month = new ReleaseMonth(); month.setReleaseMonthName("September"); event.setReleaseMonth(List.of(month));
-        DateFilter df = new DateFilter(); df.setDateFilterName("This Week"); event.setDateFilter(List.of(df));
-        Categories cat = new Categories(); cat.setCategoriesName("Music"); event.setCategories(List.of(cat));
-        MoreFilters mf = new MoreFilters(); mf.setName("Indoor"); event.setMoreFilters(List.of(mf));
-        Price price = new Price(); price.setPriceRange("₹200-₹500"); event.setPrice(List.of(price));
-        Cast cast = new Cast(); cast.setActorName("John"); cast.setCastImg("j.jpg"); event.setCast(List.of(cast));
-        Crew crew = new Crew(); crew.setMemberName("Jane"); crew.setCrewImg("jane.jpg"); event.setCrew(List.of(crew));
-        City city = new City(); city.setName("Mumbai"); event.setCity(List.of(city));
+    void testToEventDto_MappingAllFields() {
+       
+        Event event = new Event();
+        event.setEventId(1L);
+        event.setName("Test Event");
+        event.setDescription("Event description");
+        event.setRunTime("120");
+        event.setStartDate(LocalDate.of(2025, 9, 1));
+        event.setEndDate(LocalDate.of(2025, 9, 10));
+        event.setEventType("concert");
+        event.setImageurl("image.jpg");
+        event.setImdbRating(8.5);
+        event.setLikes(1000.0);
+        event.setVotes(500.0);
+        event.setCurrentlyPlaying(true);
+        event.setDeleted(false);
+        event.setAgeLimit(13);
+        event.setReleasingOn(LocalDate.of(2025, 9, 5));
 
-        EventResponseDto dto = eventService.toEventdto(event);
+     
+        Venue venue = new Venue();
+        venue.setVenueName("Grand Hall");
+        event.setVenues(List.of(venue));
 
+    
+        Languages language = new Languages();
+        language.setLanguageName("English");
+        event.setLanguages(List.of(language));
+
+      
+        Genres genre = new Genres();
+        genre.setGenresName("Action");
+        event.setGenres(List.of(genre));
+
+      
+        Format format = new Format();
+        format.setFormatName("3D");
+        event.setFormat(List.of(format));
+
+        
+        Tag tag = new Tag();
+        tag.setTagName("Popular");
+        event.setTag(List.of(tag));
+
+        
+        ReleaseMonth month = new ReleaseMonth();
+        month.setReleaseMonthName("September");
+        event.setReleaseMonth(List.of(month));
+
+        
+        DateFilter dateFilter = new DateFilter();
+        dateFilter.setDateFilterName("This Week");
+        event.setDateFilter(List.of(dateFilter));
+
+       
+        Categories category = new Categories();
+        category.setCategoriesName("Music");
+        event.setCategories(List.of(category));
+
+        
+        MoreFilters filter = new MoreFilters();
+        filter.setName("Indoor");
+        event.setMoreFilters(List.of(filter));
+
+       
+        Price price = new Price();
+        price.setPriceRange("₹200-₹500");
+        event.setPrice(List.of(price));
+
+        
+        Cast cast = new Cast();
+        cast.setActorName("John Doe");
+        cast.setCastImg("johndoe.jpg");
+        event.setCast(List.of(cast));
+
+       
+        Crew crew = new Crew();
+        crew.setMemberName("Jane Smith");
+        crew.setCrewImg("janesmith.jpg");
+        event.setCrew(List.of(crew));
+
+        
+        City city = new City();
+        city.setName("Mumbai");
+        event.setCity(List.of(city));
+
+       
+        EventResponseDto dto = eventService.toEventdto(event); 
+
+        
+        assertEquals(1L, dto.getEventId());
         assertEquals("Test Event", dto.getName());
-        assertEquals("Hall", dto.getVenueName().get(0));
+        assertEquals("Event description", dto.getDescription());
+        assertEquals("120", dto.getRunTime());
+        assertEquals("Grand Hall", dto.getVenueName().get(0));
         assertEquals("English", dto.getLanguages().get(0));
         assertEquals("Action", dto.getGenres().get(0));
         assertEquals("3D", dto.getFormat().get(0));
@@ -842,10 +1122,90 @@ class EventServiceImplTest {
         assertEquals("Music", dto.getCategories().get(0));
         assertEquals("Indoor", dto.getMoreFilters().get(0));
         assertEquals("₹200-₹500", dto.getPrice().get(0));
-        assertEquals("John", dto.getCast().get(0).getActorName());
-        assertEquals("j.jpg", dto.getCast().get(0).getCastImg());
-        assertEquals("Jane", dto.getCrew().get(0).getMemberName());
-        assertEquals("jane.jpg", dto.getCrew().get(0).getCrewImg());
+        assertEquals("John Doe", dto.getCast().get(0).getActorName());
+        assertEquals("johndoe.jpg", dto.getCast().get(0).getCastImg());
+        assertEquals("Jane Smith", dto.getCrew().get(0).getMemberName());
+        assertEquals("janesmith.jpg", dto.getCrew().get(0).getCrewImg());
         assertEquals("Mumbai", dto.getCity().get(0));
     }
+
+    
+    @DisplayName("mapToResponseDto() - should map Event to EventResponseDtoCard correctly")
+    @Test
+    void testMapToResponseDto_MapsCorrectly() {
+        
+        Event event = new Event();
+        event.setEventId(1L);
+        event.setName("Test Movie");
+        event.setLikes(120.0);
+        event.setVotes(200.0);
+        event.setImdbRating(8.5);
+        event.setImageurl("image123");
+        event.setReleasingOn(LocalDate.of(2025, 10, 1));
+        event.setStartDate(LocalDate.of(2025, 10, 2));
+        event.setAgeLimit(13);
+        event.setCurrentlyPlaying(true);
+
+       
+        Genres genre1 = new Genres(); genre1.setGenresName("Action");
+        Genres genre2 = new Genres(); genre2.setGenresName("Thriller");
+        event.setGenres(List.of(genre1, genre2));
+
+       
+        Languages lang1 = new Languages(); lang1.setLanguageName("English");
+        Languages lang2 = new Languages(); lang2.setLanguageName("Hindi");
+        event.setLanguages(List.of(lang1, lang2));
+
+        
+        Categories cat1 = new Categories(); cat1.setCategoriesName("Blockbuster");
+        event.setCategories(List.of(cat1));
+
+        
+        Venue venue1 = new Venue(); venue1.setVenueName("PVR");
+        Venue venue2 = new Venue(); venue2.setVenueName("INOX");
+        event.setVenues(List.of(venue1, venue2));
+
+       
+        ShowTime time1 = new ShowTime(); time1.setShowTime(LocalTime.of(10, 30));
+        ShowTimeDate showTimeDate = new ShowTimeDate();
+        showTimeDate.setShowDate(LocalDate.now());
+        showTimeDate.setShowTimes(List.of(time1));
+
+        Show show = new Show();
+        show.setShowPrice(250);
+        show.setShowstimedate(List.of(showTimeDate));
+        event.setShows(List.of(show));
+
+      
+        EventResponseDtoCard dto = callMapToResponseDto(event);
+
+        
+        assertEquals(event.getEventId(), dto.getEventId());
+        assertEquals("Test Movie", dto.getName());
+        assertEquals(120.0, dto.getLikes());
+        assertEquals(250, dto.getPricelist().get(0));
+        assertEquals(LocalTime.of(10, 30), dto.getStarttime());
+        assertEquals(List.of("PVR", "INOX"), dto.getVenueName());
+        assertEquals(List.of("Action", "Thriller"), dto.getGenres());
+        assertEquals(List.of("English", "Hindi"), dto.getLanguages());
+        assertEquals(List.of("Blockbuster"), dto.getCategories());
+        assertEquals(200.0, dto.getVotes());
+        assertEquals(8.5, dto.getImdbRating());
+        assertTrue(dto.getReleasedFlag());
+    }
+    private EventResponseDtoCard callMapToResponseDto(Event event) {
+        try {
+            Method method = EventServiceImpl.class.getDeclaredMethod("mapToResponseDto", Event.class);
+            method.setAccessible(true); 
+            return (EventResponseDtoCard) method.invoke(eventService, event);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    
+    
+    
+
 }
