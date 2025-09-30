@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class NotificationEvent extends ApplicationEvent {
-
     private final String title;
     private final String message;
     private final String type; // EVENT, VENUE, etc.
