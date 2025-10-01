@@ -214,7 +214,6 @@ class EventServiceImplTest {
         eventDto.setDateFilter(Collections.emptyList());
         eventDto.setCategories(Collections.emptyList());
         eventDto.setMoreFilters(Collections.emptyList());
-//        eventDto.setPrice(Collections.emptyList());
         eventDto.setCast(Collections.emptyList());
         eventDto.setCrew(Collections.emptyList());
         eventDto.setCity(Collections.emptyList());

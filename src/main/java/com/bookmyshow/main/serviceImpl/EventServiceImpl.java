@@ -205,11 +205,7 @@ public class EventServiceImpl implements EventService {
 	            .map(m -> m.getFilterId().intValue())
 	            .toList());
 
-//	    if (event.getPrice() != null)
-//	        dto.setPrice(event.getPrice()
-//	            .stream()
-//	            .map(p -> p.getPriceId().intValue())
-//	            .toList());
+
 	    if (event.getCast() != null) {
 	        dto.setCast(event.getCast()
 	            .stream()
@@ -315,10 +311,7 @@ public class EventServiceImpl implements EventService {
 	        event.setMoreFilters(moreFilters);
 	    }
 
-//	    if (eventDto.getPrice() != null) {
-//	        List<Price> prices = priceRepository.findAllById(eventDto.getPrice());
-//	        event.setPrice(prices);
-//	    }
+
 
 
 
@@ -716,9 +709,7 @@ if (events == null || events.isEmpty())
 	        event.setMoreFilters(moreFiltersRepository.findAllById(eventDto.getMoreFilters()));
 	    }
 
-//	    if (eventDto.getPrice() != null) {
-//	        event.setPrice(priceRepository.findAllById(eventDto.getPrice()));
-//	    }
+
 	    if (eventDto.getVenue() != null) {
 	      
 	        List<Long> venueIds = eventDto.getVenue().stream()
@@ -1119,9 +1110,7 @@ System.out.print(eventPage);
 	        .map(MoreFilters::getName)
 	        .toList() : new ArrayList<>());
 
-//	    dto.setPrice(event.getPrice() != null ? event.getPrice().stream()
-//	        .map(Price::getPriceRange)
-//	        .toList() : new ArrayList<>());
+
 
 	    if (event.getCast() != null) {
 	        dto.setCast(event.getCast()
