@@ -68,19 +68,8 @@ public class UserMaster {
 	    private List<Seat> seats;
 	
 	   
-	   
-	  
-	       @ManyToMany
-	       @JoinTable(
-	           name = "user_show",
-	           joinColumns = @JoinColumn(name = "user_id"),
-	           inverseJoinColumns = @JoinColumn(name = "show_id")
-	       )
-	       private Set<Show> shows = new HashSet<>();
-	   
 
-	   
-
+	
 	private Boolean deleteFlag = false;
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

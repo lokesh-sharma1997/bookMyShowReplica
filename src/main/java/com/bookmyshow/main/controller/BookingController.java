@@ -1,6 +1,7 @@
 package com.bookmyshow.main.controller;
 
 import com.bookmyshow.main.dto.BookTicketRequestDTO;
+import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.service.BookingService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +19,45 @@ public class BookingController {
     private BookingService bookingService;
 
     @PostMapping("/book")
-    public ResponseEntity<?> bookTickets(@RequestBody List<BookTicketRequestDTO> bookings) {
+    public ResponseEntity<ApiResponse<String>> bookTickets(@RequestBody List<BookTicketRequestDTO> bookings) {
         try {
             for (BookTicketRequestDTO dto : bookings) {
                 bookingService.bookTickets(dto);
             }
-            return ResponseEntity.ok("Tickets booked successfully!");
+
+            ApiResponse<String> response = new ApiResponse<>(
+                    HttpStatus.OK.value(),
+                    "Tickets booked successfully!",
+                    true,
+                    "Tickets booked successfully!"
+            );
+
+            return ResponseEntity.ok(response);
+
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Booking failed: " + e.getMessage());
+            ApiResponse<String> response = new ApiResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Booking failed: " + e.getMessage(),
+                    false,
+                    null
+            );
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+
     @GetMapping("/booked-seats")
-    public ResponseEntity<List<String>> getBookedSeats(@RequestParam Long showId) {
-        return ResponseEntity.ok(bookingService.getBookedSeats(showId));
+    public ResponseEntity<ApiResponse<List<String>>> getBookedSeats(@RequestParam Long showId) {
+        List<String> bookedSeats = bookingService.getBookedSeats(showId);
+
+        ApiResponse<List<String>> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Booked seats fetched successfully",
+                true,
+                bookedSeats
+        );
+
+        return ResponseEntity.ok(response);
     }
 
 
