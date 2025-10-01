@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.AddressDTO;
-import com.bookmyshow.main.dto.CityVDTO;
 import com.bookmyshow.main.dto.LayoutDTO;
 import com.bookmyshow.main.dto.LayoutRowDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
@@ -113,11 +112,8 @@ public class VenueServiceImpl implements VenueService {
             addressDto.setStreet(entity.getAddress().getStreet());
             addressDto.setPin(entity.getAddress().getPin());
 
-            // Map City from Entity to CityVDTO
             if (entity.getAddress().getCity() != null) {
-                CityVDTO cityVDTO = new CityVDTO();
-                cityVDTO.setCityName(entity.getAddress().getCity().getName());
-                addressDto.setCity(cityVDTO); // Set CityVDTO in AddressDTO
+                addressDto.setCityName(entity.getAddress().getCity().getName());
             }
 
             dto.setAddress(addressDto); 
@@ -212,9 +208,9 @@ public class VenueServiceImpl implements VenueService {
             address.setStreet(dto.getAddress().getStreet());
             address.setPin(dto.getAddress().getPin());
 
-            if (dto.getAddress().getCity() != null) {
+            if (dto.getAddress().getCityName() != null) {
                 City city = new City();
-                city.setName(dto.getAddress().getCity().getCityName());  
+                city.setName(dto.getAddress().getCityName());  
                 address.setCity(city);  
             }
 
@@ -268,14 +264,15 @@ public class VenueServiceImpl implements VenueService {
             address.setStreet(dto.getAddress().getStreet());
             address.setPin(dto.getAddress().getPin());
 
-            if (dto.getAddress().getCity() != null) {
-                String cityName = dto.getAddress().getCity().getCityName();
+            if (dto.getAddress().getCityName() != null) {
+                String cityName = dto.getAddress().getCityName();
 
                 City city = cityRepository.findByName(cityName);
 
                 if (city == null) {
                     city = new City();
                     city.setName(cityName);
+                    city.setPopular(false); 
                     city = cityRepository.save(city);
                 }
 
@@ -373,11 +370,17 @@ public class VenueServiceImpl implements VenueService {
             if (shows.isEmpty()) {
                 throw new RuntimeException("No shows found for venue");
             }
+            
 
             List<TimeSlotDTO> availableSlots = new ArrayList<>();
             for (Show show : shows) {
                 availableSlots.addAll(getAvailableSlotsForShow(show, date));
             }
+            if (availableSlots.isEmpty()) {
+                throw new RuntimeException("No available timeslots found for the given date");
+            }
+            
+            
             return availableSlots;
         }
     }
@@ -446,8 +449,8 @@ public class VenueServiceImpl implements VenueService {
             address.setStreet(dto.getAddress().getStreet());
             address.setPin(dto.getAddress().getPin());
 
-            if (dto.getAddress().getCity() != null) {
-                String cityName = dto.getAddress().getCity().getCityName();
+            if (dto.getAddress().getCityName() != null) {
+                String cityName = dto.getAddress().getCityName();
                 City city = cityRepository.findByName(cityName);
                 if (city == null) {
                     city = new City();

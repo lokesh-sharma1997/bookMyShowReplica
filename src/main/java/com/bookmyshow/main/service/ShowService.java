@@ -1,11 +1,13 @@
 package com.bookmyshow.main.service;
 
+import java.util.List;
+
 import com.bookmyshow.main.dto.ShowRequestDTO;
-import com.bookmyshow.main.dto.ShowResponseDTO;
+import com.bookmyshow.main.dto.VenueShowDTO;
 
 public  interface ShowService {
 
-	ShowResponseDTO getShows(ShowRequestDTO request);
+    List<VenueShowDTO> getShows(ShowRequestDTO request);
 
  
 	
