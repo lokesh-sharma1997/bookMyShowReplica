@@ -4,8 +4,10 @@ package com.bookmyshow.main.Controller;
  
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -26,7 +29,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +39,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 import com.bookmyshow.main.controller.EventController;
 import com.bookmyshow.main.dto.CategoryDTO;
@@ -74,13 +81,17 @@ class EventControllerTest {
     private EventDTO eventDto;
  
     
-    private ObjectMapper objectMapper = new ObjectMapper();
+  @Mock
+  private ObjectMapper objectMapper;
  
     @BeforeEach
     void setUp() {
+    	 MockitoAnnotations.openMocks(this); 
     	objectMapper = new ObjectMapper();
     	objectMapper.registerModule(new JavaTimeModule());
+    	
         mockMvc = MockMvcBuilders.standaloneSetup(eventController).build();
+       
  
         eventDto = new EventDTO();
         eventDto.setEventId(1L);
@@ -140,6 +151,46 @@ class EventControllerTest {
         .andExpect(jsonPath("$.data").doesNotExist());
     }
  
+    @Test
+    void testUpdateEvent() throws Exception {
+        
+       
+      
+        when(eventService.updateEvent(anyLong(), any(), any(), any(), any()))
+        .thenReturn(eventDto);
+
+
+       
+        MockMultipartFile eventJson = new MockMultipartFile(
+            "Event", 
+            "",
+            "application/json",
+            objectMapper.writeValueAsBytes(eventDto)
+        );
+
+       
+        MockMultipartFile poster = new MockMultipartFile(
+            "poster",
+            "poster.jpg",
+            MediaType.IMAGE_JPEG_VALUE,
+            "fake-image".getBytes()
+        );
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/events/update/{id}", 1L)
+                .file(eventJson)
+                .file(poster)
+               
+                .with(request -> {
+                    request.setMethod("PUT"); 
+                    return request;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+            )
+            .andExpect(status().isCreated());
+
+
+    }
+
+    
     @Test
     void testGetEventById_Success() throws Exception {
        
