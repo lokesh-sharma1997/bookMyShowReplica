@@ -35,4 +35,9 @@ public class ShowTimeDate {
     @JoinColumn(name = "show_id", referencedColumnName = "id")
     @JsonBackReference 
     private Show show; 
+
+    @ManyToOne
+    @JoinColumn(name = "venue_id", referencedColumnName = "id")
+    private Venue venue;
+   
 }

@@ -2,10 +2,14 @@ package com.bookmyshow.main.model;
  
 import java.util.List;
 
+import com.bookmyshow.main.dto.CityVDTO;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -26,7 +30,7 @@ public class Address {
     private String street;
 
     
-    private String city;
+//    private String city;
 
     private String pin;
     
@@ -34,5 +38,7 @@ public class Address {
     @OneToMany(mappedBy = "address")
     private List<Venue> venues;
 
-    
+    @ManyToOne
+    @JoinColumn(name = "city_id")  
+    private City city;
 }

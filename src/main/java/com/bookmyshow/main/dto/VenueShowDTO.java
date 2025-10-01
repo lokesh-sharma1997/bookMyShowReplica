@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ShowResponseDTO {
-	
-	    private int status;
-	    private String message;
-	    private List<VenueShowDTO> data;
-	
+public class VenueShowDTO {
+	 private String venueName;
+	    private String venueId;
+	    private String screenId;
+	    private String showId; 
+	    private List<ShowFetchDTO> shows;
 }
