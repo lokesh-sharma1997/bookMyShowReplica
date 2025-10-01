@@ -39,7 +39,7 @@ public class ShowServiceImpl implements ShowService {
             Event event = show.getEvent();
 
             List<ShowFetchDTO> showDtos = show.getShowstimedate().stream()
-                .filter(std -> std.getShowDate().equals(date)) // केवल selected date
+                .filter(std -> std.getShowDate().equals(date)) 
                 .flatMap(std -> std.getShowTimes().stream())
                 .map(st -> {
                     ShowFetchDTO dto = new ShowFetchDTO();
