@@ -52,14 +52,11 @@ public class UserController {
 
 		Page<UserDTO> usersPage = userService.getAllUsers(page, size);
 
-		if (usersPage.isEmpty()) {
-			throw new UserNotFoundException("No users found");
-		}
-
 		UsersResponse usersResponse = new UsersResponse(usersPage.getContent(), size);
 		usersResponse.setTotalEntries((int) usersPage.getTotalElements());
 
-		return ResponseEntity.ok(new ApiResponse<>(200, "Users retrieved", true, usersResponse));
+		return ResponseEntity.ok(new ApiResponse<>(200,
+				usersPage.isEmpty() ? "No users found" : "Users fetched successfully", true, usersResponse));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
@@ -86,14 +83,11 @@ public class UserController {
 
 		Page<UserDTO> usersPage = userService.searchUser(value.trim(), page, size);
 
-		if (usersPage.isEmpty()) {
-			return ResponseEntity.ok(new ApiResponse<>(200, "No user found", true, null));
-		}
-
 		UsersResponse usersResponse = new UsersResponse(usersPage.getContent(), size);
 		usersResponse.setTotalEntries((int) usersPage.getTotalElements());
 
-		return ResponseEntity.ok(new ApiResponse<>(200, "Users found", true, usersResponse));
+		return ResponseEntity.ok(new ApiResponse<>(200,
+				usersPage.isEmpty() ? "No users found" : "Users fetched successfully", true, usersResponse));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")

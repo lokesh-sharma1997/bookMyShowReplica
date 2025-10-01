@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private RoleRepository roleRepository;
 
-	// Convert Entity -> DTO
+	// Converts UserMaster entity to UserDTO
 	private UserDTO convertToDTO(UserMaster user) {
 		UserDTO dto = new UserDTO();
 		dto.setUserId(user.getUserId());
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 		dto.setDeleteFlag(user.getDeleteFlag());
 		return dto;
 	}
-
+	// Retrieves user by user Id 
 	@Override
 	public Optional<UserDTO> getByUserId(long userId) {
 		if (userId <= 0) {
@@ -56,10 +56,11 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return Optional.ofNullable(userRepository.findByUserId(userId)).map(this::convertToDTO).or(() -> {
-			throw new UserNotFoundException("User not found with ID: " + "" + userId);
+			throw new UserNotFoundException("User not found with ID: " + userId);
 		});
 	}
 
+	// Retrieves user by username
 	@Override
 	public Optional<UserDTO> getByUsername(String username) {
 		if (username == null || username.trim().isEmpty()) {
@@ -69,6 +70,7 @@ public class UserServiceImpl implements UserService {
 		return Optional.ofNullable(userRepository.findByUsername(username)).map(this::convertToDTO);
 	}
 
+	// Returns list of users filtered by role
 	@Override
 	public List<UserDTO> getByRole(String roleName) {
 		if (roleName == null || roleName.trim().isEmpty()) {
@@ -82,6 +84,7 @@ public class UserServiceImpl implements UserService {
 				.collect(Collectors.toList());
 	}
 
+	// Get All Users
 	@Override
 	public Page<UserDTO> getAllUsers(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
@@ -89,6 +92,7 @@ public class UserServiceImpl implements UserService {
 		return usersPage.map(this::convertToDTO);
 	}
 
+	// Soft deletes a user by setting deleteFlag, throws if already deleted
 	@Override
 	public boolean deleteById(long userId) {
 		if (userId <= 0) {
@@ -106,6 +110,7 @@ public class UserServiceImpl implements UserService {
 		}).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 	}
 
+	// Updates user role to Admin, validates current role and deletion status
 	@Override
 	public void updateUserRole(long userId) {
 		if (userId <= 0) {
@@ -114,22 +119,23 @@ public class UserServiceImpl implements UserService {
 
 		UserMaster user = userRepository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
-		if (user.getRole().getRoleName().equals("ADMIN")) {
+
+		if ("ADMIN".equals(user.getRole().getRoleName())) {
 			throw new IllegalArgumentException("User is already an admin. Cannot change role of admin.");
 		}
+
 		if (Boolean.TRUE.equals(user.getDeleteFlag())) {
 			throw new InvalidCredentialsException("User account is deleted. Please contact support.");
 		}
 
-		// Assuming "Admin" role is fixed with role ID = 2, add validation if needed
 		Role role = roleRepository.findById(2).orElseThrow(() -> new RoleNotFoundException("Role not found: Admin"));
 
 		user.setRole(role);
 		user.setUpdatedOn(LocalDateTime.now());
-
 		userRepository.save(user);
 	}
 
+	// Searches users globally by value
 	@Override
 	public Page<UserDTO> searchUser(String value, int page, int size) {
 		if (value == null || value.trim().isEmpty()) {
@@ -141,5 +147,4 @@ public class UserServiceImpl implements UserService {
 
 		return usersPage.map(this::convertToDTO);
 	}
-
 }

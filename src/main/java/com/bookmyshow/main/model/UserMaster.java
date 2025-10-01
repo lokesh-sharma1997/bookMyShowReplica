@@ -63,32 +63,22 @@ public class UserMaster {
 
 	@UpdateTimestamp
 	private LocalDateTime updatedOn;
-	
-	   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	    private List<Seat> seats;
-	
-	   
-	   
-	  
-	       @ManyToMany
-	       @JoinTable(
-	           name = "user_show",
-	           joinColumns = @JoinColumn(name = "user_id"),
-	           inverseJoinColumns = @JoinColumn(name = "show_id")
-	       )
-	       private Set<Show> shows = new HashSet<>();
-	   
 
-	   
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Seat> seats;
+
+	@ManyToMany
+	@JoinTable(name = "user_show", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "show_id"))
+	private Set<Show> shows = new HashSet<>();
 
 	private Boolean deleteFlag = false;
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private UserProfile userProfile;
-	
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> notifications;
-	
+	private List<Notification> notifications;
+
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Booking> bookings;
 
