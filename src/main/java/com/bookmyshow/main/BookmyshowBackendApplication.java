@@ -19,22 +19,14 @@ public class BookmyshowBackendApplication {
 
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(BookmyshowBackendApplication.class, args);
-		
+
 		System.out.println("===> BookMyShow Project Started..... <===");
 
-//		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
-//	    String password = "Mansi@01";
-//
-//	    String encrypted = AESUtil.encrypt(password, key);
-//	    String decrypted = AESUtil.decrypt(encrypted, key);
-//
-//	    System.out.println("Encrypted: " + encrypted);
-//	    System.out.println("Decrypted: " + decrypted);
-
 	}
+
 	@Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
+	public ModelMapper modelMapper() {
+		return new ModelMapper();
+	}
 
 }

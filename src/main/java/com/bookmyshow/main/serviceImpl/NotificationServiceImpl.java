@@ -44,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(n -> modelMapper.map(n, NotificationDTO.class))
                 .getContent();
 
-        // get total count (ignores pagination)
+        // get total count
         long totalCount = notificationRepository.countByUser_UserId(userId);
 
         return new NotificationPageResponse<>(totalCount, dtos);
