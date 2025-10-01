@@ -35,6 +35,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 	
 	Page<Event> findAll(Specification<Event> spec, Pageable pageable);
 
+
+
 	
 
 

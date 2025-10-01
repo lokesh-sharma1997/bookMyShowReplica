@@ -1,4 +1,4 @@
-package com.bookmyshow.main.serviceImpl;
+package com.bookmyshow.main.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

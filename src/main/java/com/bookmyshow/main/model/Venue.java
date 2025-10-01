@@ -35,7 +35,7 @@ public class Venue {
 //    private Address address; 
 
     @ManyToOne(cascade = CascadeType.PERSIST) 
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    @JoinColumn(name = "address_id")
     private Address address;
 
     @ManyToMany(cascade = CascadeType.PERSIST)
@@ -50,7 +50,7 @@ public class Venue {
     private List<SupportedCategory> supportedCategories; 
 
     @OneToMany(mappedBy = "venue",cascade = CascadeType.PERSIST)
-    private List<Screen> screens= new ArrayList<>(); // Screens (only for "movies")
+    private List<Screen> screens= new ArrayList<>(); 
     
     
     @ManyToMany(mappedBy = "venues")
@@ -61,11 +61,6 @@ public class Venue {
     private List<Show> show;
 
     
-    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TimeSlot> timeSlots = new ArrayList<>();
-
-
-
     private Boolean deleted = false;
 
 }

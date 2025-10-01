@@ -6,4 +6,6 @@ import com.bookmyshow.main.model.City;
 
 public interface CityRepository extends JpaRepository<City, Integer> {
 
+	City findByName(String cityName);
+
 }
