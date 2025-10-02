@@ -124,13 +124,7 @@ public class Event {
     )
 	private List<MoreFilters> moreFilters;
 
-	@ManyToMany
-    @JoinTable(
-        name = "event_price_map",
-        joinColumns = @JoinColumn(name = "event_id"),
-        inverseJoinColumns = @JoinColumn(name = "price_id", referencedColumnName = "priceId")
-    )
-	private List<Price> price;
+
 
 	@ManyToMany
     @JoinTable(
@@ -140,8 +134,7 @@ public class Event {
     )
 	private List<Cast> cast;
 	
-//	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Cast> cast;
+
 
 	@ManyToMany
     @JoinTable(

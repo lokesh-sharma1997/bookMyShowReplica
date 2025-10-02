@@ -186,7 +186,6 @@ class EventServiceImplTest {
         event.setDateFilter(new ArrayList<>());
         event.setCategories(new ArrayList<>());
         event.setMoreFilters(new ArrayList<>());
-        event.setPrice(new ArrayList<>());
         event.setCast(new ArrayList<>());
         event.setCrew(new ArrayList<>());
         event.setCity(new ArrayList<>());
@@ -215,7 +214,6 @@ class EventServiceImplTest {
         eventDto.setDateFilter(Collections.emptyList());
         eventDto.setCategories(Collections.emptyList());
         eventDto.setMoreFilters(Collections.emptyList());
-        eventDto.setPrice(Collections.emptyList());
         eventDto.setCast(Collections.emptyList());
         eventDto.setCrew(Collections.emptyList());
         eventDto.setCity(Collections.emptyList());
@@ -1086,9 +1084,6 @@ class EventServiceImplTest {
        
         Price price = new Price();
         price.setPriceRange("₹200-₹500");
-        event.setPrice(List.of(price));
-
-        
         Cast cast = new Cast();
         cast.setActorName("John Doe");
         cast.setCastImg("johndoe.jpg");
@@ -1122,7 +1117,6 @@ class EventServiceImplTest {
         assertEquals("This Week", dto.getDateFilter().get(0));
         assertEquals("Music", dto.getCategories().get(0));
         assertEquals("Indoor", dto.getMoreFilters().get(0));
-        assertEquals("₹200-₹500", dto.getPrice().get(0));
         assertEquals("John Doe", dto.getCast().get(0).getActorName());
         assertEquals("johndoe.jpg", dto.getCast().get(0).getCastImg());
         assertEquals("Jane Smith", dto.getCrew().get(0).getMemberName());

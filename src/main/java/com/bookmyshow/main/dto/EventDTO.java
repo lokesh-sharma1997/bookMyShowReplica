@@ -32,7 +32,6 @@ public class EventDTO {
     private List<Integer> dateFilter;
     private List<Integer> categories;
     private List<Integer> moreFilters;
-    private List<Integer> price;
     private List<CastDTO> cast;
     private List<CrewDTO> crew;
     private List<Integer> city;
