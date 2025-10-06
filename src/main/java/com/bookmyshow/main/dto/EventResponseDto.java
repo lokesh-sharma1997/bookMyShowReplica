@@ -35,7 +35,6 @@ public class EventResponseDto {
     private List<String> dateFilter;
     private List<String> categories;
     private List<String> moreFilters;
-    private List<String> price;
     private List<CastDTO> cast;
     private List<CrewDTO> crew;
     private List<String> city;
