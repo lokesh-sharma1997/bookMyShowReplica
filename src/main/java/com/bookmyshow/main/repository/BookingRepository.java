@@ -1,5 +1,5 @@
 package com.bookmyshow.main.repository;
-
+	
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +13,7 @@ import io.lettuce.core.dynamic.annotation.Param;
 
 public interface BookingRepository extends JpaRepository<Booking,Long> {
 
-	Optional<UserMaster> findByShowId(Long showId);
+    List<Booking> findByShowId(Long showId);
 
 }
 	

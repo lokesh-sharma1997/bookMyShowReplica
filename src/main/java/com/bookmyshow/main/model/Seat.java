@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Entity
 @Table(name = "seat")
 @Data
@@ -22,38 +21,35 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Seat {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+	@Id
+	@GeneratedValue
+	private Long id;
 
-    private String seatNumber;
+	private String seatNumber;
 
-    private boolean reserved;
+	private boolean reserved;
 
-    @ManyToOne
-    @JoinColumn(name = "show_id")
-    private Show show;
+	@ManyToOne
+	@JoinColumn(name = "show_id")
+	private Show show;
 
-    @ManyToOne
-    @JoinColumn(name = "screen_id")
-    private Screen screen;
+	@ManyToOne
+	@JoinColumn(name = "screen_id")
+	private Screen screen;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserMaster user;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private UserMaster user;
 
-    @ManyToOne
-    @JoinColumn(name = "show_category_id")
-    private ShowCategory showCategory;
-    
-    @ManyToMany(mappedBy = "seats")
-    private List<Booking> bookings;
-    
-    @ManyToOne
-    @JoinColumn(name = "layout_row_id")
-    private LayoutRow layoutRow;
+	@ManyToOne
+	@JoinColumn(name = "show_category_id")
+	private ShowCategory showCategory;
 
+	@ManyToMany(mappedBy = "seats")
+	private List<Booking> bookings;
 
-   
+	@ManyToOne
+	@JoinColumn(name = "layout_row_id")
+	private LayoutRow layoutRow;
 
 }

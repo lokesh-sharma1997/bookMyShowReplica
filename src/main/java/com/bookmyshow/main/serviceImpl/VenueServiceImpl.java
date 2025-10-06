@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.AddressDTO;
-import com.bookmyshow.main.dto.CityVDTO;
 import com.bookmyshow.main.dto.LayoutDTO;
 import com.bookmyshow.main.dto.LayoutRowDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
@@ -113,11 +112,8 @@ public class VenueServiceImpl implements VenueService {
             addressDto.setStreet(entity.getAddress().getStreet());
             addressDto.setPin(entity.getAddress().getPin());
 
-            // Map City from Entity to CityVDTO
             if (entity.getAddress().getCity() != null) {
-                CityVDTO cityVDTO = new CityVDTO();
-                cityVDTO.setCityName(entity.getAddress().getCity().getName());
-                addressDto.setCity(cityVDTO); // Set CityVDTO in AddressDTO
+                addressDto.setCityName(entity.getAddress().getCity().getName());
             }
 
             dto.setAddress(addressDto); 
@@ -212,9 +208,9 @@ public class VenueServiceImpl implements VenueService {
             address.setStreet(dto.getAddress().getStreet());
             address.setPin(dto.getAddress().getPin());
 
-            if (dto.getAddress().getCity() != null) {
+            if (dto.getAddress().getCityName() != null) {
                 City city = new City();
-                city.setName(dto.getAddress().getCity().getCityName());  
+                city.setName(dto.getAddress().getCityName());  
                 address.setCity(city);  
             }
 
@@ -268,14 +264,15 @@ public class VenueServiceImpl implements VenueService {
             address.setStreet(dto.getAddress().getStreet());
             address.setPin(dto.getAddress().getPin());
 
-            if (dto.getAddress().getCity() != null) {
-                String cityName = dto.getAddress().getCity().getCityName();
+            if (dto.getAddress().getCityName() != null) {
+                String cityName = dto.getAddress().getCityName();
 
                 City city = cityRepository.findByName(cityName);
 
                 if (city == null) {
                     city = new City();
                     city.setName(cityName);
+                    city.setPopular(false); 
                     city = cityRepository.save(city);
                 }
 
@@ -373,12 +370,23 @@ public class VenueServiceImpl implements VenueService {
             if (shows.isEmpty()) {
                 throw new RuntimeException("No shows found for venue");
             }
+            
 
             List<TimeSlotDTO> availableSlots = new ArrayList<>();
             for (Show show : shows) {
                 availableSlots.addAll(getAvailableSlotsForShow(show, date));
             }
-            return availableSlots;
+            if (availableSlots.isEmpty()) {
+                throw new RuntimeException("No available timeslots found for the given date");
+            }
+            
+            
+            List<TimeSlotDTO> uniqueSlots = availableSlots.stream()
+                .distinct()
+                .sorted(Comparator.comparing(TimeSlotDTO::getStartTime))
+                .collect(Collectors.toList());
+
+            return uniqueSlots;
         }
     }
     private List<TimeSlotDTO> getAvailableSlotsForShow(Show show, LocalDate date) {
@@ -446,8 +454,8 @@ public class VenueServiceImpl implements VenueService {
             address.setStreet(dto.getAddress().getStreet());
             address.setPin(dto.getAddress().getPin());
 
-            if (dto.getAddress().getCity() != null) {
-                String cityName = dto.getAddress().getCity().getCityName();
+            if (dto.getAddress().getCityName() != null) {
+                String cityName = dto.getAddress().getCityName();
                 City city = cityRepository.findByName(cityName);
                 if (city == null) {
                     city = new City();
@@ -518,29 +526,38 @@ public class VenueServiceImpl implements VenueService {
         return entityToDto(saved);
     }
     private int parseRuntimeToMinutes(String runTime) {
-        if (runTime == null || runTime.isBlank()) return 120; 
+        if (runTime == null || runTime.isBlank()) 
+            throw new IllegalArgumentException("Runtime is missing for this event.");
 
         runTime = runTime.toLowerCase().trim();
 
-        int hours = 0, minutes = 0;
+        int hours = 0;
+        int minutes = 0;
 
-        if (runTime.contains("h")) {
-            String hrPart = runTime.split("h")[0].trim();
-            if (!hrPart.isEmpty()) {
-                hours = Integer.parseInt(hrPart);
+        try {
+            if (runTime.matches(".*\\d+\\s*h.*")) {
+                String hrPart = runTime.split("h|hr")[0].replaceAll("[^0-9]", "").trim();
+                if (!hrPart.isEmpty()) hours = Integer.parseInt(hrPart);
             }
-            runTime = runTime.substring(runTime.indexOf("h") + 1).trim(); 
+
+            if (runTime.matches(".*\\d+\\s*m.*")) {
+                String minPart = runTime.substring(runTime.lastIndexOf("h") + 1)
+                        .replaceAll("[^0-9]", "").trim();
+                if (!minPart.isEmpty()) minutes = Integer.parseInt(minPart);
+            } else if (runTime.contains("minute")) {
+                String num = runTime.replaceAll("[^0-9]", "").trim();
+                if (!num.isEmpty()) minutes = Integer.parseInt(num);
+            } else if (runTime.matches("\\d+")) {
+                minutes = Integer.parseInt(runTime);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid runtime format in DB: " + runTime, e);
         }
 
-        if (runTime.contains("m")) {
-            String minPart = runTime.replace("m", "").trim();
-            if (!minPart.isEmpty()) {
-                minutes = Integer.parseInt(minPart);
-            }
-        }
-
-        return hours * 60 + minutes;
+        return (hours * 60) + minutes;
     }
+
 
 
 }

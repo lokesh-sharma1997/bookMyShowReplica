@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class VenueDTO {
 
-	@JsonIgnore 
+//	@JsonIgnore 
     private Long id;
 	
     private String venueName;

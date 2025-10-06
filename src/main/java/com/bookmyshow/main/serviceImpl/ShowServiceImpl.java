@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.bookmyshow.main.dto.ShowCategoryDTO;
 import com.bookmyshow.main.dto.ShowFetchDTO;
 import com.bookmyshow.main.dto.ShowRequestDTO;
-import com.bookmyshow.main.dto.ShowResponseDTO;
 import com.bookmyshow.main.dto.VenueShowDTO;
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Layout;
@@ -28,19 +27,19 @@ public class ShowServiceImpl implements ShowService {
     private final ShowRepository showRepository;
 
     @Override
-    public ShowResponseDTO getShows(ShowRequestDTO request) {
+    public List<VenueShowDTO> getShows(ShowRequestDTO request) {
         LocalDate date = LocalDate.parse(request.getDate());
 
         List<Show> shows = showRepository.findByEventIdAndShowDate(request.getEventId(), date);
 
-        List<VenueShowDTO> venueShows = shows.stream().map(show -> {
+        return shows.stream().map(show -> {
             Venue venue = show.getVenue();
             Screen screen = show.getScreen();
             Layout layout = show.getLayout();
             Event event = show.getEvent();
 
             List<ShowFetchDTO> showDtos = show.getShowstimedate().stream()
-                .filter(std -> std.getShowDate().equals(date)) // only selected date
+                .filter(std -> std.getShowDate().equals(date)) 
                 .flatMap(std -> std.getShowTimes().stream())
                 .map(st -> {
                     ShowFetchDTO dto = new ShowFetchDTO();
@@ -77,7 +76,5 @@ public class ShowServiceImpl implements ShowService {
                 showDtos
             );
         }).toList();
-
-        return new ShowResponseDTO(200, "shows fetched successfully", venueShows);
     }
 }

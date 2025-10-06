@@ -1,12 +1,17 @@
 package com.bookmyshow.main.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookmyshow.main.dto.ShowRequestDTO;
-import com.bookmyshow.main.dto.ShowResponseDTO;
+import com.bookmyshow.main.dto.VenueShowDTO;
+import com.bookmyshow.main.response.ApiResponse;
 import com.bookmyshow.main.service.ShowService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,9 +23,8 @@ public class ShowController {
 
     private final ShowService showService;
 
-    // GET API: /api/shows?eventId=1&date=2025-10-05
     @GetMapping
-    public ShowResponseDTO getShows(
+    public ResponseEntity<ApiResponse<List<VenueShowDTO>>> getShows(
             @RequestParam Long eventId,
             @RequestParam String date) {
 
@@ -28,6 +32,15 @@ public class ShowController {
         request.setEventId(eventId);
         request.setDate(date);
 
-        return showService.getShows(request);
+        List<VenueShowDTO> shows = showService.getShows(request);
+
+        ApiResponse<List<VenueShowDTO>> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Show fetched successfully",
+                true,
+                shows
+        );
+
+        return ResponseEntity.ok(response);
     }
 }
