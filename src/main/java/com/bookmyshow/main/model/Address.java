@@ -1,8 +1,6 @@
 package com.bookmyshow.main.model;
- 
-import java.util.List;
 
-import com.bookmyshow.main.dto.CityVDTO;
+import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,25 +18,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="address")
+@Table(name = "address")
 public class Address {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-    private String street;
 
-    
-//    private String city;
+	private String street;
 
-    private String pin;
-    
-    
-    @OneToMany(mappedBy = "address")
-    private List<Venue> venues;
+	private String pin;
 
-    @ManyToOne
-    @JoinColumn(name = "city_id")  
-    private City city;
+	@OneToMany(mappedBy = "address")
+	private List<Venue> venues;
+
+	@ManyToOne
+	@JoinColumn(name = "city_id")
+	private City city;
 }

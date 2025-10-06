@@ -20,7 +20,9 @@ public interface ShowtimedateRepository extends JpaRepository<ShowTimeDate, Long
             Long venueId,
             Long screenId,
             LocalDate showDate
-    );    
+    ); 
+    
+    
 
 }
 	
