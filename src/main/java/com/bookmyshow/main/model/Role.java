@@ -22,7 +22,7 @@ public class Role {
 	private int roleId;
 
 	@Column(nullable = false, unique = true)
-	private String roleName; // e.g., "ADMIN", "USER", "MANAGER", etc.
+	private String roleName; // e.g. "ADMIN", "USER" etc.
 
 	@OneToMany(mappedBy = "role")
 	private List<UserMaster> users;

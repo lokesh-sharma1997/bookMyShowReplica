@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.bookmyshow.main.controller.UserController;
@@ -75,7 +76,7 @@ public class UserControllerTest {
 		ResponseEntity<ApiResponse<UsersResponse>> response = userController.getAllUsers(0, 10);
 
 		assertEquals(200, response.getBody().getStatusCode());
-		assertEquals("Users retrieved", response.getBody().getMessage());
+		assertEquals("Users fetched successfully", response.getBody().getMessage());
 		assertEquals(1, response.getBody().getData().getUsers().size());
 	}
 
@@ -85,11 +86,13 @@ public class UserControllerTest {
 		Page<UserDTO> emptyPage = Page.empty();
 		when(userService.getAllUsers(0, 10)).thenReturn(emptyPage);
 
-		UserNotFoundException thrown = assertThrows(UserNotFoundException.class, () -> {
-			userController.getAllUsers(0, 10);
-		});
+		ResponseEntity<ApiResponse<UsersResponse>> response = userController.getAllUsers(0, 10);
 
-		assertEquals("No users found", thrown.getMessage());
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertTrue(response.getBody().isSuccess());
+		assertEquals("No users found", response.getBody().getMessage());
+		assertTrue(response.getBody().getData().getUsers().isEmpty());
+		assertEquals(0, response.getBody().getData().getTotalEntries());
 	}
 
 	// deleteUser success
@@ -125,7 +128,7 @@ public class UserControllerTest {
 		ResponseEntity<ApiResponse<UsersResponse>> response = userController.globalSearchUser("kashish", 0, 10);
 
 		assertEquals(200, response.getBody().getStatusCode());
-		assertEquals("Users found", response.getBody().getMessage());
+		assertEquals("Users fetched successfully", response.getBody().getMessage());
 		assertNotNull(response.getBody().getData());
 		assertEquals(1, response.getBody().getData().getUsers().size());
 	}
@@ -134,13 +137,14 @@ public class UserControllerTest {
 	@Test
 	void testGlobalSearchUser_NoResults() {
 		Page<UserDTO> emptyPage = Page.empty();
-		when(userService.searchUser("nonexistent", 0, 10)).thenReturn(emptyPage);
+		when(userService.searchUser("emptylist", 0, 10)).thenReturn(emptyPage);
 
-		ResponseEntity<ApiResponse<UsersResponse>> response = userController.globalSearchUser("nonexistent", 0, 10);
+		ResponseEntity<ApiResponse<UsersResponse>> response = userController.globalSearchUser("emptylist", 0, 10);
 
 		assertEquals(200, response.getBody().getStatusCode());
-		assertEquals("No user found", response.getBody().getMessage());
-		assertNull(response.getBody().getData());
+		assertEquals("No users found", response.getBody().getMessage());
+		assertTrue(response.getBody().getData().getUsers().isEmpty());
+		assertEquals(0, response.getBody().getData().getTotalEntries());
 	}
 
 	// globalSearchUser bad request (empty search value)

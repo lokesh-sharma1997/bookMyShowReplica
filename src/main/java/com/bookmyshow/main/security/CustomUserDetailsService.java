@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class CustomUserDetailsService implements UserDetailsService {
 
 	private final UserRepository userRepository; // requires: User findByUsername(String username)
-
+	 // Loads user details from DB and converts to Spring Security UserDetails
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		UserMaster data = userRepository.findByUsername(username);
