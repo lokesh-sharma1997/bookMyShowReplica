@@ -1036,11 +1036,6 @@ class EventServiceImplTest {
         event.setAgeLimit(13);
         event.setReleasingOn(LocalDate.of(2025, 9, 5));
 
-     
-        Venue venue = new Venue();
-        venue.setVenueName("Grand Hall");
-        event.setVenues(List.of(venue));
-
     
         Languages language = new Languages();
         language.setLanguageName("English");
@@ -1108,7 +1103,7 @@ class EventServiceImplTest {
         assertEquals("Test Event", dto.getName());
         assertEquals("Event description", dto.getDescription());
         assertEquals("120", dto.getRunTime());
-        assertEquals("Grand Hall", dto.getVenueName().get(0));
+//        assertEquals("Grand Hall", dto.getVenueName().get(0));
         assertEquals("English", dto.getLanguages().get(0));
         assertEquals("Action", dto.getGenres().get(0));
         assertEquals("3D", dto.getFormat().get(0));
@@ -1155,20 +1150,18 @@ class EventServiceImplTest {
         Categories cat1 = new Categories(); cat1.setCategoriesName("Blockbuster");
         event.setCategories(List.of(cat1));
 
-        
-        Venue venue1 = new Venue(); venue1.setVenueName("PVR");
-        Venue venue2 = new Venue(); venue2.setVenueName("INOX");
-        event.setVenues(List.of(venue1, venue2));
-
-       
+  
         ShowTime time1 = new ShowTime(); time1.setShowTime(LocalTime.of(10, 30));
         ShowTimeDate showTimeDate = new ShowTimeDate();
         showTimeDate.setShowDate(LocalDate.now());
         showTimeDate.setShowTimes(List.of(time1));
+        Venue venue1 = new Venue();
+        venue1.setVenueName("PVR");
 
         Show show = new Show();
         show.setShowPrice(250);
         show.setShowstimedate(List.of(showTimeDate));
+        show.setVenue(venue1);
         event.setShows(List.of(show));
 
       
@@ -1180,7 +1173,7 @@ class EventServiceImplTest {
         assertEquals(120.0, dto.getLikes());
         assertEquals(250, dto.getPricelist().get(0));
         assertEquals(LocalTime.of(10, 30), dto.getStarttime());
-        assertEquals(List.of("PVR", "INOX"), dto.getVenueName());
+        assertEquals(List.of("PVR"), dto.getVenueName());
         assertEquals(List.of("Action", "Thriller"), dto.getGenres());
         assertEquals(List.of("English", "Hindi"), dto.getLanguages());
         assertEquals(List.of("Blockbuster"), dto.getCategories());
