@@ -10,17 +10,16 @@ import lombok.Data;
 
 @Data
 public class LayoutDTO {
-	
+
+	private Long id;
+	private String layoutName;
+	private List<String> rows;
+	private int cols;
+
 	@JsonIgnore
-    private Long id;
-    private String layoutName;
-    private List<String> rows;  
-    private int cols;
-    
-    @JsonIgnore
-   private int price;
-   
-    @JsonIgnore
+	private int price;
+
+	@JsonIgnore
 	private Long ScreenId;
 
 }
