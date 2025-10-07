@@ -7,12 +7,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 public class ScreenDTO {
-	
-	
-	@JsonIgnore
-    private Long id;
-	
-    private String screenName;
-    private List<LayoutDTO> layouts; 
+
+	private Long id;
+
+	private String screenName;
+	private List<LayoutDTO> layouts;
 
 }
