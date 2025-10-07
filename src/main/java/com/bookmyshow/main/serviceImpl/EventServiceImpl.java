@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.bookmyshow.main.dto.CastDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -779,7 +781,7 @@ public class EventServiceImpl implements EventService {
 				price, moreFilters, releaseMonths, dateFilters);
 
 		if ("Movie".equalsIgnoreCase(type) && !includeCurrentlyPlaying) {
-			// Add condition to specification that currentlyPlaying must be true
+			// Add condition to specification that currentlyPlaying must be false
 			Specification<Event> currentlyPlayingSpec = (root, query, criteriaBuilder) -> criteriaBuilder
 					.isFalse(root.get("currentlyPlaying"));
 			spec = spec.and(currentlyPlayingSpec);
@@ -834,10 +836,12 @@ public class EventServiceImpl implements EventService {
 			dto.setStarttime(firstShowTime);
 		}
 
-		if (event.getVenues() != null && !event.getVenues().isEmpty()) {
+		if (event.getShows() != null && !event.getShows().isEmpty()) {
 
-			List<String> venueName = event.getVenues().stream().map(v -> v.getVenueName()).toList();
-			dto.setVenueName(venueName);
+			List<String> venueNameList = event.getShows().stream().map(s -> s.getVenue().getVenueName())
+					.collect(Collectors.toList());
+
+			dto.setVenueName(venueNameList);
 		} else {
 			dto.setVenueName(List.of());
 		}
@@ -888,10 +892,13 @@ public class EventServiceImpl implements EventService {
 		dto.setDeleted(event.getDeleted());
 		dto.setAgeLimit(event.getAgeLimit() != null ? event.getAgeLimit() : 0);
 		dto.setReleasingOn(event.getReleasingOn());
-		if (event.getVenues() != null && !event.getVenues().isEmpty()) {
 
-			List<String> venueName = event.getVenues().stream().map(v -> v.getVenueName()).toList();
-			dto.setVenueName(venueName);
+		if (event.getShows() != null && !event.getShows().isEmpty()) {
+
+			List<String> venueNameList = event.getShows().stream().map(s -> s.getVenue().getVenueName())
+					.collect(Collectors.toList());
+
+			dto.setVenueName(venueNameList);
 		} else {
 			dto.setVenueName(List.of());
 		}
