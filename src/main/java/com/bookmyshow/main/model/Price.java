@@ -22,6 +22,5 @@ public class Price {
     @Column(nullable = false, unique = true)
     private String priceRange;
     
-    @ManyToMany(mappedBy = "price")
-	private List<Event> events;
+
 }

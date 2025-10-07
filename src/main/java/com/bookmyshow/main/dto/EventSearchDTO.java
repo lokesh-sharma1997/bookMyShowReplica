@@ -8,4 +8,5 @@ import lombok.Data;
 public class EventSearchDTO {
     private Long eventId;
     private String name;
+    private String eventType;
 }

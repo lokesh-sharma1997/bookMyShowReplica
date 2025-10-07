@@ -14,13 +14,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "amenity")
 public class Amenity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "amenity_name")  
-     private String amenityName; 
+	@Column(name = "amenity_name")
+	private String amenityName;
 
-    @ManyToMany(mappedBy = "amenities")
-    private List<Venue> venues; 
+	@ManyToMany(mappedBy = "amenities")
+	private List<Venue> venues;
 }

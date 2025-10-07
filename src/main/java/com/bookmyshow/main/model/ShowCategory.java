@@ -18,18 +18,18 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ShowCategory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "show_id")
-    private Show show;
+	@ManyToOne
+	@JoinColumn(name = "show_id")
+	private Show show;
 
-    @ManyToOne
-    @JoinColumn(name = "layout_id")
-    private Layout layout;
+	@ManyToOne
+	@JoinColumn(name = "layout_id")
+	private Layout layout;
 
-    private Integer price;
+	private Integer price;
 
 }

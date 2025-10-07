@@ -16,15 +16,8 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 	static List<Seat> findByShowCategoryId(Long id) {
 		return null;
 	}
-
-
-
+	
 	List<Seat> findByShowCategoryIdAndReservedTrue(Long id);
-
-
-
-
-
 
 	List<Seat> findByShowIdAndScreenId(Long id, Long id2);
 

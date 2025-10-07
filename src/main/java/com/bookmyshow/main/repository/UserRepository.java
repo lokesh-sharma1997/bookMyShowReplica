@@ -28,6 +28,8 @@ public interface UserRepository extends JpaRepository<UserMaster, Long> {
 
 	Page<UserMaster> findByDeleteFlagFalse(Pageable pageable);
 
+	Page<UserMaster> findByRoleAndDeleteFlagFalse(Role role, Pageable pageable);
+
 	@Query("SELECT user FROM UserMaster user WHERE " + "(LOWER(user.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR "
 			+ "LOWER(user.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR "
 			+ "LOWER(user.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR "

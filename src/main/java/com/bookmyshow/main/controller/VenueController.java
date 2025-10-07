@@ -38,18 +38,38 @@ public class VenueController {
 
 	    return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    
+    
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<VenueDTO>> getAllVenues() {
+    public ResponseEntity<ApiResponse<List<VenueDTO>>> getAllVenues() {
         List<VenueDTO> venues = venueService.getAllVenues();
-        return ResponseEntity.ok(venues);
+
+        ApiResponse<List<VenueDTO>> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "All venues fetched successfully",
+                true,
+                venues
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/city/{city}")
-    public ResponseEntity<List<VenueDTO>> getVenuesByCity(@PathVariable String city) {
+    public ResponseEntity<ApiResponse<List<VenueDTO>>> getVenuesByCity(@PathVariable String city) {
         List<VenueDTO> venues = venueService.getVenuesByCity(city);
-        return ResponseEntity.ok(venues);
+
+        ApiResponse<List<VenueDTO>> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Venues fetched successfully for city: " + city,
+                true,
+                venues
+        );
+
+        return ResponseEntity.ok(response);
     }
+    
+    
 
     @PatchMapping("/delete/{id}")
     public ResponseEntity<ApiResponse<String>> softDeleteVenue(@PathVariable Long id) {
@@ -59,16 +79,28 @@ public class VenueController {
 		}
         return ResponseEntity.ok(new ApiResponse<>(204, "Venue deleted successfully", true, "Venue with ID " + id + " deleted"));
     }
-   
-        @GetMapping("/{venueId}/available-timeslots")
-        public ResponseEntity<List<TimeSlotDTO>> getAvailableTimeSlots(
-                @PathVariable Long venueId,
-                @RequestParam(required = false) Long screenId,
-                @RequestParam LocalDate date
-        ) {
-            List<TimeSlotDTO> availableTimeSlots = venueService.getAvailableTimeSlots(venueId, screenId, date);
-            return ResponseEntity.ok(availableTimeSlots);
-        }
+    
+    
+    
+    @GetMapping("/{venueId}/available-timeslots")
+    public ResponseEntity<ApiResponse<List<TimeSlotDTO>>> getAvailableTimeSlots(
+            @PathVariable Long venueId,
+            @RequestParam(required = false) Long screenId,
+            @RequestParam LocalDate date
+    ) {
+        List<TimeSlotDTO> availableTimeSlots = venueService.getAvailableTimeSlots(venueId, screenId, date);
+
+        ApiResponse<List<TimeSlotDTO>> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Available timeslots fetched successfully",
+                true,
+                availableTimeSlots
+        );
+
+        return ResponseEntity.ok(response);
+    }
+    
+    
 
         @PutMapping("/{venueId}/update")
         public ResponseEntity<ApiResponse<VenueDTO>> updateVenue(

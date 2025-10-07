@@ -1,9 +1,7 @@
 package com.bookmyshow.main.serviceImpl;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -48,7 +46,8 @@ public class UserServiceImpl implements UserService {
 		dto.setDeleteFlag(user.getDeleteFlag());
 		return dto;
 	}
-	// Retrieves user by user Id 
+
+	// Retrieves user by user Id
 	@Override
 	public Optional<UserDTO> getByUserId(long userId) {
 		if (userId <= 0) {
@@ -68,20 +67,6 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return Optional.ofNullable(userRepository.findByUsername(username)).map(this::convertToDTO);
-	}
-
-	// Returns list of users filtered by role
-	@Override
-	public List<UserDTO> getByRole(String roleName) {
-		if (roleName == null || roleName.trim().isEmpty()) {
-			throw new IllegalArgumentException("Role name cannot be null or empty.");
-		}
-
-		Role role = roleRepository.findByRoleName(roleName.toUpperCase())
-				.orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
-
-		return userRepository.findByRole(role).stream().filter(user -> !user.getDeleteFlag()).map(this::convertToDTO)
-				.collect(Collectors.toList());
 	}
 
 	// Get All Users
@@ -147,4 +132,21 @@ public class UserServiceImpl implements UserService {
 
 		return usersPage.map(this::convertToDTO);
 	}
+
+	@Override
+	public Page<UserDTO> getByRoleName(String roleName, int page, int size) {
+
+		if (roleName == null || roleName.trim().isEmpty()) {
+			throw new IllegalArgumentException("Role name cannot be null or empty.");
+		}
+
+		Role role = roleRepository.findByRoleName(roleName.toUpperCase())
+				.orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
+
+		Pageable pageable = PageRequest.of(page, size);
+		Page<UserMaster> usersPage = userRepository.findByRoleAndDeleteFlagFalse(role, pageable);
+
+		return usersPage.map(this::convertToDTO);
+	}
+
 }

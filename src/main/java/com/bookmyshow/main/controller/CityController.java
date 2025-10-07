@@ -22,7 +22,7 @@ public class CityController {
 
 	@GetMapping("/all")
 	public ResponseEntity<ApiResponse<List<CityDTO>>>getAllCities() {
-//		return cityService.getAllCities();
+
 		
 		return ResponseEntity.ok(
 	            new ApiResponse<>(
@@ -36,7 +36,7 @@ public class CityController {
 
 	@GetMapping("/popular")
 	public ResponseEntity<ApiResponse<List<CityDTO>>> getPopularCities() {
-//		return cityService.getPopularCities();
+
 		
 
 		return ResponseEntity.ok(
