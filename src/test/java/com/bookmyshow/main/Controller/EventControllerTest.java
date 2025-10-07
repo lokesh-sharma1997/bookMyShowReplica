@@ -326,8 +326,8 @@ class EventControllerTest {
     void testSearchEventNames() throws Exception {
        
         List<EventSearchDTO> mockEventNames = Arrays.asList(
-                new EventSearchDTO(1L, "Concert"),
-                new EventSearchDTO(2L, "Conference")
+                new EventSearchDTO(1L, "Concert","Movie"),
+                new EventSearchDTO(2L, "Conference","Movie")
         );
         
         EventSearchRequestDto requestDto = new EventSearchRequestDto();

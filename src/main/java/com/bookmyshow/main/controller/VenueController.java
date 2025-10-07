@@ -106,5 +106,4 @@ public class VenueController {
 
 		return ResponseEntity.status(response.isSuccess() ? HttpStatus.OK : HttpStatus.NOT_FOUND).body(response);
 	}
-
 }

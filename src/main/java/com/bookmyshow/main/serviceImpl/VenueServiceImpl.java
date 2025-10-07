@@ -421,7 +421,6 @@ public class VenueServiceImpl implements VenueService {
 				if (city == null) {
 					city = new City();
 					city.setName(cityName);
-					city.setPopular(false);
 					city = cityRepository.save(city);
 				}
 				address.setCity(city);
