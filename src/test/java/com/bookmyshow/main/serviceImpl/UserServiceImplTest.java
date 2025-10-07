@@ -51,7 +51,6 @@ class UserServiceImplTest {
 		role = new Role();
 		role.setRoleId(1);
 		role.setRoleName("USER");
-
 		user = new UserMaster();
 		user.setUserId(1L);
 		user.setName("Kashish Saraswat");
@@ -100,24 +99,6 @@ class UserServiceImplTest {
 		Optional<UserDTO> result = userService.getByUsername("unknown");
 
 		assertFalse(result.isPresent());
-	}
-
-	@Test
-	void testGetByRoleFound() {
-		when(roleRepository.findByRoleName("ADMIN")).thenReturn(Optional.of(role));
-		when(userRepository.findByRole(role)).thenReturn(List.of(user));
-
-		List<UserDTO> result = userService.getByRole("ADMIN");
-
-		assertEquals(1, result.size());
-		assertEquals("kashish11", result.get(0).getUsername());
-	}
-
-	@Test
-	void testGetByRoleNotFound() {
-		when(roleRepository.findByRoleName("ADMIN")).thenReturn(Optional.empty());
-
-		assertThrows(RoleNotFoundException.class, () -> userService.getByRole("ADMIN"));
 	}
 
 	@Test
@@ -217,4 +198,38 @@ class UserServiceImplTest {
 		assertEquals(1, resultPage.getContent().size());
 		assertEquals("kashish11", resultPage.getContent().get(0).getUsername());
 	}
+
+	@Test
+	void testGetByRoleName_ValidRole_ReturnsUserDTOPage() {
+		role.setRoleName("ADMIN");
+
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<UserMaster> usersPage = new PageImpl<>(List.of(user), pageable, 1);
+
+		when(roleRepository.findByRoleName("ADMIN")).thenReturn(Optional.of(role));
+		when(userRepository.findByRoleAndDeleteFlagFalse(role, pageable)).thenReturn(usersPage);
+
+		Page<UserDTO> result = userService.getByRoleName("ADMIN", 0, 10);
+
+		assertNotNull(result);
+		assertEquals(1, result.getContent().size());
+		assertEquals("kashish11", result.getContent().get(0).getUsername());
+	}
+
+	@Test
+	void testGetByRoleName_ValidRole_NoUsersFound() {
+		role.setRoleName("ADMIN");
+
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<UserMaster> emptyPage = Page.empty();
+
+		when(roleRepository.findByRoleName("ADMIN")).thenReturn(Optional.of(role));
+		when(userRepository.findByRoleAndDeleteFlagFalse(role, pageable)).thenReturn(emptyPage);
+
+		Page<UserDTO> result = userService.getByRoleName("ADMIN", 0, 10);
+
+		assertNotNull(result);
+		assertTrue(result.getContent().isEmpty());
+	}
+
 }
