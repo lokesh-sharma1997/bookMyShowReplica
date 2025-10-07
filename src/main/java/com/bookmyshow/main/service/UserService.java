@@ -12,11 +12,11 @@ public interface UserService {
 
 	Optional<UserDTO> getByUsername(String username);
 
-	List<UserDTO> getByRole(String roleName);
-
 	public Page<UserDTO> searchUser(String value, int page, int size);
 
-    Page<UserDTO> getAllUsers(int page, int size);
+	Page<UserDTO> getByRoleName(String roleName, int page, int size);
+
+	Page<UserDTO> getAllUsers(int page, int size);
 
 	boolean deleteById(long userId);
 

@@ -62,12 +62,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				response.getWriter().write("Token has expired or is invalid.");
 				return;
 			}
-			/**
-			 * // Second check if the JWT itself is expired if
-			 * (jwtService.isTokenExpired(token)) {
-			 * response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			 * response.getWriter().write("Token has expired."); return; }
-			 **/
 
 			// If token is valid and not expired, proceed with user authentication
 			if (jwtService.isTokenValid(token, userDetails)) {
@@ -75,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						userDetails, null, userDetails.getAuthorities());
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 
-				// Refresh token TTL in Redis to 10 minutes (600,000 milliseconds)
+				// Refresh token TTL in Redis to 10 minutes
 				long newTTLInMillis = 10 * 60 * 1000; // 10 minutes
 				tokenService.refreshTokenTTL(userId, newTTLInMillis);
 			} else {
@@ -99,16 +93,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				"/bookmyshow/api/city/**", "/venues/city/{city}", "/venues/getAll", "/bookmyshow/venue/getAll",
 				"/bookmyshow/api/states", "/bookmyshow/api/events/{id}", "/bookmyshow/api/events/filter",
 				"/bookmyshow/auth/**", "/bookmyshow/api/auth/**", "/bookmyshow/swagger-ui/**",
-				"/bookmyshow/v3/api-docs/**");
+				"/bookmyshow/v3/api-docs/**", "/bookmyshow/api/shows");
 
 		return publicPaths.stream().anyMatch(path -> pathMatcher.match(path, requestUri));
 	}
 
 	private String extractJwtFromRequest(HttpServletRequest request) {
-		// Extract token from the Authorization header (Bearer token)
+		// Extract token from the Authorization header
 		String header = request.getHeader("Authorization");
 		if (header != null && header.startsWith("Bearer ")) {
-			return header.substring(7); // Extract the token part after "Bearer "
+			return header.substring(7);
 		}
 		return null; // Return null if no token found
 	}

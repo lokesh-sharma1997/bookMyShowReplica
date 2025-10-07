@@ -21,5 +21,7 @@ public interface VenueService {
 
 	List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date);
 
+	VenueDTO getVenueById(Long id);
+
     
 }

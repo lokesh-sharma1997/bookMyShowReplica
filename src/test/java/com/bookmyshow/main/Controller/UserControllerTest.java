@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.bookmyshow.main.controller.UserController;
@@ -66,30 +67,32 @@ public class UserControllerTest {
 		assertEquals("User not found with id: 2", thrown.getMessage());
 	}
 
-	// getAllUsers success
 	@Test
-	void testGetAllUsers_Success() {
-		Page<UserDTO> page = new PageImpl<>(List.of(user));
-		when(userService.getAllUsers(0, 10)).thenReturn(page);
+	void testGetUsers_ByValidRole_Success() {
+	    Page<UserDTO> page = new PageImpl<>(List.of(user)); 
+	    when(userService.getByRoleName("ADMIN", 0, 10)).thenReturn(page);
 
-		ResponseEntity<ApiResponse<UsersResponse>> response = userController.getAllUsers(0, 10);
+	    ResponseEntity<ApiResponse<UsersResponse>> response = userController.getUsers("ADMIN", 0, 10);
 
-		assertEquals(200, response.getBody().getStatusCode());
-		assertEquals("Users retrieved", response.getBody().getMessage());
-		assertEquals(1, response.getBody().getData().getUsers().size());
+	    assertEquals(HttpStatus.OK, response.getStatusCode());
+	    assertTrue(response.getBody().isSuccess());
+	    assertEquals("Users fetched successfully", response.getBody().getMessage());
+	    assertEquals(1, response.getBody().getData().getUsers().size());
+	    assertEquals(200, response.getBody().getStatusCode());
 	}
 
-	// getAllUsers no users found -> throws exception
 	@Test
-	void testGetAllUsers_NoUsers() {
-		Page<UserDTO> emptyPage = Page.empty();
-		when(userService.getAllUsers(0, 10)).thenReturn(emptyPage);
+	void testGetUsers_ByValidRole_NoUsersFound() {
+	    Page<UserDTO> emptyPage = Page.empty();
+	    when(userService.getByRoleName("ADMIN", 0, 10)).thenReturn(emptyPage);
 
-		UserNotFoundException thrown = assertThrows(UserNotFoundException.class, () -> {
-			userController.getAllUsers(0, 10);
-		});
+	    ResponseEntity<ApiResponse<UsersResponse>> response = userController.getUsers("ADMIN", 0, 10);
 
-		assertEquals("No users found", thrown.getMessage());
+	    assertEquals(HttpStatus.OK, response.getStatusCode());
+	    assertTrue(response.getBody().isSuccess());
+	    assertEquals("No users found", response.getBody().getMessage());
+	    assertTrue(response.getBody().getData().getUsers().isEmpty());
+	    assertEquals(0, response.getBody().getData().getTotalEntries());
 	}
 
 	// deleteUser success
@@ -125,7 +128,7 @@ public class UserControllerTest {
 		ResponseEntity<ApiResponse<UsersResponse>> response = userController.globalSearchUser("kashish", 0, 10);
 
 		assertEquals(200, response.getBody().getStatusCode());
-		assertEquals("Users found", response.getBody().getMessage());
+		assertEquals("Users fetched successfully", response.getBody().getMessage());
 		assertNotNull(response.getBody().getData());
 		assertEquals(1, response.getBody().getData().getUsers().size());
 	}
@@ -134,13 +137,14 @@ public class UserControllerTest {
 	@Test
 	void testGlobalSearchUser_NoResults() {
 		Page<UserDTO> emptyPage = Page.empty();
-		when(userService.searchUser("nonexistent", 0, 10)).thenReturn(emptyPage);
+		when(userService.searchUser("emptylist", 0, 10)).thenReturn(emptyPage);
 
-		ResponseEntity<ApiResponse<UsersResponse>> response = userController.globalSearchUser("nonexistent", 0, 10);
+		ResponseEntity<ApiResponse<UsersResponse>> response = userController.globalSearchUser("emptylist", 0, 10);
 
 		assertEquals(200, response.getBody().getStatusCode());
-		assertEquals("No user found", response.getBody().getMessage());
-		assertNull(response.getBody().getData());
+		assertEquals("No users found", response.getBody().getMessage());
+		assertTrue(response.getBody().getData().getUsers().isEmpty());
+		assertEquals(0, response.getBody().getData().getTotalEntries());
 	}
 
 	// globalSearchUser bad request (empty search value)
@@ -154,32 +158,7 @@ public class UserControllerTest {
 		assertNull(response.getBody().getData());
 	}
 
-	// getByRole success
-	@Test
-	void testGetByRole_Success() {
-		List<UserDTO> users = List.of(user);
-		when(userService.getByRole("USER")).thenReturn(users);
-
-		ResponseEntity<ApiResponse<UsersResponse>> response = userController.getByRole("USER");
-
-		assertEquals(200, response.getBody().getStatusCode());
-		assertEquals("Users found with role: USER", response.getBody().getMessage());
-		assertEquals(1, response.getBody().getData().getUsers().size());
-	}
-
-	// getByRole invalid role -> RoleNotFoundException
-	@Test
-	void testGetByRole_InvalidRole() {
-		when(userService.getByRole("INVALID")).thenThrow(new IllegalArgumentException("Invalid role"));
-
-		RoleNotFoundException thrown = assertThrows(RoleNotFoundException.class, () -> {
-			userController.getByRole("INVALID");
-		});
-
-		assertEquals("Invalid role name: INVALID", thrown.getMessage());
-	}
-
-	// updateUserRole success
+		// updateUserRole success
 	@Test
 	void testUpdateUserRole_Success() {
 		// Mocking userService.updateUserRole (void method)

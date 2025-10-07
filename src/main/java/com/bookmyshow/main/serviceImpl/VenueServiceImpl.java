@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.Duration;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -54,510 +53,476 @@ import com.bookmyshow.main.events.NotificationEvent;
 @Service
 public class VenueServiceImpl implements VenueService {
 
-    @Autowired
-    private VenueRepository venueRepository;
+	@Autowired
+	private VenueRepository venueRepository;
 
-    @Autowired
-    private AmenityRepository amenityRepository;
+	@Autowired
+	private AmenityRepository amenityRepository;
 
-    @Autowired
-    private AddressRepository addressRepository;
-    
-    @Autowired
-    private ShowRepository showRepository;
-    
-    @Autowired
-    private ShowtimedateRepository showtimedateRepository;
+	@Autowired
+	private AddressRepository addressRepository;
 
-    
-    @Autowired
-    private CityRepository cityRepository;
-    
-    @Autowired
-    private LayoutRepository layoutRepository;
-    
-    @Autowired
-    private ScreenRepository screenRepository;
-    
-    @Autowired
-    private LayoutRowRepository layoutRowRepository;
-    
-   @Autowired
-   private BookingRepository bookingRepository;
-    
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+	@Autowired
+	private ShowRepository showRepository;
 
-    @Autowired
-    private ShowTimeRepository showTimeRepository;
+	@Autowired
+	private ShowtimedateRepository showtimedateRepository;
 
-    
-    // Convert entity to DTO
-    private VenueDTO entityToDto(Venue entity) {
-        if (entity == null) {
-            return null;
-        }
-        
+	@Autowired
+	private CityRepository cityRepository;
 
-        VenueDTO dto = new VenueDTO();
-        dto.setId(entity.getId());
-        dto.setVenueName(entity.getVenueName());
-        dto.setVenueCapacity(entity.getVenueCapacity());
+	@Autowired
+	private LayoutRepository layoutRepository;
+
+	@Autowired
+	private ScreenRepository screenRepository;
+
+	@Autowired
+	private LayoutRowRepository layoutRowRepository;
+
+	@Autowired
+	private BookingRepository bookingRepository;
+
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
+
+	@Autowired
+	private ShowTimeRepository showTimeRepository;
+
+	// Convert entity to DTO
+	private VenueDTO entityToDto(Venue entity) {
+		if (entity == null) {
+			return null;
+		}
+
+		VenueDTO dto = new VenueDTO();
+		dto.setId(entity.getId());
+		dto.setVenueName(entity.getVenueName());
+		dto.setVenueCapacity(entity.getVenueCapacity());
 //        dto.setVenueFor(entity.getVenueFor());
-        dto.setVenueType(entity.getVenueType());
-        
-        
-        if (entity.getAddress() != null) {
-            AddressDTO addressDto = new AddressDTO();
-            addressDto.setStreet(entity.getAddress().getStreet());
-            addressDto.setPin(entity.getAddress().getPin());
+		dto.setVenueType(entity.getVenueType());
 
-            if (entity.getAddress().getCity() != null) {
-                addressDto.setCityName(entity.getAddress().getCity().getName());
-            }
+		if (entity.getAddress() != null) {
+			AddressDTO addressDto = new AddressDTO();
+			addressDto.setStreet(entity.getAddress().getStreet());
+			addressDto.setPin(entity.getAddress().getPin());
 
-            dto.setAddress(addressDto); 
-        }
-        if (entity.getAmenities() != null) {
-            List<String> amenityNames = entity.getAmenities().stream()
-                    .map(Amenity::getAmenityName)
-                    .collect(Collectors.toList());
-            dto.setAmenities(amenityNames); 
-        }
+			if (entity.getAddress().getCity() != null) {
+				addressDto.setCityName(entity.getAddress().getCity().getName());
+			}
 
-        
-        
-        
-        if (entity.getSupportedCategories() != null) {
-            List<String> supportedCategoryNames = entity.getSupportedCategories().stream()
-                    .map(SupportedCategory::getCategoryname)
-                    .collect(Collectors.toList());
-            dto.setSupportedCategories(supportedCategoryNames);
-        }
+			dto.setAddress(addressDto);
+		}
+		if (entity.getAmenities() != null) {
+			List<String> amenityNames = entity.getAmenities().stream().map(Amenity::getAmenityName)
+					.collect(Collectors.toList());
+			dto.setAmenities(amenityNames);
+		}
 
-        if ("movie".equalsIgnoreCase(entity.getVenueType()) && entity.getScreens() != null) {
-            List<ScreenDTO> screenDTOs = entity.getScreens().stream().map(screen -> {
-                ScreenDTO screenDto = new ScreenDTO();
-                screenDto.setId(screen.getId());
-                screenDto.setScreenName(screen.getScreenName());
+		if (entity.getSupportedCategories() != null) {
+			List<String> supportedCategoryNames = entity.getSupportedCategories().stream()
+					.map(SupportedCategory::getCategoryname).collect(Collectors.toList());
+			dto.setSupportedCategories(supportedCategoryNames);
+		}
 
-                List<LayoutDTO> layoutDTOs = screen.getLayouts().stream().map(layout -> {
-                    LayoutDTO layoutDto = new LayoutDTO();
-                    layoutDto.setId(layout.getId());
-                    layoutDto.setLayoutName(layout.getLayoutName());
-                    layoutDto.setCols(layout.getCols());
-                    layoutDto.setScreenId(screen.getId());
-                    
-                    if (layout.getLayoutRows() != null) {
-                        List<String> rowStrings = layout.getLayoutRows().stream()
-                            .map(LayoutRow::getRowName) 
-                            .collect(Collectors.toList());
-                        layoutDto.setRows(rowStrings);
-                    }
+		if ("movie".equalsIgnoreCase(entity.getVenueType()) && entity.getScreens() != null) {
+			List<ScreenDTO> screenDTOs = entity.getScreens().stream().map(screen -> {
+				ScreenDTO screenDto = new ScreenDTO();
+				screenDto.setId(screen.getId());
+				screenDto.setScreenName(screen.getScreenName());
 
-                    return layoutDto;
-                }).collect(Collectors.toList());
+				List<LayoutDTO> layoutDTOs = screen.getLayouts().stream().map(layout -> {
+					LayoutDTO layoutDto = new LayoutDTO();
+					layoutDto.setId(layout.getId());
+					layoutDto.setLayoutName(layout.getLayoutName());
+					layoutDto.setCols(layout.getCols());
+					layoutDto.setScreenId(screen.getId());
 
-                screenDto.setLayouts(layoutDTOs);
-                return screenDto;
-            }).collect(Collectors.toList());
+					if (layout.getLayoutRows() != null) {
+						List<String> rowStrings = layout.getLayoutRows().stream().map(LayoutRow::getRowName)
+								.collect(Collectors.toList());
+						layoutDto.setRows(rowStrings);
+					}
 
-            dto.setScreens(screenDTOs);
-        }
+					return layoutDto;
+				}).collect(Collectors.toList());
 
-        return dto;
-    }
+				screenDto.setLayouts(layoutDTOs);
+				return screenDto;
+			}).collect(Collectors.toList());
 
-    private Venue dtoToEntity(VenueDTO dto) {
-        if (dto == null) {
-            return null;
-        }
+			dto.setScreens(screenDTOs);
+		}
 
-        Venue entity = new Venue();
-        entity.setVenueName(dto.getVenueName());
-        entity.setVenueCapacity(dto.getVenueCapacity());
+		return dto;
+	}
+
+	private Venue dtoToEntity(VenueDTO dto) {
+		if (dto == null) {
+			return null;
+		}
+
+		Venue entity = new Venue();
+		entity.setVenueName(dto.getVenueName());
+		entity.setVenueCapacity(dto.getVenueCapacity());
 //        entity.setVenueFor(dto.getVenueFor());
-        entity.setVenueType(dto.getVenueType());
+		entity.setVenueType(dto.getVenueType());
 
-        if (dto.getAmenities() != null) {
-            List<Amenity> amenities = dto.getAmenities().stream()
-                .map(amenityName -> {
-                    Amenity amenity = new Amenity();
-                    amenity.setAmenityName(amenityName);
-                    return amenity;
-                }).collect(Collectors.toList());
-            entity.setAmenities(amenities);
-        } else {
-            entity.setAmenities(new ArrayList<>());
-        }
+		if (dto.getAmenities() != null) {
+			List<Amenity> amenities = dto.getAmenities().stream().map(amenityName -> {
+				Amenity amenity = new Amenity();
+				amenity.setAmenityName(amenityName);
+				return amenity;
+			}).collect(Collectors.toList());
+			entity.setAmenities(amenities);
+		} else {
+			entity.setAmenities(new ArrayList<>());
+		}
 
-        if (dto.getSupportedCategories() != null) {
-            List<SupportedCategory> supportedCategories = dto.getSupportedCategories().stream()
-                .map(categoryName -> {
-                    SupportedCategory category = new SupportedCategory();
-                    category.setCategoryname(categoryName);
-                    return category;
-                })
-                .collect(Collectors.toList());
-            entity.setSupportedCategories(supportedCategories);
-        }
-        
-        
-        if (dto.getAddress() != null) {
-            Address address = new Address();
-            address.setStreet(dto.getAddress().getStreet());
-            address.setPin(dto.getAddress().getPin());
+		if (dto.getSupportedCategories() != null) {
+			List<SupportedCategory> supportedCategories = dto.getSupportedCategories().stream().map(categoryName -> {
+				SupportedCategory category = new SupportedCategory();
+				category.setCategoryname(categoryName);
+				return category;
+			}).collect(Collectors.toList());
+			entity.setSupportedCategories(supportedCategories);
+		}
 
-            if (dto.getAddress().getCityName() != null) {
-                City city = new City();
-                city.setName(dto.getAddress().getCityName());  
-                address.setCity(city);  
-            }
+		if (dto.getAddress() != null) {
+			Address address = new Address();
+			address.setStreet(dto.getAddress().getStreet());
+			address.setPin(dto.getAddress().getPin());
 
-            entity.setAddress(address);
-        }
-        if ("movie".equalsIgnoreCase(dto.getVenueType()) && dto.getScreens() != null) {
-            List<Screen> screens = dto.getScreens().stream().map(screenDto -> {
-                Screen screen = new Screen();
-                screen.setScreenName(screenDto.getScreenName());
+			if (dto.getAddress().getCityName() != null) {
+				City city = new City();
+				city.setName(dto.getAddress().getCityName());
+				address.setCity(city);
+			}
 
-                if (screenDto.getLayouts() != null && !screenDto.getLayouts().isEmpty()) {
-                    List<Layout> layouts = screenDto.getLayouts().stream().map(layoutDto -> {
-                        Layout layout = new Layout();
-                        layout.setLayoutName(layoutDto.getLayoutName());
-                        layout.setCols(layoutDto.getCols());
+			entity.setAddress(address);
+		}
+		if ("movie".equalsIgnoreCase(dto.getVenueType()) && dto.getScreens() != null) {
+			List<Screen> screens = dto.getScreens().stream().map(screenDto -> {
+				Screen screen = new Screen();
+				screen.setScreenName(screenDto.getScreenName());
 
-                        if (layoutDto.getRows() != null && !layoutDto.getRows().isEmpty()) {
-                            List<LayoutRow> layoutRows = layoutDto.getRows().stream().map(rowName -> {
-                                LayoutRow layoutRow = new LayoutRow();
-                                layoutRow.setRowName(rowName);
-                                layoutRow.setLayout(layout);  
-                                return layoutRow;
-                            }).collect(Collectors.toList());
-                            layout.setLayoutRows(layoutRows);
-                        } else {
-                            layout.setLayoutRows(new ArrayList<>()); 
-                        }
+				if (screenDto.getLayouts() != null && !screenDto.getLayouts().isEmpty()) {
+					List<Layout> layouts = screenDto.getLayouts().stream().map(layoutDto -> {
+						Layout layout = new Layout();
+						layout.setLayoutName(layoutDto.getLayoutName());
+						layout.setCols(layoutDto.getCols());
 
-                        return layout;
-                    }).collect(Collectors.toList());
-                    screen.setLayouts(layouts);
-                } else {
-                    screen.setLayouts(new ArrayList<>()); 
-                }
+						if (layoutDto.getRows() != null && !layoutDto.getRows().isEmpty()) {
+							List<LayoutRow> layoutRows = layoutDto.getRows().stream().map(rowName -> {
+								LayoutRow layoutRow = new LayoutRow();
+								layoutRow.setRowName(rowName);
+								layoutRow.setLayout(layout);
+								return layoutRow;
+							}).collect(Collectors.toList());
+							layout.setLayoutRows(layoutRows);
+						} else {
+							layout.setLayoutRows(new ArrayList<>());
+						}
 
-                return screen;
-            }).collect(Collectors.toList());
-            entity.setScreens(screens);
-        }
+						return layout;
+					}).collect(Collectors.toList());
+					screen.setLayouts(layouts);
+				} else {
+					screen.setLayouts(new ArrayList<>());
+				}
 
-        return entity;
-    }
+				return screen;
+			}).collect(Collectors.toList());
+			entity.setScreens(screens);
+		}
 
+		return entity;
+	}
 
+	@Override
+	public VenueDTO createVenue(VenueDTO dto) {
+		Venue entity = dtoToEntity(dto);
+		if (dto.getAddress() != null) {
+			Address address = new Address();
+			address.setStreet(dto.getAddress().getStreet());
+			address.setPin(dto.getAddress().getPin());
 
-    @Override
-    public VenueDTO createVenue(VenueDTO dto) {
-        Venue entity = dtoToEntity(dto);
-        if (dto.getAddress() != null) {
-            Address address = new Address();
-            address.setStreet(dto.getAddress().getStreet());
-            address.setPin(dto.getAddress().getPin());
+			if (dto.getAddress().getCityName() != null) {
+				String cityName = dto.getAddress().getCityName();
 
-            if (dto.getAddress().getCityName() != null) {
-                String cityName = dto.getAddress().getCityName();
+				City city = cityRepository.findByName(cityName);
 
-                City city = cityRepository.findByName(cityName);
+				if (city == null) {
+					city = new City();
+					city.setName(cityName);
+					city.setPopular(false);
+					city = cityRepository.save(city);
+				}
 
-                if (city == null) {
-                    city = new City();
-                    city.setName(cityName);
-                    city.setPopular(false); 
-                    city = cityRepository.save(city);
-                }
+				address.setCity(city);
+			}
 
-                address.setCity(city);
-            }
+			Address savedAddress = addressRepository.save(address);
+			entity.setAddress(savedAddress);
+		}
 
-            Address savedAddress = addressRepository.save(address);
-            entity.setAddress(savedAddress);
-        }
+		if ("movie".equalsIgnoreCase(entity.getVenueType())) {
+			if (entity.getScreens() == null) {
+				entity.setScreens(new ArrayList<>());
+			}
 
-        if ("movie".equalsIgnoreCase(entity.getVenueType())) {
-            if (entity.getScreens() == null) {
-                entity.setScreens(new ArrayList<>());
-            }
-            
-            
-            	
+			for (Screen screen : entity.getScreens()) {
+				screen.setVenue(entity);
+				if (screen.getLayouts() != null) {
+					for (Layout layout : screen.getLayouts()) {
+						layout.setScreen(screen);
+						if (layout.getLayoutRows() != null) {
+							for (LayoutRow layoutRow : layout.getLayoutRows()) {
+								layoutRow.setLayout(layout);
+							}
+						}
+					}
+				}
+			}
+		} else {
+			entity.setScreens(new ArrayList<>());
+		}
 
-            for (Screen screen : entity.getScreens()) {
-                screen.setVenue(entity);
-                if (screen.getLayouts() != null) {
-                    for (Layout layout : screen.getLayouts()) {
-                        layout.setScreen(screen);
-                        if (layout.getLayoutRows() != null) {
-                            for (LayoutRow layoutRow : layout.getLayoutRows()) {
-                                layoutRow.setLayout(layout);
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            entity.setScreens(new ArrayList<>());
-        }
+		Venue saved = venueRepository.save(entity);
 
-        Venue saved = venueRepository.save(entity);
-        
-        eventPublisher.publishEvent(new NotificationEvent(
-                this,
-                "New "+saved.getVenueType()+" Added",
-                saved.getVenueName() + " is now available!",
-                "VENUE"
-        ));
-        return entityToDto(saved);
-    }
+		eventPublisher.publishEvent(new NotificationEvent(this, "New " + saved.getVenueType() + " Added",
+				saved.getVenueName() + " is now available!", "VENUE"));
+		return entityToDto(saved);
+	}
 
-    @Override
-    public List<VenueDTO> getAllVenues() {
-        return venueRepository.findAll()
-                .stream()
-                .filter(data -> !Boolean.TRUE.equals(data.getDeleted()))
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
-    }
+	@Override
+	public List<VenueDTO> getAllVenues() {
+		return venueRepository.findAll().stream().filter(data -> !Boolean.TRUE.equals(data.getDeleted()))
+				.map(this::entityToDto).collect(Collectors.toList());
+	}
 
-    @Override
-    public List<VenueDTO> getVenuesByCity(String city) {
-        List<Venue> venues = Optional.ofNullable(venueRepository.findByAddress_City_Name(city))
-                                     .orElse(Collections.emptyList()); 
-        return venues.stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
-    }
+	@Override
+	public List<VenueDTO> getVenuesByCity(String city) {
+		List<Venue> venues = Optional.ofNullable(venueRepository.findByAddress_City_Name(city))
+				.orElse(Collections.emptyList());
+		return venues.stream().map(this::entityToDto).collect(Collectors.toList());
+	}
 
-    @Override
-    public boolean softDeleteVenue(Long id) {
-        return venueRepository.findById(id)
-                .map(venue -> {
-                    if (Boolean.TRUE.equals(venue.getDeleted())) {
-                        throw new RuntimeException("Venue already deleted with id: " + id);
-                    }
-                    venue.setDeleted(true);
-                    venueRepository.save(venue);
-                    return true;
-                })
-                .orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + id));
-    }
-    
-    
-    
-    @Override
-    public List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date) {
-        Venue venue = venueRepository.findById(venueId)
-            .orElseThrow(() -> new RuntimeException("Venue not found"));
+	@Override
+	public boolean softDeleteVenue(Long id) {
+		return venueRepository.findById(id).map(venue -> {
+			if (Boolean.TRUE.equals(venue.getDeleted())) {
+				throw new RuntimeException("Venue already deleted with id: " + id);
+			}
+			venue.setDeleted(true);
+			venueRepository.save(venue);
+			return true;
+		}).orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + id));
+	}
 
-        if ("movie".equalsIgnoreCase(venue.getVenueType())) {
-            if (screenId == null) {
-                throw new IllegalArgumentException("ScreenId is required for movie venues");
-            }
-            Show show = showRepository.findByVenueIdAndScreenId(venueId, screenId)
-                .orElseThrow(() -> new RuntimeException("Show not found for venue and screen"));
-            return getAvailableSlotsForShow(show, date);
-        } else {
-            List<Show> shows = showRepository.findByVenueId(venueId);
-            if (shows.isEmpty()) {
-                throw new RuntimeException("No shows found for venue");
-            }
-            
+	@Override
+	public List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date) {
+		Venue venue = venueRepository.findById(venueId).orElseThrow(() -> new RuntimeException("Venue not found"));
 
-            List<TimeSlotDTO> availableSlots = new ArrayList<>();
-            for (Show show : shows) {
-                availableSlots.addAll(getAvailableSlotsForShow(show, date));
-            }
-            if (availableSlots.isEmpty()) {
-                throw new RuntimeException("No available timeslots found for the given date");
-            }
-            
-            
-            List<TimeSlotDTO> uniqueSlots = availableSlots.stream()
-                .distinct()
-                .sorted(Comparator.comparing(TimeSlotDTO::getStartTime))
-                .collect(Collectors.toList());
+		if ("movie".equalsIgnoreCase(venue.getVenueType())) {
+			if (screenId == null) {
+				throw new IllegalArgumentException("ScreenId is required for movie venues");
+			}
+			Show show = showRepository.findByVenueIdAndScreenId(venueId, screenId)
+					.orElseThrow(() -> new RuntimeException("Show not found for venue and screen"));
+			return getAvailableSlotsForShow(show, date);
+		} else {
+			List<Show> shows = showRepository.findByVenueId(venueId);
+			if (shows.isEmpty()) {
+				throw new RuntimeException("No shows found for venue");
+			}
 
-            return uniqueSlots;
-        }
-    }
-    private List<TimeSlotDTO> getAvailableSlotsForShow(Show show, LocalDate date) {
-        Optional<ShowTimeDate> showTimeDateOpt = show.getShowstimedate().stream()
-            .filter(std -> std.getShowDate().equals(date))
-            .findFirst();
+			List<TimeSlotDTO> availableSlots = new ArrayList<>();
+			for (Show show : shows) {
+				availableSlots.addAll(getAvailableSlotsForShow(show, date));
+			}
+			if (availableSlots.isEmpty()) {
+				throw new RuntimeException("No available timeslots found for the given date");
+			}
 
-        if (showTimeDateOpt.isEmpty()) return Collections.emptyList();
+			List<TimeSlotDTO> uniqueSlots = availableSlots.stream().distinct()
+					.sorted(Comparator.comparing(TimeSlotDTO::getStartTime)).collect(Collectors.toList());
 
-        ShowTimeDate showTimeDate = showTimeDateOpt.get();
+			return uniqueSlots;
+		}
+	}
 
-        List<ShowTime> allShowTimes = new ArrayList<>(showTimeDate.getShowTimes());
-        allShowTimes.sort(Comparator.comparing(ShowTime::getShowTime));
+	private List<TimeSlotDTO> getAvailableSlotsForShow(Show show, LocalDate date) {
+		Optional<ShowTimeDate> showTimeDateOpt = show.getShowstimedate().stream()
+				.filter(std -> std.getShowDate().equals(date)).findFirst();
 
-        List<Long> bookedShowTimeIds = showTimeRepository.findBookedShowTimes(showTimeDate.getId());
+		if (showTimeDateOpt.isEmpty())
+			return Collections.emptyList();
 
-        int duration = parseRuntimeToMinutes(show.getEvent().getRunTime());
-        int buffer = 30;
+		ShowTimeDate showTimeDate = showTimeDateOpt.get();
 
-        List<TimeSlotDTO> freeSlots = new ArrayList<>();
-        LocalTime prevEnd = LocalTime.of(0, 0); // day start
+		List<ShowTime> allShowTimes = new ArrayList<>(showTimeDate.getShowTimes());
+		allShowTimes.sort(Comparator.comparing(ShowTime::getShowTime));
 
-        for (ShowTime current : allShowTimes) {
-            LocalTime currentStart = current.getShowTime();
+		List<Long> bookedShowTimeIds = showTimeRepository.findBookedShowTimes(showTimeDate.getId());
 
-            if (prevEnd.isBefore(currentStart)) {
-                long freeMinutes = Duration.between(prevEnd, currentStart).toMinutes();
-                if (freeMinutes >= duration) {
-                    TimeSlotDTO dto = new TimeSlotDTO();
-                    dto.setStartTime(prevEnd);
-                    dto.setEndTime(currentStart);
-                    freeSlots.add(dto);
-                }
-            }
+		int duration = parseRuntimeToMinutes(show.getEvent().getRunTime());
+		int buffer = 30;
 
-            if (bookedShowTimeIds.contains(current.getId())) {
-                LocalTime busyEnd = currentStart.plusMinutes(duration + buffer);
-                if (busyEnd.isAfter(LocalTime.of(23, 59))) {
-                    busyEnd = LocalTime.of(23, 59);
-                }
-                prevEnd = busyEnd;
-            } else {
-                prevEnd = currentStart;
-            }
-        }
+		List<TimeSlotDTO> freeSlots = new ArrayList<>();
+		LocalTime prevEnd = LocalTime.of(0, 0); // day start
 
-        return freeSlots;
-    }
+		for (ShowTime current : allShowTimes) {
+			LocalTime currentStart = current.getShowTime();
 
+			if (prevEnd.isBefore(currentStart)) {
+				long freeMinutes = Duration.between(prevEnd, currentStart).toMinutes();
+				if (freeMinutes >= duration) {
+					TimeSlotDTO dto = new TimeSlotDTO();
+					dto.setStartTime(prevEnd);
+					dto.setEndTime(currentStart);
+					freeSlots.add(dto);
+				}
+			}
 
+			if (bookedShowTimeIds.contains(current.getId())) {
+				LocalTime busyEnd = currentStart.plusMinutes(duration + buffer);
+				if (busyEnd.isAfter(LocalTime.of(23, 59))) {
+					busyEnd = LocalTime.of(23, 59);
+				}
+				prevEnd = busyEnd;
+			} else {
+				prevEnd = currentStart;
+			}
+		}
 
-    @Override
-    public VenueDTO updateVenue(Long venueId, VenueDTO dto) {
-        Venue existingVenue = venueRepository.findById(venueId)
-                .orElseThrow(() -> new RuntimeException("Venue not found:"));
+		return freeSlots;
+	}
 
-        existingVenue.setVenueName(dto.getVenueName());
-        existingVenue.setVenueType(dto.getVenueType());
+	@Override
+	public VenueDTO updateVenue(Long venueId, VenueDTO dto) {
+		Venue existingVenue = venueRepository.findById(venueId)
+				.orElseThrow(() -> new RuntimeException("Venue not found:"));
 
-        if (dto.getAddress() != null) {
-            Address address = existingVenue.getAddress();
-            if (address == null) {
-                address = new Address();
-            }
-            address.setStreet(dto.getAddress().getStreet());
-            address.setPin(dto.getAddress().getPin());
+		existingVenue.setVenueName(dto.getVenueName());
+		existingVenue.setVenueType(dto.getVenueType());
 
-            if (dto.getAddress().getCityName() != null) {
-                String cityName = dto.getAddress().getCityName();
-                City city = cityRepository.findByName(cityName);
-                if (city == null) {
-                    city = new City();
-                    city.setName(cityName);
-                    city = cityRepository.save(city);
-                }
-                address.setCity(city);
-            }
+		if (dto.getAddress() != null) {
+			Address address = existingVenue.getAddress();
+			if (address == null) {
+				address = new Address();
+			}
+			address.setStreet(dto.getAddress().getStreet());
+			address.setPin(dto.getAddress().getPin());
 
-            Address savedAddress = addressRepository.save(address);
-            existingVenue.setAddress(savedAddress);
-        }
+			if (dto.getAddress().getCityName() != null) {
+				String cityName = dto.getAddress().getCityName();
+				City city = cityRepository.findByName(cityName);
+				if (city == null) {
+					city = new City();
+					city.setName(cityName);
+					city = cityRepository.save(city);
+				}
+				address.setCity(city);
+			}
 
-        if ("movie".equalsIgnoreCase(existingVenue.getVenueType())) {
-            if (dto.getScreens() != null) {
-                List<Screen> updatedScreens = new ArrayList<>();
-                for (ScreenDTO screenDto : dto.getScreens()) {
-                    Screen screen = screenDto.getId() != null ? 
-                            screenRepository.findById(screenDto.getId()).orElse(new Screen()) : new Screen();
+			Address savedAddress = addressRepository.save(address);
+			existingVenue.setAddress(savedAddress);
+		}
 
-                    screen.setVenue(existingVenue);
+		if ("movie".equalsIgnoreCase(existingVenue.getVenueType())) {
+			if (dto.getScreens() != null) {
+				List<Screen> updatedScreens = new ArrayList<>();
+				for (ScreenDTO screenDto : dto.getScreens()) {
+					Screen screen = screenDto.getId() != null
+							? screenRepository.findById(screenDto.getId()).orElse(new Screen())
+							: new Screen();
 
-                    if (screenDto.getLayouts() != null) {
-                        List<Layout> updatedLayouts = new ArrayList<>();
-                        for (LayoutDTO layoutDto : screenDto.getLayouts()) {
-                            Layout layout;
-                            if (layoutDto.getId() != null) {
-                                layout = layoutRepository.findById(layoutDto.getId())
-                                        .orElse(new Layout());
-                            } else {
-                                layout = new Layout();
-                            }
-                            layout.setScreen(screen);
-                            
-                            if (layoutDto.getRows() != null) {
-                                List<LayoutRow> updatedRows = new ArrayList<>();
-                                for (String rowName : layoutDto.getRows()) {
-                                    LayoutRow row = new LayoutRow();
-                                    row.setLayout(layout);
-                                    row.setRowName(rowName);  
-                                    updatedRows.add(row);
-                                }
-                                layout.setLayoutRows(updatedRows);
-                            }
-                            updatedLayouts.add(layout);
-                        }
-                        screen.setLayouts(updatedLayouts);
-                    }
-                    updatedScreens.add(screen);
-                }
-                existingVenue.setScreens(updatedScreens);
-            } else {
-                existingVenue.setScreens(new ArrayList<>());
-            }
-        } else {
-            existingVenue.setScreens(new ArrayList<>());
-        }
+					screen.setVenue(existingVenue);
 
-        Venue saved = venueRepository.save(existingVenue);
+					if (screenDto.getLayouts() != null) {
+						List<Layout> updatedLayouts = new ArrayList<>();
+						for (LayoutDTO layoutDto : screenDto.getLayouts()) {
+							Layout layout;
+							if (layoutDto.getId() != null) {
+								layout = layoutRepository.findById(layoutDto.getId()).orElse(new Layout());
+							} else {
+								layout = new Layout();
+							}
+							layout.setScreen(screen);
 
-        eventPublisher.publishEvent(new NotificationEvent(
-                this,
-                "Venue Updated",
-                saved.getVenueName() + " has been updated.",
-                "VENUE"
-        ));
+							if (layoutDto.getRows() != null) {
+								List<LayoutRow> updatedRows = new ArrayList<>();
+								for (String rowName : layoutDto.getRows()) {
+									LayoutRow row = new LayoutRow();
+									row.setLayout(layout);
+									row.setRowName(rowName);
+									updatedRows.add(row);
+								}
+								layout.setLayoutRows(updatedRows);
+							}
+							updatedLayouts.add(layout);
+						}
+						screen.setLayouts(updatedLayouts);
+					}
+					updatedScreens.add(screen);
+				}
+				existingVenue.setScreens(updatedScreens);
+			} else {
+				existingVenue.setScreens(new ArrayList<>());
+			}
+		} else {
+			existingVenue.setScreens(new ArrayList<>());
+		}
 
-        return entityToDto(saved);
-    }
-    private int parseRuntimeToMinutes(String runTime) {
-        if (runTime == null || runTime.isBlank()) 
-            throw new IllegalArgumentException("Runtime is missing for this event.");
+		Venue saved = venueRepository.save(existingVenue);
 
-        runTime = runTime.toLowerCase().trim();
+		eventPublisher.publishEvent(
+				new NotificationEvent(this, "Venue Updated", saved.getVenueName() + " has been updated.", "VENUE"));
 
-        int hours = 0;
-        int minutes = 0;
+		return entityToDto(saved);
+	}
 
-        try {
-            if (runTime.matches(".*\\d+\\s*h.*")) {
-                String hrPart = runTime.split("h|hr")[0].replaceAll("[^0-9]", "").trim();
-                if (!hrPart.isEmpty()) hours = Integer.parseInt(hrPart);
-            }
+	private int parseRuntimeToMinutes(String runTime) {
+		if (runTime == null || runTime.isBlank())
+			throw new IllegalArgumentException("Runtime is missing for this event.");
 
-            if (runTime.matches(".*\\d+\\s*m.*")) {
-                String minPart = runTime.substring(runTime.lastIndexOf("h") + 1)
-                        .replaceAll("[^0-9]", "").trim();
-                if (!minPart.isEmpty()) minutes = Integer.parseInt(minPart);
-            } else if (runTime.contains("minute")) {
-                String num = runTime.replaceAll("[^0-9]", "").trim();
-                if (!num.isEmpty()) minutes = Integer.parseInt(num);
-            } else if (runTime.matches("\\d+")) {
-                minutes = Integer.parseInt(runTime);
-            }
+		runTime = runTime.toLowerCase().trim();
 
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid runtime format in DB: " + runTime, e);
-        }
+		int hours = 0;
+		int minutes = 0;
 
-        return (hours * 60) + minutes;
-    }
+		try {
+			if (runTime.matches(".*\\d+\\s*h.*")) {
+				String hrPart = runTime.split("h|hr")[0].replaceAll("[^0-9]", "").trim();
+				if (!hrPart.isEmpty())
+					hours = Integer.parseInt(hrPart);
+			}
 
+			if (runTime.matches(".*\\d+\\s*m.*")) {
+				String minPart = runTime.substring(runTime.lastIndexOf("h") + 1).replaceAll("[^0-9]", "").trim();
+				if (!minPart.isEmpty())
+					minutes = Integer.parseInt(minPart);
+			} else if (runTime.contains("minute")) {
+				String num = runTime.replaceAll("[^0-9]", "").trim();
+				if (!num.isEmpty())
+					minutes = Integer.parseInt(num);
+			} else if (runTime.matches("\\d+")) {
+				minutes = Integer.parseInt(runTime);
+			}
 
+		} catch (Exception e) {
+			throw new RuntimeException("Invalid runtime format in DB: " + runTime, e);
+		}
+
+		return (hours * 60) + minutes;
+	}
+
+	@Override
+	public VenueDTO getVenueById(Long id) {
+		Optional<Venue> optionalVenue = venueRepository.findById(id);
+
+		return optionalVenue.map(this::entityToDto).orElse(null);
+	}
 
 }
