@@ -93,7 +93,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				"/bookmyshow/api/city/**", "/venues/city/{city}", "/venues/getAll", "/bookmyshow/venue/getAll",
 				"/bookmyshow/api/states", "/bookmyshow/api/events/{id}", "/bookmyshow/api/events/filter",
 				"/bookmyshow/auth/**", "/bookmyshow/api/auth/**", "/bookmyshow/swagger-ui/**",
-				"/bookmyshow/v3/api-docs/**", "/bookmyshow/api/shows");
+				"/bookmyshow/v3/api-docs/**","/bookmyshow/api/shows","/venues/{id}","/api/bookings/booked-seats");
 
 		return publicPaths.stream().anyMatch(path -> pathMatcher.match(path, requestUri));
 	}
