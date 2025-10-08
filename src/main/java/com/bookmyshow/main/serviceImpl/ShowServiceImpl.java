@@ -24,57 +24,51 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ShowServiceImpl implements ShowService {
 
-    private final ShowRepository showRepository;
+	private final ShowRepository showRepository;
 
-    @Override
-    public List<VenueShowDTO> getShows(ShowRequestDTO request) {
-        LocalDate date = LocalDate.parse(request.getDate());
+	@Override
+	public List<VenueShowDTO> getShows(ShowRequestDTO request) {
+		LocalDate date = LocalDate.parse(request.getDate());
 
-        List<Show> shows = showRepository.findByEventIdAndShowDate(request.getEventId(), date);
+		List<Show> shows = showRepository.findByEventIdAndShowDate(request.getEventId(), date);
 
-        return shows.stream().map(show -> {
-            Venue venue = show.getVenue();
-            Screen screen = show.getScreen();
-            Layout layout = show.getLayout();
-            Event event = show.getEvent();
+		return shows.stream().map(show -> {
+			Venue venue = show.getVenue();
+			Screen screen = show.getScreen();
+			Layout layout = show.getLayout();
+			Event event = show.getEvent();
 
-            List<ShowFetchDTO> showDtos = show.getShowstimedate().stream()
-                .filter(std -> std.getShowDate().equals(date)) 
-                .flatMap(std -> std.getShowTimes().stream())
-                .map(st -> {
-                    ShowFetchDTO dto = new ShowFetchDTO();
-                    dto.setTime(st.getShowTime().toString());
+			List<ShowFetchDTO> showDtos = show.getShowstimedate().stream().filter(std -> std.getShowDate().equals(date))
+					.flatMap(std -> std.getShowTimes().stream()).map(st -> {
+						ShowFetchDTO dto = new ShowFetchDTO();
+						dto.setTime(st.getShowTime().toString());
 
-                    List<ShowCategoryDTO> categories = layout.getLayoutRows().stream()
-                        .map(row -> {
-                            boolean anyReserved = row.getSeats().stream().anyMatch(Seat::isReserved);
-                            String status = anyReserved ? "BOOKED" : "AVAILABLE";
+						List<ShowCategoryDTO> categories = List.of();
 
-                            return new ShowCategoryDTO(
-                                layout.getLayoutName(),
-                                status,
-                                String.valueOf(show.getShowPrice())
-                            );
-                        })
-                        .toList();
+						if ("MOVIE".equalsIgnoreCase(event.getEventType()) && layout != null) {
+							categories = layout.getLayoutRows().stream().map(row -> {
+								boolean anyReserved = row.getSeats().stream().anyMatch(Seat::isReserved);
+								String status = anyReserved ? "BOOKED" : "AVAILABLE";
 
-                    dto.setAvailableCategories(categories);
-                    return dto;
-                })
-                .toList();
+								return new ShowCategoryDTO(layout.getLayoutName(), status,
+										String.valueOf(show.getShowPrice()));
+							}).toList();
+						} else {
+							categories = List
+									.of(new ShowCategoryDTO(null, "AVAILABLE", String.valueOf(show.getShowPrice())));
+						}
 
-            String screenId = null;
-            if ("MOVIE".equalsIgnoreCase(event.getEventType())) {
-                screenId = String.valueOf(screen.getId());
-            }
+						dto.setAvailableCategories(categories);
+						return dto;
+					}).toList();
 
-            return new VenueShowDTO(
-                venue.getVenueName(),
-                String.valueOf(venue.getId()),
-                screenId,
-                String.valueOf(show.getId()),
-                showDtos
-            );
-        }).toList();
-    }
+			String screenId = null;
+			if ("MOVIE".equalsIgnoreCase(event.getEventType()) && screen != null) {
+				screenId = String.valueOf(screen.getId());
+			}
+
+			return new VenueShowDTO(venue.getVenueName(), String.valueOf(venue.getId()), screenId,
+					String.valueOf(show.getId()), showDtos);
+		}).toList();
+	}
 }
