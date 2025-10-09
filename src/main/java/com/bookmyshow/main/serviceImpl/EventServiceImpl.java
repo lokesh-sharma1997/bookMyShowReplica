@@ -780,10 +780,10 @@ public class EventServiceImpl implements EventService {
 		Specification<Event> spec = EventSpecification.filterEvents(type, languages, genres, formats, tags, categories,
 				price, moreFilters, releaseMonths, dateFilters);
 
-		if ("Movie".equalsIgnoreCase(type) && !includeCurrentlyPlaying) {
+		if ("Movie".equalsIgnoreCase(type)) {
 			// Add condition to specification that currentlyPlaying must be false
 			Specification<Event> currentlyPlayingSpec = (root, query, criteriaBuilder) -> criteriaBuilder
-					.isFalse(root.get("currentlyPlaying"));
+					.equal(root.get("currentlyPlaying"),includeCurrentlyPlaying);
 			spec = spec.and(currentlyPlayingSpec);
 		}
 
