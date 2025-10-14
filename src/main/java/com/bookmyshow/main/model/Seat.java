@@ -30,10 +30,6 @@ public class Seat {
 	private boolean reserved;
 
 	@ManyToOne
-	@JoinColumn(name = "show_id")
-	private Show show;
-
-	@ManyToOne
 	@JoinColumn(name = "screen_id")
 	private Screen screen;
 

@@ -11,17 +11,10 @@ import com.bookmyshow.main.model.Show;
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 	List<Seat> findByScreenId(Long id);
 
-	
-
 	static List<Seat> findByShowCategoryId(Long id) {
 		return null;
 	}
-	
+
 	List<Seat> findByShowCategoryIdAndReservedTrue(Long id);
-
-	List<Seat> findByShowIdAndScreenId(Long id, Long id2);
-
-
-
 
 }
