@@ -28,22 +28,13 @@ import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.LayoutRow;
 import com.bookmyshow.main.model.Screen;
+import com.bookmyshow.main.model.Seat;
 import com.bookmyshow.main.model.Show;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.SupportedCategory;
 import com.bookmyshow.main.model.Venue;
-import com.bookmyshow.main.repository.AddressRepository;
-import com.bookmyshow.main.repository.AmenityRepository;
-import com.bookmyshow.main.repository.BookingRepository;
-import com.bookmyshow.main.repository.CityRepository;
-import com.bookmyshow.main.repository.LayoutRepository;
-import com.bookmyshow.main.repository.LayoutRowRepository;
-import com.bookmyshow.main.repository.ScreenRepository;
-import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.ShowtimedateRepository;
-import com.bookmyshow.main.repository.ShowTimeRepository;
-import com.bookmyshow.main.repository.VenueRepository;
+import com.bookmyshow.main.repository.*;
 import com.bookmyshow.main.service.VenueService;
 
 import jakarta.transaction.Transactional;
@@ -52,6 +43,8 @@ import com.bookmyshow.main.events.NotificationEvent;
 
 @Service
 public class VenueServiceImpl implements VenueService {
+
+	private final SeatRepository seatRepository;
 
 	@Autowired
 	private VenueRepository venueRepository;
@@ -88,6 +81,10 @@ public class VenueServiceImpl implements VenueService {
 
 	@Autowired
 	private ShowTimeRepository showTimeRepository;
+
+	VenueServiceImpl(SeatRepository seatRepository) {
+		this.seatRepository = seatRepository;
+	}
 
 	// Convert entity to DTO
 	private VenueDTO entityToDto(Venue entity) {
@@ -279,6 +276,8 @@ public class VenueServiceImpl implements VenueService {
 						if (layout.getLayoutRows() != null) {
 							for (LayoutRow layoutRow : layout.getLayoutRows()) {
 								layoutRow.setLayout(layout);
+
+								createSeatsForLayoutRow(layoutRow, screen, layout.getCols());
 							}
 						}
 					}
@@ -293,6 +292,22 @@ public class VenueServiceImpl implements VenueService {
 		eventPublisher.publishEvent(new NotificationEvent(this, "New " + saved.getVenueType() + " Added",
 				saved.getVenueName() + " is now available!", "VENUE"));
 		return entityToDto(saved);
+	}
+
+	private void createSeatsForLayoutRow(LayoutRow layoutRow, Screen screen, int numberOfSeatsPerRow) {
+		List<Seat> seats = new ArrayList<>();
+
+		for (int i = 1; i <= numberOfSeatsPerRow; i++) {
+			Seat seat = new Seat();
+			seat.setSeatNumber(layoutRow.getRowName() + i);
+			seat.setReserved(false);
+			seat.setLayoutRow(layoutRow);
+			seat.setScreen(screen);
+
+			seats.add(seat);
+		}
+
+		layoutRow.setSeats(seats);
 	}
 
 	@Override

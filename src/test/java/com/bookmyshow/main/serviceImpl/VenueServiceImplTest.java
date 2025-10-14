@@ -13,6 +13,7 @@ import com.bookmyshow.main.exception.VenueNotFoundException;
 import com.bookmyshow.main.model.*;
 import com.bookmyshow.main.repository.*;
 import com.bookmyshow.main.dto.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,9 +36,19 @@ public class VenueServiceImplTest {
 
     @Mock
     private CityRepository cityRepository;
+    
+    @Mock
+    private SeatRepository seatRepository;
 
     @InjectMocks
     private VenueServiceImpl venueService;
+    private void injectDependencies() {
+        ReflectionTestUtils.setField(venueService, "venueRepository", venueRepository);
+        ReflectionTestUtils.setField(venueService, "amenityRepository", amenityRepository);
+        ReflectionTestUtils.setField(venueService, "addressRepository", addressRepository);
+        ReflectionTestUtils.setField(venueService, "cityRepository", cityRepository);
+        ReflectionTestUtils.setField(venueService, "seatRepository", seatRepository);
+    }
 
 //    @Test
 //    public void testCreateVenue_withNewCity_savesCityAndAddress() {
@@ -86,6 +97,7 @@ public class VenueServiceImplTest {
 
     @Test
     public void testGetAllVenues_returnsNonDeletedVenues() {
+    	 injectDependencies(); 
         Venue venue1 = new Venue();
         venue1.setId(1L);
         venue1.setVenueName("Venue 1");
@@ -106,6 +118,7 @@ public class VenueServiceImplTest {
 
     @Test
     public void testGetVenuesByCity_returnsVenues() {
+    	 injectDependencies(); 
         Venue venue = new Venue();
         venue.setId(1L);
         venue.setVenueName("City Venue");
@@ -120,6 +133,7 @@ public class VenueServiceImplTest {
 
     @Test
     public void testGetVenuesByCity_noVenues_returnsEmptyList() {
+    	 injectDependencies(); 
         when(venueRepository.findByAddress_City_Name("UnknownCity")).thenReturn(null);
 
         List<VenueDTO> result = venueService.getVenuesByCity("UnknownCity");
@@ -129,6 +143,7 @@ public class VenueServiceImplTest {
 
     @Test
     public void testSoftDeleteVenue_marksVenueDeleted() {
+    	 injectDependencies(); 
         Venue venue = new Venue();
         venue.setId(1L);
         venue.setDeleted(false);
@@ -145,6 +160,7 @@ public class VenueServiceImplTest {
 
     @Test
     public void testSoftDeleteVenue_alreadyDeleted_throwsException() {
+    	 injectDependencies(); 
         Venue venue = new Venue();
         venue.setId(1L);
         venue.setDeleted(true);
@@ -160,6 +176,7 @@ public class VenueServiceImplTest {
 
     @Test
     public void testSoftDeleteVenue_venueNotFound_throwsVenueNotFoundException() {
+    	 injectDependencies(); 
         when(venueRepository.findById(1L)).thenReturn(Optional.empty());
 
         VenueNotFoundException ex = assertThrows(VenueNotFoundException.class, () -> {
