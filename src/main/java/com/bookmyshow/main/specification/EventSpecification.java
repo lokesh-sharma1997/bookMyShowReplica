@@ -33,7 +33,7 @@ public class EventSpecification {
 	       
 	        query.distinct(true);
 	        predicates.add(builder.isFalse(root.get("deleted")));
-
+	        query.orderBy(builder.desc(root.get("eventId")));
 	      
 	        if (type != null && !type.isEmpty()) {
 	            predicates.add(builder.equal(builder.lower(root.get("eventType")), type.toLowerCase()));

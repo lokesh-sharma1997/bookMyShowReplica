@@ -1103,7 +1103,6 @@ class EventServiceImplTest {
         assertEquals("Test Event", dto.getName());
         assertEquals("Event description", dto.getDescription());
         assertEquals("120", dto.getRunTime());
-//        assertEquals("Grand Hall", dto.getVenueName().get(0));
         assertEquals("English", dto.getLanguages().get(0));
         assertEquals("Action", dto.getGenres().get(0));
         assertEquals("3D", dto.getFormat().get(0));

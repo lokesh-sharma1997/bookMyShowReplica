@@ -6,9 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.bookmyshow.main.config.ValidEndDate;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Data
+@ValidEndDate
 @Entity
 @Table(name = "events")
 public class Event {
@@ -36,8 +39,10 @@ public class Event {
 	@NotBlank(message = "Run Time is required")
 	private String runTime;
 
+	@FutureOrPresent(message = "start date must be today or in the future")
 	private LocalDate startDate;
 
+	
 	private LocalDate endDate;
 
 	@NotBlank(message = "Event Type is required")
@@ -98,6 +103,8 @@ public class Event {
     )
 	private List<ReleaseMonth> releaseMonth;
 
+	
+	@FutureOrPresent(message = "Release date must be today or in the future")
 	private LocalDate releasingOn;
 
 	@ManyToMany
