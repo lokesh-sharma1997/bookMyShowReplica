@@ -73,9 +73,15 @@ public class EventController {
 			@RequestPart("poster") MultipartFile poster,
 			@RequestPart(value = "castImages", required = false) List<MultipartFile> castImages,
 			@RequestPart(value = "crewImages", required = false) List<MultipartFile> crewImages) throws IOException {
+		long posterMaxlength =  2 * 1024 * 1024;   // 2Mb
 
 		if (poster == null || poster.isEmpty()) {
-			throw new EventCustomException("Poster image is required for creating an event");
+			throw new EventCustomException("Poster size is required for creating an event");
+			
+		}
+		if(poster.getSize()>posterMaxlength)
+		{
+			throw new EventCustomException("Poster image must be minimum to 2Mb");
 		}
 
 		ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
