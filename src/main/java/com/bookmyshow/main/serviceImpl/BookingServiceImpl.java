@@ -1,6 +1,7 @@
 package com.bookmyshow.main.serviceImpl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.BookTicketRequestDTO;
+import com.bookmyshow.main.dto.BookingContentDTO;
 import com.bookmyshow.main.model.Booking;
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Layout;
@@ -149,4 +151,39 @@ public class BookingServiceImpl implements BookingService {
 				.map(Seat::getSeatNumber).toList();
 	}
 
-}
+	@Override
+	public List<BookingContentDTO> getAllBookingsByUser(Long userId) {
+	    List<Booking> bookings = bookingRepository.findAllByUserUserId(userId);
+
+	    if (bookings.isEmpty()) {
+	        throw new RuntimeException("No bookings found for this user");
+	    }
+
+	    List<BookingContentDTO> bookingContents = new ArrayList<>();
+
+	    for (Booking booking : bookings) {
+	        int totalSeats = booking.getSeats().size();
+	        int  totalAmount = totalSeats * booking.getShow().getShowPrice();
+	       
+
+	        BookingContentDTO content = new BookingContentDTO();
+	        content.setEventName(booking.getEvent().getName());
+	        content.setEventPoster(booking.getEvent().getImageurl());
+	        content.setVenue(booking.getVenue().getVenueName());
+	        content.setCity(booking.getVenue().getAddress().getCity().getName());
+	        content.setScreen(booking.getScreen().getScreenName());
+	        content.setDate(booking.getShowTimeDate().getShowDate().toString());
+	        content.setTime(booking.getShowTime().getShowTime().toString());
+	        content.setSeats(booking.getSeats().stream()
+	                .map(Seat::getSeatNumber)
+	                .toList());
+	        content.setTotalAmount(totalAmount);
+
+	        bookingContents.add(content);
+	    }
+
+	    return bookingContents;
+	}
+
+	}
+

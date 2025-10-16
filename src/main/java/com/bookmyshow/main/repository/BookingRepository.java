@@ -14,6 +14,8 @@ import io.lettuce.core.dynamic.annotation.Param;
 public interface BookingRepository extends JpaRepository<Booking,Long> {
 
     List<Booking> findByShowId(Long showId);
+    List<Booking>findAllByUserUserId(Long userid);
 
+  
 }
 	
