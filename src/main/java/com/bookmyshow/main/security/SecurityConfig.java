@@ -27,7 +27,7 @@ public class SecurityConfig {
 	private final JwtService jwtService;
 	private final TokenService tokenService;
 
-	// Constructor injection for dependencies
+	// Constructor to inject dependencies for user details, JWT, and token services
 	public SecurityConfig(CustomUserDetailsService userDetailsService, JwtService jwtService,
 			TokenService tokenService) {
 		this.userDetailsService = userDetailsService;
@@ -35,29 +35,45 @@ public class SecurityConfig {
 		this.tokenService = tokenService;
 	}
 
-	// Register JwtAuthenticationFilter as a Spring Bean
+	// Registers JwtAuthenticationFilter bean to be used in security filter chain
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
 		return new JwtAuthenticationFilter(jwtService, userDetailsService, tokenService);
 	}
 
+	// Configures the security filter chain: disables CSRF, sets public endpoints, enables CORS, and adds JWT filter
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(authz -> authz
-				// Permitting all GET requests and filtering movies
-				.requestMatchers("/api/events/get-all-events", "/venues/city/{city}", "/venues/getAll", "/api/city/**",
-						"/venue/getAll", "/api/states", "/api/events/{id}", "/api/events/filter", "/auth/**",
-						"/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
-				.permitAll().anyRequest().authenticated())
-				.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enabling CORS
-				.userDetailsService(userDetailsService) // Custom user details service
-				.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // Add JWT
-																											// filter
-																											// before
+		http.csrf(AbstractHttpConfigurer::disable)
+			.authorizeHttpRequests(authz -> authz
+				.requestMatchers(
+					"/api/events/get-all-events",
+					"/venues/city/{city}",
+					"/venues/getAll",
+					"/api/city/**",
+					"/venue/getAll",
+					"/venues/{id}",
+					"/api/shows",
+					"/api/states",
+					"/api/events/{id}",
+					"/api/events/filter",
+					"/api/bookings/booked-seats",
+					"/auth/**",
+					"/api/auth/**",
+					"/swagger-ui/**",
+					"/v3/api-docs/**"
+				)
+				.permitAll()
+				.anyRequest().authenticated()
+			)
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+			.userDetailsService(userDetailsService)
+			.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
 
+	// Configures CORS settings to allow all origins and common HTTP methods and headers
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
@@ -65,29 +81,32 @@ public class SecurityConfig {
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
 		configuration.setAllowCredentials(true);
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
 
+	// Defines the password encoder bean using BCrypt hashing
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
+	// Exposes the AuthenticationManager bean for authentication processes
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
-	// public static void main(String[] args) throws Exception {
+
+	// Uncommented main method was used for AES encryption/decryption testing (currently commented out)
+//	public static void main(String[] args) throws Exception {
 //		String key = "U29tZVNlY3JldEtleVRoYXRJc1ZlcnlTZWN1cmUhISE=";
-//   String password = "Kashish@2004";
-//	  //  fGM/pEkdMgb8KK7POUA6HA==
-//	    String encrypted = AESUtil.encrypt(password, key);
-//	    String decrypted = AESUtil.decrypt(encrypted, key);
+//		String password = "Kashish@2004";
+//		String encrypted = AESUtil.encrypt(password, key);
+//		String decrypted = AESUtil.decrypt(encrypted, key);
 //
-//	    System.out.println("Encrypted: " + encrypted);
-//	    System.out.println("Decrypted: " + decrypted);
-//
+//		System.out.println("Encrypted: " + encrypted);
+//		System.out.println("Decrypted: " + decrypted);
 //	}
 }

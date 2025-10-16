@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class StateServiceImpl implements StateService {
 	private final StateRepository stateRepository;
 
+    //Returns All States
 	@Override
 	public List<StateDto> getAllStates() {
 		return stateRepository.findAll().stream().map(state -> new StateDto(state.getStatekey(), state.getName()))

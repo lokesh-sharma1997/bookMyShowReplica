@@ -46,20 +46,27 @@ public class UserController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getAllUsers}")
-	public ResponseEntity<ApiResponse<UsersResponse>> getAllUsers(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size) {
+	@Operation(summary = "${user.getusers}")
+	public ResponseEntity<ApiResponse<UsersResponse>> getUsers(@RequestParam(required = false) String roleName,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
-		Page<UserDTO> usersPage = userService.getAllUsers(page, size);
+		Page<UserDTO> usersPage;
 
-		if (usersPage.isEmpty()) {
-			throw new UserNotFoundException("No users found");
+		if (roleName == null || roleName.trim().isEmpty() || roleName.equalsIgnoreCase("all")) {
+			usersPage = userService.getAllUsers(page, size);
+		} else {
+			try {
+				usersPage = userService.getByRoleName(roleName, page, size);
+			} catch (IllegalArgumentException e) {
+				throw new RoleNotFoundException("Invalid role name: " + roleName);
+			}
 		}
 
 		UsersResponse usersResponse = new UsersResponse(usersPage.getContent(), size);
 		usersResponse.setTotalEntries((int) usersPage.getTotalElements());
 
-		return ResponseEntity.ok(new ApiResponse<>(200, "Users retrieved", true, usersResponse));
+		return ResponseEntity.ok(new ApiResponse<>(200,
+				usersPage.isEmpty() ? "No users found" : "Users fetched successfully", true, usersResponse));
 	}
 
 	@PreAuthorize("hasRole('ADMIN')")
@@ -76,6 +83,7 @@ public class UserController {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "${user.searchUser}")
 	public ResponseEntity<ApiResponse<UsersResponse>> globalSearchUser(@RequestParam String value,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
@@ -86,29 +94,11 @@ public class UserController {
 
 		Page<UserDTO> usersPage = userService.searchUser(value.trim(), page, size);
 
-		if (usersPage.isEmpty()) {
-			return ResponseEntity.ok(new ApiResponse<>(200, "No user found", true, null));
-		}
-
 		UsersResponse usersResponse = new UsersResponse(usersPage.getContent(), size);
 		usersResponse.setTotalEntries((int) usersPage.getTotalElements());
 
-		return ResponseEntity.ok(new ApiResponse<>(200, "Users found", true, usersResponse));
-	}
-
-	@PreAuthorize("hasRole('ADMIN')")
-	@GetMapping(value = "/role/{roleName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "${user.getUserByRole}")
-	public ResponseEntity<ApiResponse<UsersResponse>> getByRole(@PathVariable String roleName) {
-		List<UserDTO> users;
-		try {
-			users = userService.getByRole(roleName);
-		} catch (IllegalArgumentException e) {
-			throw new RoleNotFoundException("Invalid role name: " + roleName);
-		}
-
-		return ResponseEntity
-				.ok(new ApiResponse<>(200, "Users found with role: " + roleName, true, new UsersResponse(users)));
+		return ResponseEntity.ok(new ApiResponse<>(200,
+				usersPage.isEmpty() ? "No users found" : "Users fetched successfully", true, usersResponse));
 	}
 
 	@PutMapping("/{userId}/role")
