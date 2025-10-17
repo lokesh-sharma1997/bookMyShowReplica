@@ -32,10 +32,6 @@ private Venue venue;
 @JoinColumn(name = "screen_id", referencedColumnName = "id")
 private Screen screen;
 
-@ManyToOne
-@JoinColumn(name = "layout_id", referencedColumnName = "id")
-private Layout layout;
-
 
 private int showPrice;
 
@@ -43,7 +39,9 @@ private int showPrice;
 @JsonManagedReference
 private List<ShowTimeDate> showstimedate; 
 
-
+@OneToMany(mappedBy = "show", cascade = CascadeType.ALL)
+@JsonManagedReference
+private List<Show_layout> showLayouts;
 @ManyToOne
 @JoinColumn(name = "event_id", referencedColumnName = "event_id")
 @JsonBackReference
