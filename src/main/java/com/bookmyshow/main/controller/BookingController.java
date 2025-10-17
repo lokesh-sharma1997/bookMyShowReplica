@@ -53,21 +53,21 @@ public class BookingController {
 	}
 
 	@GetMapping("/user/{userId}/shows")
-	public ResponseEntity<ApiResponse<Map<String, List<BookingContentDTO>>>> getAllBookings(@PathVariable Long userId) {
+	public ResponseEntity<ApiResponse<List<BookingContentDTO>>> getAllBookings(@PathVariable Long userId) {
 	    try {
 	        List<BookingContentDTO> bookingsContent = bookingService.getAllBookingsByUser(userId);
 
-	        ApiResponse<Map<String, List<BookingContentDTO>>> response = new ApiResponse<>(
+	        ApiResponse<List<BookingContentDTO>> response = new ApiResponse<>(
 	                HttpStatus.OK.value(),
 	                "Booking details fetched successfully",
 	                true,
-	                Map.of("content", bookingsContent)
+	                bookingsContent  
 	        );
 
 	        return ResponseEntity.ok(response);
 
 	    } catch (RuntimeException e) {
-	        ApiResponse<Map<String, List<BookingContentDTO>>> response = new ApiResponse<>(
+	        ApiResponse<List<BookingContentDTO>> response = new ApiResponse<>(
 	                HttpStatus.BAD_REQUEST.value(),
 	                "Failed to fetch bookings: " + e.getMessage(),
 	                false,

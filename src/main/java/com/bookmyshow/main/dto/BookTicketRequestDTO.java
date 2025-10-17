@@ -18,4 +18,5 @@ public class BookTicketRequestDTO {
     private LocalDate date;
     private LocalTime time;
     private List<String> reservedSeats;
+    private List<String> eventSeats;
 }

@@ -16,5 +16,5 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 	}
 
 	List<Seat> findByShowCategoryIdAndReservedTrue(Long id);
-
+	  List<Seat> findByVenueId(Long venueId);
 }

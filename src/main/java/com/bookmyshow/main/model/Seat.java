@@ -48,4 +48,8 @@ public class Seat {
 	@JoinColumn(name = "layout_row_id")
 	private LayoutRow layoutRow;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "venue_id")
+	private Venue venue;
+
 }

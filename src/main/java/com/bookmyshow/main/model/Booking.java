@@ -4,7 +4,8 @@
 	import java.util.List;
 	
 	import jakarta.persistence.Column;
-	import jakarta.persistence.Entity;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
 	import jakarta.persistence.FetchType;
 	import jakarta.persistence.GeneratedValue;
 	import jakarta.persistence.GenerationType;
@@ -42,7 +43,7 @@
 		private Venue venue;
 	
 		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name = "screen_id", nullable = false)
+		@JoinColumn(name = "screen_id", nullable = true)
 		private Screen screen;
 	
 		@ManyToOne(fetch = FetchType.LAZY)
@@ -60,7 +61,12 @@
 		@Column(nullable = false)
 		private LocalDateTime bookingTime;
 	
+	    @ElementCollection
 		@ManyToMany(fetch = FetchType.LAZY)
 		@JoinTable(name = "booking_seats_map", joinColumns = @JoinColumn(name = "booking_id"), inverseJoinColumns = @JoinColumn(name = "seat_id"))
 		private List<Seat> seats;
+		
+	    @Column(name = "event_seats", nullable = true)
+	    private String eventSeats;
+		
 	}
