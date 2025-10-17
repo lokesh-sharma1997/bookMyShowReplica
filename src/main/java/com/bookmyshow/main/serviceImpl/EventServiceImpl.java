@@ -42,6 +42,7 @@ import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.ShowDTO;
 import com.bookmyshow.main.dto.ShowTimeDTO;
+import com.bookmyshow.main.dto.Show_layoutDto;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.events.NotificationEvent;
 import com.bookmyshow.main.exception.EventCustomException;
@@ -63,6 +64,7 @@ import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Show;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
+import com.bookmyshow.main.model.Show_layout;
 import com.bookmyshow.main.model.Tag;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
@@ -344,64 +346,86 @@ public class EventServiceImpl implements EventService {
 		}
 
 		if (eventDto.getShow() != null) {
-			List<Show> shows = new ArrayList<>();
-			for (ShowDTO showDTO : eventDto.getShow()) {
-				Show show = new Show();
-				show.setId(showDTO.getShowid());
-
-				if (showDTO.getVenue() != null) {
-					Venue venue = venueRepository.findById(showDTO.getVenue())
-							.orElseThrow(() -> new RuntimeException("Venue not found"));
-					show.setVenue(venue);
-				}
-				if (showDTO.getScreen() != null) {
-					Screen screen = screenRepository.findById(showDTO.getScreen())
-							.orElseThrow(() -> new RuntimeException("Screen not found"));
-					show.setScreen(screen);
-				}
-				if (showDTO.getLayout() != null) {
-					Layout layout = layoutRepository.findById(showDTO.getLayout())
-							.orElseThrow(() -> new RuntimeException("Layout not found"));
-					show.setLayout(layout);
-				}
-
-				show.setShowPrice(showDTO.getShowPrice());
-
-				List<ShowTimeDate> showtimes = new ArrayList<>();
-				if (showDTO.getShowtimesdate() != null) {
-					for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
-
-						ShowTimeDate showTimeDate = new ShowTimeDate();
-						showTimeDate.setShowDate(showTimeDTO.getShowDate());
-						showTimeDate.setShow(show);
-
-						List<ShowTime> showTimes = new ArrayList<>();
-
-						if (showTimeDTO.getShowTime() != null) {
-							for (LocalTime showTime : showTimeDTO.getShowTime()) {
-								ShowTime showTimeEntity = new ShowTime();
-								showTimeEntity.setShowTime(showTime);
-								showTimeEntity.setShowTimeDate(showTimeDate);
-								showTimes.add(showTimeEntity);
-							}
-						}
-
-						showTimeDate.setShowTimes(showTimes);
-
-						showtimes.add(showTimeDate);
-					}
-				}
-
-				show.setEvent(event);
-
-				show.setShowstimedate(showtimes);
-
-				shows.add(show);
-			}
-
-			event.setShows(shows);
+		    List<Show> shows = new ArrayList<>();
+ 
+		    for (ShowDTO showDTO : eventDto.getShow()) {
+		        Show show = new Show();
+		        show.setId(showDTO.getShowid());
+ 
+		      
+		        if (showDTO.getVenue() != null) {
+		            Venue venue = venueRepository.findById(showDTO.getVenue())
+		                    .orElseThrow(() -> new RuntimeException("Venue not found"));
+		            show.setVenue(venue);
+		        }
+ 
+		      
+		        if (showDTO.getScreen() != null) {
+		            Screen screen = screenRepository.findById(showDTO.getScreen())
+		                    .orElseThrow(() -> new RuntimeException("Screen not found"));
+		            show.setScreen(screen);
+		        }
+ 
+ 
+		        
+		        show.setShowPrice(showDTO.getShowPrice() != null ? showDTO.getShowPrice() : 0);
+ 
+ 
+		       
+		        List<ShowTimeDate> showTimeDates = new ArrayList<>();
+		        if (showDTO.getShowtimesdate() != null) {
+		            for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
+ 
+		                ShowTimeDate showTimeDate = new ShowTimeDate();
+		                showTimeDate.setShowDate(showTimeDTO.getShowDate());
+		                showTimeDate.setShow(show);
+ 
+		                List<ShowTime> showTimes = new ArrayList<>();
+ 
+		                if (showTimeDTO.getShowTime() != null) {
+		                    for (LocalTime showTime : showTimeDTO.getShowTime()) {
+		                        ShowTime showTimeEntity = new ShowTime();
+		                        showTimeEntity.setShowTime(showTime);
+		                        showTimeEntity.setShowTimeDate(showTimeDate);
+		                        showTimes.add(showTimeEntity);
+		                    }
+		                }
+ 
+		                showTimeDate.setShowTimes(showTimes);
+		                showTimeDates.add(showTimeDate);
+		            }
+		        }
+		        show.setShowstimedate(showTimeDates);
+ 
+		      
+		        List<Show_layout> showLayouts = new ArrayList<>();
+		        if (showDTO.getCategory() != null) {
+		            for (Show_layoutDto layoutDto : showDTO.getCategory()) {
+		                Show_layout showLayout = new Show_layout();
+		                showLayout.setMoviePrice(layoutDto.getMoviePrice());
+		                showLayout.setShow(show);
+ 
+		            
+		                if (layoutDto.getLayout() != null) {
+		                    Layout layout = layoutRepository.findById(layoutDto.getLayout())
+		                            .orElseThrow(() -> new RuntimeException("Layout not found"));
+		                    showLayout.setLayout(layout);
+		                }
+ 
+		                showLayouts.add(showLayout);
+		            }
+		        }
+		        show.setShowLayouts(showLayouts);
+ 
+		       
+		        show.setEvent(event);
+ 
+		        shows.add(show);
+		    }
+ 
+		    event.setShows(shows);
 		} else {
-			event.setShows(Collections.emptyList());
+		    event.setShows(Collections.emptyList());
 		}
 
 		Event savedEvent = eventRepository.save(event);
@@ -695,9 +719,9 @@ public class EventServiceImpl implements EventService {
 				if (showDTO.getScreen() != null) {
 					screenRepository.findById(showDTO.getScreen()).ifPresent(show::setScreen);
 				}
-				if (showDTO.getLayout() != null) {
-					layoutRepository.findById(showDTO.getLayout()).ifPresent(show::setLayout);
-				}
+//				if (showDTO.getLayout() != null) {
+//					layoutRepository.findById(showDTO.getLayout()).ifPresent(show::setLayout);
+//				}
 
 				if (showDTO.getShowPrice() != null) {
 					show.setShowPrice(showDTO.getShowPrice());
@@ -823,8 +847,25 @@ public class EventServiceImpl implements EventService {
 		dto.setAgeLimit(event.getAgeLimit());
 
 		if (event.getShows() != null && !event.getShows().isEmpty()) {
-			List<Integer> showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
-			dto.setPricelist(showPrices);
+		    List<Integer> showPrices;
+		    
+		    if ("Movie".equalsIgnoreCase(event.getEventType())) {
+		      
+		        showPrices = event.getShows().stream()
+		                .filter(s -> s.getShowLayouts() != null)
+		                .flatMap(s -> s.getShowLayouts().stream())
+		                .map(Show_layout::getMoviePrice)
+		                .toList();
+		    } else {
+		        
+		        showPrices = event.getShows().stream()
+		                .map(Show::getShowPrice)
+		                .toList();
+		    }
+		    
+		    dto.setPricelist(showPrices);
+		} else {
+		    dto.setPricelist(List.of());
 		}
 
 		if (event.getShows() != null && !event.getShows().isEmpty()) {
@@ -950,10 +991,26 @@ public class EventServiceImpl implements EventService {
 
 		dto.setCity(event.getCity() != null ? event.getCity().stream().map(City::getName).toList() : new ArrayList<>());
 
-		// Price extract
 		if (event.getShows() != null && !event.getShows().isEmpty()) {
-			List<Integer> showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
-			dto.setPricelist(showPrices);
+		    List<Integer> showPrices;
+		    
+		    if ("Movie".equalsIgnoreCase(event.getEventType())) {
+		      
+		        showPrices = event.getShows().stream()
+		                .filter(s -> s.getShowLayouts() != null)
+		                .flatMap(s -> s.getShowLayouts().stream())
+		                .map(Show_layout::getMoviePrice)
+		                .toList();
+		    } else {
+		        
+		        showPrices = event.getShows().stream()
+		                .map(Show::getShowPrice)
+		                .toList();
+		    }
+		    
+		    dto.setPricelist(showPrices);
+		} else {
+		    dto.setPricelist(List.of());
 		}
 
 		if (event.getShows() != null && !event.getShows().isEmpty()) {

@@ -35,7 +35,7 @@ public class ShowServiceImpl implements ShowService {
 		return shows.stream().map(show -> {
 			Venue venue = show.getVenue();
 			Screen screen = show.getScreen();
-			Layout layout = show.getLayout();
+//			Layout layout = show.getLayout();
 			Event event = show.getEvent();
 
 			List<ShowFetchDTO> showDtos = show.getShowstimedate().stream().filter(std -> std.getShowDate().equals(date))
@@ -45,18 +45,18 @@ public class ShowServiceImpl implements ShowService {
 
 						List<ShowCategoryDTO> categories = List.of();
 
-						if ("MOVIE".equalsIgnoreCase(event.getEventType()) && layout != null) {
-							categories = layout.getLayoutRows().stream().map(row -> {
-								boolean anyReserved = row.getSeats().stream().anyMatch(Seat::isReserved);
-								String status = anyReserved ? "BOOKED" : "AVAILABLE";
-
-								return new ShowCategoryDTO(layout.getLayoutName(), status,
-										String.valueOf(show.getShowPrice()));
-							}).toList();
-						} else {
-							categories = List
-									.of(new ShowCategoryDTO(null, "AVAILABLE", String.valueOf(show.getShowPrice())));
-						}
+//						if ("MOVIE".equalsIgnoreCase(event.getEventType()) && layout != null) {
+//							categories = layout.getLayoutRows().stream().map(row -> {
+//								boolean anyReserved = row.getSeats().stream().anyMatch(Seat::isReserved);
+//								String status = anyReserved ? "BOOKED" : "AVAILABLE";
+//
+//								return new ShowCategoryDTO(layout.getLayoutName(), status,
+//										String.valueOf(show.getShowPrice()));
+//							}).toList();
+//						} else {
+//							categories = List
+//									.of(new ShowCategoryDTO(null, "AVAILABLE", String.valueOf(show.getShowPrice())));
+//						}
 
 						dto.setAvailableCategories(categories);
 						return dto;

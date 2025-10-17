@@ -34,8 +34,8 @@ public class Layout {
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL) 
     private List<LayoutRow> layoutRows;
 
-	@OneToMany(mappedBy = "layout", cascade = CascadeType.PERSIST)
-    private List<Show> shows;
+    @OneToMany(mappedBy = "layout", cascade = CascadeType.PERSIST)
+    private List<Show_layout> show_layouts;
 	
 
 
