@@ -719,9 +719,6 @@ public class EventServiceImpl implements EventService {
 				if (showDTO.getScreen() != null) {
 					screenRepository.findById(showDTO.getScreen()).ifPresent(show::setScreen);
 				}
-//				if (showDTO.getLayout() != null) {
-//					layoutRepository.findById(showDTO.getLayout()).ifPresent(show::setLayout);
-//				}
 
 				if (showDTO.getShowPrice() != null) {
 					show.setShowPrice(showDTO.getShowPrice());

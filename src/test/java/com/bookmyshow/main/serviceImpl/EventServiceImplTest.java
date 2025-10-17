@@ -326,7 +326,6 @@ class EventServiceImplTest {
         showDTO.setShowPrice(100);
         showDTO.setVenue(10L); 
         showDTO.setScreen(1L); 
-//        showDTO.setLayout(1L); 
 
         ShowTimeDTO showTimeDTO = new ShowTimeDTO();
         showTimeDTO.setShowDate(LocalDate.of(2025, 9, 25));
@@ -864,7 +863,6 @@ class EventServiceImplTest {
         showDTO.setShowPrice(500);
         showDTO.setVenue(10L);
         showDTO.setScreen(20L);
-//        showDTO.setLayout(30L);
         showDTO.setShowid(null);
 
         ShowTimeDTO showTimeDTO = new ShowTimeDTO();
@@ -909,7 +907,6 @@ class EventServiceImplTest {
         assertEquals(500, savedShow.getShowPrice());
         assertEquals(venue, savedShow.getVenue());
         assertEquals(screen, savedShow.getScreen());
-//        assertEquals(layout, savedShow.getLayout());
         assertEquals(existingEvent, savedShow.getEvent());
 
        

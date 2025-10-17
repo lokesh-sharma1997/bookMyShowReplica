@@ -32,11 +32,7 @@ private Venue venue;
 @JoinColumn(name = "screen_id", referencedColumnName = "id")
 private Screen screen;
 
-//@ManyToOne
-//@JoinColumn(name = "layout_id", referencedColumnName = "id")
-//private Layout layout;
-//
-//
+
 private int showPrice;
 
 @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
