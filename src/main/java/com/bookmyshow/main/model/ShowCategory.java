@@ -1,5 +1,7 @@
 package com.bookmyshow.main.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -23,12 +25,13 @@ public class ShowCategory {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "show_id")
+	@JoinColumn(name = "show_id", referencedColumnName = "id")
+	@JsonBackReference
 	private Show show;
 
 	@ManyToOne
-	@JoinColumn(name = "layout_id")
-	private Layout layout;
+//	@JoinColumn(name = "layout_id")
+	private Layout layoutId;
 
 	private Integer price;
 

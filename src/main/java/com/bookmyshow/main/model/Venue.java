@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 
 @Data
 @NoArgsConstructor
@@ -62,5 +64,9 @@ public class Venue {
 
     
     private Boolean deleted = false;
+    
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.PERSIST)
+    @JsonManagedReference("venue-showtimedate")
+	private List<ShowTimeDate> showstimedate;
 
 }

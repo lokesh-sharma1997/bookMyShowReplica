@@ -62,6 +62,7 @@ import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.model.ShowCategory;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Show_layout;
@@ -379,6 +380,8 @@ public class EventServiceImpl implements EventService {
 		                ShowTimeDate showTimeDate = new ShowTimeDate();
 		                showTimeDate.setShowDate(showTimeDTO.getShowDate());
 		                showTimeDate.setShow(show);
+		                showTimeDate.setVenue(show.getVenue());
+
  
 		                List<ShowTime> showTimes = new ArrayList<>();
  
@@ -396,26 +399,44 @@ public class EventServiceImpl implements EventService {
 		            }
 		        }
 		        show.setShowstimedate(showTimeDates);
+		        
+		        List<ShowCategory> showCategories = new ArrayList<>();
+		        if (showDTO.getCategory() != null) {
+		            for (Show_layoutDto show_layoutDto : showDTO.getCategory()) {
+ 
+		                ShowCategory showCategory = new ShowCategory();
+		                showCategory.setLayoutId(show_layoutDto.getLayoutId());
+		                showCategory.setPrice(show_layoutDto.getMoviePrice());
+		                showCategory.setShow(show);
+ 
+		            }
+		        } else {
+		        	for (Show_layoutDto categoryId : showDTO.getCategory()) {
+		                ShowCategory showCategory = new ShowCategory();
+		                showCategory.setShow(show);
+		                }
+				}
+		        show.setShowCategories(showCategories);
  
 		      
-		        List<Show_layout> showLayouts = new ArrayList<>();
-		        if (showDTO.getCategory() != null) {
-		            for (Show_layoutDto layoutDto : showDTO.getCategory()) {
-		                Show_layout showLayout = new Show_layout();
-		                showLayout.setMoviePrice(layoutDto.getMoviePrice());
-		                showLayout.setShow(show);
- 
-		            
-		                if (layoutDto.getLayout() != null) {
-		                    Layout layout = layoutRepository.findById(layoutDto.getLayout())
-		                            .orElseThrow(() -> new RuntimeException("Layout not found"));
-		                    showLayout.setLayout(layout);
-		                }
- 
-		                showLayouts.add(showLayout);
-		            }
-		        }
-		        show.setShowLayouts(showLayouts);
+//		        List<Show_layout> showLayouts = new ArrayList<>();
+//		        if (showDTO.getCategory() != null) {
+//		            for (Show_layoutDto layoutDto : showDTO.getCategory()) {
+//		                Show_layout showLayout = new Show_layout();
+//		                showLayout.setMoviePrice(layoutDto.getMoviePrice());
+//		                showLayout.setShow(show);
+// 
+//		            
+//		                if (layoutDto.getLayout() != null) {
+//		                    Layout layout = layoutRepository.findById(layoutDto.getLayout())
+//		                            .orElseThrow(() -> new RuntimeException("Layout not found"));
+//		                    showLayout.setLayout(layout);
+//		                }
+// 
+//		                showLayouts.add(showLayout);
+//		            }
+//		        }
+//		        show.setShowLayouts(showLayouts);
  
 		       
 		        show.setEvent(event);
@@ -433,14 +454,14 @@ public class EventServiceImpl implements EventService {
 		eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
 				savedEvent.getName() + " is now available!", savedEvent.getEventType()));
 
-		for (Show show : event.getShows()) {
-
-			for (ShowTimeDate showTimeDate : show.getShowstimedate()) {
-
-			}
-
-			showRepository.save(show);
-		}
+//		for (Show show : event.getShows()) {
+//
+//			for (ShowTimeDate showTimeDate : show.getShowstimedate()) {
+//
+//			}
+//
+//			showRepository.save(show);
+//		}
 		return toDto(savedEvent);
 	}
 
