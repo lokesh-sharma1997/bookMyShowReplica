@@ -32,7 +32,8 @@ public class Show {
 	@JoinColumn(name = "screen_id", referencedColumnName = "id")
 	private Screen screen;
 
-	private int showPrice;
+	
+	private Integer showPrice;
 
 	@OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference("show-showtimedate")
