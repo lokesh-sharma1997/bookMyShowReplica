@@ -1,9 +1,9 @@
 package com.bookmyshow.main.serviceImpl;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,23 +11,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
+import com.bookmyshow.main.dto.CastDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.bookmyshow.main.dto.CastDTO;
 import com.bookmyshow.main.dto.CategoryDTO;
 import com.bookmyshow.main.dto.CrewDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
+
 import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.dto.EventResponseDtoCard;
 import com.bookmyshow.main.dto.EventSearchDTO;
@@ -39,6 +42,7 @@ import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.ShowDTO;
 import com.bookmyshow.main.dto.ShowTimeDTO;
+import com.bookmyshow.main.dto.Show_layoutDto;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.events.NotificationEvent;
 import com.bookmyshow.main.exception.EventCustomException;
@@ -47,15 +51,18 @@ import com.bookmyshow.main.model.Categories;
 import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.model.Crew;
 import com.bookmyshow.main.model.DateFilter;
+
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
 import com.bookmyshow.main.model.Genres;
 import com.bookmyshow.main.model.Languages;
+import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.model.ShowCategory;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Show_layout;
@@ -80,6 +87,8 @@ import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.TagRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
+import java.util.Objects;
+
 import com.bookmyshow.main.specification.EventSpecification;
 
 @Service
@@ -203,198 +212,171 @@ public class EventServiceImpl implements EventService {
 		return mapper.map(dto, Event.class);
 	}
 
-//	@Override
-//	public EventDTO createEvent(EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
-//			List<MultipartFile> crewImages) throws IOException {
-//
-//		String base64Poster = Base64.getEncoder().encodeToString(poster.getBytes());
-//
-//		Event event = toEntity(eventDto);
-//		event.setDeleted(false);
-//		event.setImageurl(base64Poster);
-//		if (eventDto.getCurrentlyPlaying() == null) {
-//			event.setCurrentlyPlaying(false);
-//		}
-//
-//		Set<String> predefined = new HashSet<>(Arrays.asList("Movie", "Show", "Cartoon", "Event"));
-//		String eventType = eventDto.getEventType();
-//		event.setEventType(predefined.contains(eventType) ? eventType : eventType);
-//
-//		if (eventDto.getLanguages() != null) {
-//			List<Languages> langs = languagesRepository.findAllById(eventDto.getLanguages());
-//			event.setLanguages(langs);
-//		}
-//
-//		if (eventDto.getGenres() != null) {
-//			List<Genres> genres = genresRepository.findAllById(eventDto.getGenres());
-//			event.setGenres(genres);
-//		}
-//
-//		if (eventDto.getFormat() != null) {
-//			List<Format> formats = formatRepository.findAllById(eventDto.getFormat());
-//			event.setFormat(formats);
-//		}
-//
-//		if (eventDto.getTag() != null) {
-//			List<Tag> tags = tagRepository.findAllById(eventDto.getTag());
-//			event.setTag(tags);
-//		}
-//
-//		if (eventDto.getReleaseMonth() != null) {
-//			List<ReleaseMonth> months = releaseMonthRepository.findAllById(eventDto.getReleaseMonth());
-//			event.setReleaseMonth(months);
-//		}
-//
-//		if (eventDto.getDateFilter() != null) {
-//			List<DateFilter> filters = dateFilterRepository.findAllById(eventDto.getDateFilter());
-//			event.setDateFilter(filters);
-//		}
-//
-//		if (eventDto.getCategories() != null) {
-//			List<Categories> cats = categoriesRepository.findAllById(eventDto.getCategories());
-//			event.setCategories(cats);
-//		}
-//
-//		if (eventDto.getMoreFilters() != null) {
-//			List<MoreFilters> moreFilters = moreFiltersRepository.findAllById(eventDto.getMoreFilters());
-//			event.setMoreFilters(moreFilters);
-//		}
-//
-//		if (eventDto.getCast() != null) {
-//
-//			if (castImages != null) {
-//				for (int i = 0; i < eventDto.getCast().size(); i++) {
-//					if (i < castImages.size()) {
-//						String base64 = Base64.getEncoder().encodeToString(castImages.get(i).getBytes());
-//						eventDto.getCast().get(i).setCastImg(base64);
-//					}
-//				}
-//			}
-//			List<Cast> castEntities = new ArrayList<>();
-//			for (CastDTO c : eventDto.getCast()) {
-//				Optional<Cast> existingCast = castRepository.findByActorName(c.getActorName());
-//				Cast castEntity;
-//				if (existingCast.isPresent()) {
-//					castEntity = existingCast.get();
-//					if (c.getCastImg() != null && !c.getCastImg().isEmpty()) {
-//						castEntity.setCastImg(c.getCastImg());
-//						castRepository.save(castEntity);
-//					}
-//				} else {
-//					castEntity = new Cast();
-//					castEntity.setActorName(c.getActorName());
-//					castEntity.setCastImg(c.getCastImg());
-//					castEntity = castRepository.save(castEntity);
-//				}
-//				castEntities.add(castEntity);
-//			}
-//			event.setCast(castEntities);
-//
-//		}
-//		if (eventDto.getCrew() != null) {
-//
-//			if (crewImages != null) {
-//				for (int i = 0; i < eventDto.getCrew().size(); i++) {
-//					if (i < crewImages.size()) {
-//						String base64 = Base64.getEncoder().encodeToString(crewImages.get(i).getBytes());
-//						eventDto.getCrew().get(i).setCrewImg(base64);
-//					}
-//				}
-//			}
-//
-//			List<Crew> crewEntities = new ArrayList<>();
-//			for (CrewDTO c : eventDto.getCrew()) {
-//				Optional<Crew> existingCrew = crewRepository.findByMemberName(c.getMemberName());
-//				Crew crewEntity;
-//				if (existingCrew.isPresent()) {
-//					crewEntity = existingCrew.get();
-//					if (c.getCrewImg() != null && !c.getCrewImg().isEmpty()) {
-//						crewEntity.setCrewImg(c.getCrewImg());
-//						crewRepository.save(crewEntity);
-//					}
-//				} else {
-//					crewEntity = new Crew();
-//					crewEntity.setMemberName(c.getMemberName());
-//					crewEntity.setCrewImg(c.getCrewImg());
-//					crewEntity = crewRepository.save(crewEntity);
-//				}
-//				crewEntities.add(crewEntity);
-//			}
-//			event.setCrew(crewEntities);
-//
-//		}
-//
-//		if (eventDto.getCity() != null) {
-//			List<City> cities = cityRepository.findAllById(eventDto.getCity());
-//			event.setCity(cities);
-//		}
-//		if (eventDto.getVenue() != null) {
-//
-//			List<Long> venueIds = eventDto.getVenue().stream().map(Integer::longValue).collect(Collectors.toList());
-//
-//			List<Venue> venues = venueRepository.findAllById(venueIds);
-//
-//			event.setVenues(venues);
-//		}
-//
-//		if (eventDto.getShow() != null) {
-//		    List<Show> shows = new ArrayList<>();
-// 
-//		    for (ShowDTO showDTO : eventDto.getShow()) {
-//		        Show show = new Show();
-//		        show.setId(showDTO.getShowid());
-// 
-//		      
-//		        if (showDTO.getVenue() != null) {
-//		            Venue venue = venueRepository.findById(showDTO.getVenue())
-//		                    .orElseThrow(() -> new RuntimeException("Venue not found"));
-//		            show.setVenue(venue);
-//		        }
-// 
-//		      
-//		        if (showDTO.getScreen() != null) {
-//		            Screen screen = screenRepository.findById(showDTO.getScreen())
-//		                    .orElseThrow(() -> new RuntimeException("Screen not found"));
-//		            show.setScreen(screen);
-//		        }
-// 
-// 
-//		        if (showDTO.getShowPrice() == null) {
-//		        	show.setShowPrice(null);
-//				}else {
-//					show.setShowPrice(showDTO.getShowPrice() != null ? showDTO.getShowPrice() : 0);
-//				}
-//		        
-// 
-// 
-//		       
-////		        List<ShowTimeDate> showTimeDates = new ArrayList<>();
-////		        if (showDTO.getShowtimesdate() != null) {
-////		            for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
-//// 
-////		                ShowTimeDate showTimeDate = new ShowTimeDate();
-////		                showTimeDate.setShowDate(showTimeDTO.getShowDate());
-////		                showTimeDate.setShow(show);
-////		                showTimeDate.setVenue(show.getVenue());
-////
-//// 
-////		                List<ShowTime> showTimes = new ArrayList<>();
-//// 
-////		                if (showTimeDTO.getShowTime() != null) {
-////		                    for (LocalTime showTime : showTimeDTO.getShowTime()) {
-////		                        ShowTime showTimeEntity = new ShowTime();
-////		                        showTimeEntity.setShowTime(showTime);
-////		                        showTimeEntity.setShowTimeDate(showTimeDate);
-////		                        showTimes.add(showTimeEntity);
-////		                    }
-////		                }
-//// 
-////		                showTimeDate.setShowTimes(showTimes);
-////		                showTimeDates.add(showTimeDate);
-////		            }
-////		        }
-////		        show.setShowstimedate(showTimeDates);
-//		        
+	@Override
+	public EventDTO createEvent(EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
+			List<MultipartFile> crewImages) throws IOException {
+
+		String base64Poster = Base64.getEncoder().encodeToString(poster.getBytes());
+
+		Event event = toEntity(eventDto);
+		event.setDeleted(false);
+		event.setImageurl(base64Poster);
+		if (eventDto.getCurrentlyPlaying() == null) {
+			event.setCurrentlyPlaying(false);
+		}
+
+		Set<String> predefined = new HashSet<>(Arrays.asList("Movie", "Show", "Cartoon", "Event"));
+		String eventType = eventDto.getEventType();
+		event.setEventType(predefined.contains(eventType) ? eventType : eventType);
+
+		if (eventDto.getLanguages() != null) {
+			List<Languages> langs = languagesRepository.findAllById(eventDto.getLanguages());
+			event.setLanguages(langs);
+		}
+
+		if (eventDto.getGenres() != null) {
+			List<Genres> genres = genresRepository.findAllById(eventDto.getGenres());
+			event.setGenres(genres);
+		}
+
+		if (eventDto.getFormat() != null) {
+			List<Format> formats = formatRepository.findAllById(eventDto.getFormat());
+			event.setFormat(formats);
+		}
+
+		if (eventDto.getTag() != null) {
+			List<Tag> tags = tagRepository.findAllById(eventDto.getTag());
+			event.setTag(tags);
+		}
+
+		if (eventDto.getReleaseMonth() != null) {
+			List<ReleaseMonth> months = releaseMonthRepository.findAllById(eventDto.getReleaseMonth());
+			event.setReleaseMonth(months);
+		}
+
+		if (eventDto.getDateFilter() != null) {
+			List<DateFilter> filters = dateFilterRepository.findAllById(eventDto.getDateFilter());
+			event.setDateFilter(filters);
+		}
+
+		if (eventDto.getCategories() != null) {
+			List<Categories> cats = categoriesRepository.findAllById(eventDto.getCategories());
+			event.setCategories(cats);
+		}
+
+		if (eventDto.getMoreFilters() != null) {
+			List<MoreFilters> moreFilters = moreFiltersRepository.findAllById(eventDto.getMoreFilters());
+			event.setMoreFilters(moreFilters);
+		}
+
+		if (eventDto.getCast() != null) {
+
+			if (castImages != null) {
+				for (int i = 0; i < eventDto.getCast().size(); i++) {
+					if (i < castImages.size()) {
+						String base64 = Base64.getEncoder().encodeToString(castImages.get(i).getBytes());
+						eventDto.getCast().get(i).setCastImg(base64);
+					}
+				}
+			}
+			List<Cast> castEntities = new ArrayList<>();
+			for (CastDTO c : eventDto.getCast()) {
+				Optional<Cast> existingCast = castRepository.findByActorName(c.getActorName());
+				Cast castEntity;
+				if (existingCast.isPresent()) {
+					castEntity = existingCast.get();
+					if (c.getCastImg() != null && !c.getCastImg().isEmpty()) {
+						castEntity.setCastImg(c.getCastImg());
+						castRepository.save(castEntity);
+					}
+				} else {
+					castEntity = new Cast();
+					castEntity.setActorName(c.getActorName());
+					castEntity.setCastImg(c.getCastImg());
+					castEntity = castRepository.save(castEntity);
+				}
+				castEntities.add(castEntity);
+			}
+			event.setCast(castEntities);
+
+		}
+		if (eventDto.getCrew() != null) {
+
+			if (crewImages != null) {
+				for (int i = 0; i < eventDto.getCrew().size(); i++) {
+					if (i < crewImages.size()) {
+						String base64 = Base64.getEncoder().encodeToString(crewImages.get(i).getBytes());
+						eventDto.getCrew().get(i).setCrewImg(base64);
+					}
+				}
+			}
+
+			List<Crew> crewEntities = new ArrayList<>();
+			for (CrewDTO c : eventDto.getCrew()) {
+				Optional<Crew> existingCrew = crewRepository.findByMemberName(c.getMemberName());
+				Crew crewEntity;
+				if (existingCrew.isPresent()) {
+					crewEntity = existingCrew.get();
+					if (c.getCrewImg() != null && !c.getCrewImg().isEmpty()) {
+						crewEntity.setCrewImg(c.getCrewImg());
+						crewRepository.save(crewEntity);
+					}
+				} else {
+					crewEntity = new Crew();
+					crewEntity.setMemberName(c.getMemberName());
+					crewEntity.setCrewImg(c.getCrewImg());
+					crewEntity = crewRepository.save(crewEntity);
+				}
+				crewEntities.add(crewEntity);
+			}
+			event.setCrew(crewEntities);
+
+		}
+
+		if (eventDto.getCity() != null) {
+			List<City> cities = cityRepository.findAllById(eventDto.getCity());
+			event.setCity(cities);
+		}
+		if (eventDto.getVenue() != null) {
+
+			List<Long> venueIds = eventDto.getVenue().stream().map(Integer::longValue).collect(Collectors.toList());
+
+			List<Venue> venues = venueRepository.findAllById(venueIds);
+
+			event.setVenues(venues);
+		}
+
+		if (eventDto.getShow() != null) {
+		    List<Show> shows = new ArrayList<>();
+ 
+		    for (ShowDTO showDTO : eventDto.getShow()) {
+		        Show show = new Show();
+		        show.setId(showDTO.getShowid());
+ 
+		      
+		        if (showDTO.getVenue() != null) {
+		            Venue venue = venueRepository.findById(showDTO.getVenue())
+		                    .orElseThrow(() -> new RuntimeException("Venue not found"));
+		            show.setVenue(venue);
+		        }
+ 
+		      
+		        if (showDTO.getScreen() != null) {
+		            Screen screen = screenRepository.findById(showDTO.getScreen())
+		                    .orElseThrow(() -> new RuntimeException("Screen not found"));
+		            show.setScreen(screen);
+		        }
+ 
+ 
+		        if (showDTO.getShowPrice() == null) {
+		        	show.setShowPrice(null);
+				}else {
+					show.setShowPrice(showDTO.getShowPrice() != null ? showDTO.getShowPrice() : 0);
+				}
+		        
+ 
+ 
+		       
 //		        List<ShowTimeDate> showTimeDates = new ArrayList<>();
 //		        if (showDTO.getShowtimesdate() != null) {
 //		            for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
@@ -421,270 +403,100 @@ public class EventServiceImpl implements EventService {
 //		            }
 //		        }
 //		        show.setShowstimedate(showTimeDates);
-//		        
-//		        List<ShowCategory> showCategories = new ArrayList<>();
-//		        if (showDTO.getCategory() != null && !showDTO.getCategory().isEmpty()) {
-//		            for (Show_layoutDto show_layoutDto : showDTO.getCategory()) {
-// 
+		        
+		        List<ShowTimeDate> showTimeDates = new ArrayList<>();
+		        if (showDTO.getShowtimesdate() != null) {
+		            for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
+ 
+		                ShowTimeDate showTimeDate = new ShowTimeDate();
+		                showTimeDate.setShowDate(showTimeDTO.getShowDate());
+		                showTimeDate.setShow(show);
+		                showTimeDate.setVenue(show.getVenue());
+
+ 
+		                List<ShowTime> showTimes = new ArrayList<>();
+ 
+		                if (showTimeDTO.getShowTime() != null) {
+		                    for (LocalTime showTime : showTimeDTO.getShowTime()) {
+		                        ShowTime showTimeEntity = new ShowTime();
+		                        showTimeEntity.setShowTime(showTime);
+		                        showTimeEntity.setShowTimeDate(showTimeDate);
+		                        showTimes.add(showTimeEntity);
+		                    }
+		                }
+ 
+		                showTimeDate.setShowTimes(showTimes);
+		                showTimeDates.add(showTimeDate);
+		            }
+		        }
+		        show.setShowstimedate(showTimeDates);
+		        
+		        List<ShowCategory> showCategories = new ArrayList<>();
+		        if (showDTO.getCategory() != null && !showDTO.getCategory().isEmpty()) {
+		            for (Show_layoutDto show_layoutDto : showDTO.getCategory()) {
+ 
+		                ShowCategory showCategory = new ShowCategory();
+		                showCategory.setLayoutId(show_layoutDto.getLayoutId());
+		                showCategory.setPrice(show_layoutDto.getMoviePrice());
+		                showCategory.setShow(show);
+ 
+//		                showCategories.add(showCategory);
+		            }
+		        } 
+//		        else {
+//		        	for (Show_layoutDto categoryId : showDTO.getCategory()) {
 //		                ShowCategory showCategory = new ShowCategory();
-//		                showCategory.setLayoutId(show_layoutDto.getLayoutId());
-//		                showCategory.setPrice(show_layoutDto.getMoviePrice());
 //		                showCategory.setShow(show);
+//		                }
+//				}
+		        show.setShowCategories(showCategories);
+ 
+		      
+//		        List<Show_layout> showLayouts = new ArrayList<>();
+//		        if (showDTO.getCategory() != null) {
+//		            for (Show_layoutDto layoutDto : showDTO.getCategory()) {
+//		                Show_layout showLayout = new Show_layout();
+//		                showLayout.setMoviePrice(layoutDto.getMoviePrice());
+//		                showLayout.setShow(show);
 // 
-////		                showCategories.add(showCategory);
+//		            
+//		                if (layoutDto.getLayout() != null) {
+//		                    Layout layout = layoutRepository.findById(layoutDto.getLayout())
+//		                            .orElseThrow(() -> new RuntimeException("Layout not found"));
+//		                    showLayout.setLayout(layout);
+//		                }
+// 
+//		                showLayouts.add(showLayout);
 //		            }
-//		        } 
-////		        else {
-////		        	for (Show_layoutDto categoryId : showDTO.getCategory()) {
-////		                ShowCategory showCategory = new ShowCategory();
-////		                showCategory.setShow(show);
-////		                }
-////				}
-//		        show.setShowCategories(showCategories);
-// 
-//		      
-////		        List<Show_layout> showLayouts = new ArrayList<>();
-////		        if (showDTO.getCategory() != null) {
-////		            for (Show_layoutDto layoutDto : showDTO.getCategory()) {
-////		                Show_layout showLayout = new Show_layout();
-////		                showLayout.setMoviePrice(layoutDto.getMoviePrice());
-////		                showLayout.setShow(show);
-//// 
-////		            
-////		                if (layoutDto.getLayout() != null) {
-////		                    Layout layout = layoutRepository.findById(layoutDto.getLayout())
-////		                            .orElseThrow(() -> new RuntimeException("Layout not found"));
-////		                    showLayout.setLayout(layout);
-////		                }
-//// 
-////		                showLayouts.add(showLayout);
-////		            }
-////		        }
-////		        show.setShowLayouts(showLayouts);
-// 
-//		       
-//		        show.setEvent(event);
-// 
-//		        shows.add(show);
-//		    }
-// 
-//		    event.setShows(shows);
-//		} else {
-//		    event.setShows(Collections.emptyList());
+//		        }
+//		        show.setShowLayouts(showLayouts);
+ 
+		       
+		        show.setEvent(event);
+ 
+		        shows.add(show);
+		    }
+ 
+		    event.setShows(shows);
+		} else {
+		    event.setShows(Collections.emptyList());
+		}
+
+		Event savedEvent = eventRepository.save(event);
+
+		eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
+				savedEvent.getName() + " is now available!", savedEvent.getEventType()));
+
+//		for (Show show : event.getShows()) {
+//
+//			for (ShowTimeDate showTimeDate : show.getShowstimedate()) {
+//
+//			}
+//
+//			showRepository.save(show);
 //		}
-//
-//		Event savedEvent = eventRepository.save(event);
-//
-//		eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
-//				savedEvent.getName() + " is now available!", savedEvent.getEventType()));
-//
-////		for (Show show : event.getShows()) {
-////
-////			for (ShowTimeDate showTimeDate : show.getShowstimedate()) {
-////
-////			}
-////
-////			showRepository.save(show);
-////		}
-//		return toDto(savedEvent);
-//	}
-	
-	
-	@Override
-	public EventDTO createEvent(EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
-	                            List<MultipartFile> crewImages) throws IOException {
-
-	    String base64Poster = Base64.getEncoder().encodeToString(poster.getBytes());
-
-	    Event event = toEntity(eventDto);
-	    event.setDeleted(false);
-	    event.setImageurl(base64Poster);
-	    if (eventDto.getCurrentlyPlaying() == null) {
-	        event.setCurrentlyPlaying(false);
-	    }
-
-	    String eventType = eventDto.getEventType();
-	    event.setEventType(eventType);
-
-	    // ----- RELATIONSHIPS -----
-	    if (eventDto.getLanguages() != null)
-	        event.setLanguages(languagesRepository.findAllById(eventDto.getLanguages()));
-
-	    if (eventDto.getGenres() != null)
-	        event.setGenres(genresRepository.findAllById(eventDto.getGenres()));
-
-	    if (eventDto.getFormat() != null)
-	        event.setFormat(formatRepository.findAllById(eventDto.getFormat()));
-
-	    if (eventDto.getTag() != null)
-	        event.setTag(tagRepository.findAllById(eventDto.getTag()));
-
-	    if (eventDto.getReleaseMonth() != null)
-	        event.setReleaseMonth(releaseMonthRepository.findAllById(eventDto.getReleaseMonth()));
-
-	    if (eventDto.getDateFilter() != null)
-	        event.setDateFilter(dateFilterRepository.findAllById(eventDto.getDateFilter()));
-
-	    if (eventDto.getCategories() != null)
-	        event.setCategories(categoriesRepository.findAllById(eventDto.getCategories()));
-
-	    if (eventDto.getMoreFilters() != null)
-	        event.setMoreFilters(moreFiltersRepository.findAllById(eventDto.getMoreFilters()));
-
-	    // ----- CAST -----
-	    if (eventDto.getCast() != null) {
-	        if (castImages != null) {
-	            for (int i = 0; i < eventDto.getCast().size(); i++) {
-	                if (i < castImages.size()) {
-	                    String base64 = Base64.getEncoder().encodeToString(castImages.get(i).getBytes());
-	                    eventDto.getCast().get(i).setCastImg(base64);
-	                }
-	            }
-	        }
-
-	        List<Cast> castEntities = new ArrayList<>();
-	        for (CastDTO c : eventDto.getCast()) {
-	            Optional<Cast> existingCast = castRepository.findByActorName(c.getActorName());
-	            Cast castEntity = existingCast.orElseGet(Cast::new);
-	            castEntity.setActorName(c.getActorName());
-	            castEntity.setCastImg(c.getCastImg());
-	            castEntities.add(castRepository.save(castEntity));
-	        }
-	        event.setCast(castEntities);
-	    }
-
-	    // ----- CREW -----
-	    if (eventDto.getCrew() != null) {
-	        if (crewImages != null) {
-	            for (int i = 0; i < eventDto.getCrew().size(); i++) {
-	                if (i < crewImages.size()) {
-	                    String base64 = Base64.getEncoder().encodeToString(crewImages.get(i).getBytes());
-	                    eventDto.getCrew().get(i).setCrewImg(base64);
-	                }
-	            }
-	        }
-
-	        List<Crew> crewEntities = new ArrayList<>();
-	        for (CrewDTO c : eventDto.getCrew()) {
-	            Optional<Crew> existingCrew = crewRepository.findByMemberName(c.getMemberName());
-	            Crew crewEntity = existingCrew.orElseGet(Crew::new);
-	            crewEntity.setMemberName(c.getMemberName());
-	            crewEntity.setCrewImg(c.getCrewImg());
-	            crewEntities.add(crewRepository.save(crewEntity));
-	        }
-	        event.setCrew(crewEntities);
-	    }
-
-	    // ----- CITY & VENUE -----
-	    if (eventDto.getCity() != null)
-	        event.setCity(cityRepository.findAllById(eventDto.getCity()));
-
-	    if (eventDto.getVenue() != null) {
-	        List<Long> venueIds = eventDto.getVenue().stream().map(Integer::longValue).collect(Collectors.toList());
-	        event.setVenues(venueRepository.findAllById(venueIds));
-	    }
-
-	    // ----- SHOWS -----
-	    if (eventDto.getShow() != null) {
-	        List<Show> shows = new ArrayList<>();
-
-	        boolean isMovie = "Movie".equalsIgnoreCase(eventType);
-	        LocalDate startDate = eventDto.getStartDate();
-	        LocalDate endDate = eventDto.getEndDate();
-
-	        for (ShowDTO showDTO : eventDto.getShow()) {
-	            Show show = new Show();
-	            show.setId(showDTO.getShowid());
-
-	            if (showDTO.getVenue() != null) {
-	                Venue venue = venueRepository.findById(showDTO.getVenue())
-	                        .orElseThrow(() -> new RuntimeException("Venue not found"));
-	                show.setVenue(venue);
-	            }
-
-	            if (showDTO.getScreen() != null) {
-	                Screen screen = screenRepository.findById(showDTO.getScreen())
-	                        .orElseThrow(() -> new RuntimeException("Screen not found"));
-	                show.setScreen(screen);
-	            }
-
-	            // ----- Price Logic -----
-	            if (isMovie) {
-	                show.setShowPrice(null); // movies don’t have show price
-	            } else {
-	                show.setShowPrice(showDTO.getShowPrice());
-	            }
-
-	            // ----- Show Time Logic -----
-	            List<ShowTimeDate> showTimeDates = new ArrayList<>();
-
-	            if (isMovie) {
-	                // Use JSON dates directly
-	                if (showDTO.getShowtimesdate() != null) {
-	                    for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
-	                        ShowTimeDate showTimeDate = new ShowTimeDate();
-	                        showTimeDate.setShowDate(showTimeDTO.getShowDate());
-	                        showTimeDate.setShow(show);
-	                        showTimeDate.setVenue(show.getVenue());
-
-	                        List<ShowTime> showTimes = new ArrayList<>();
-	                        for (LocalTime showTime : showTimeDTO.getShowTime()) {
-	                            ShowTime st = new ShowTime();
-	                            st.setShowTime(showTime);
-	                            st.setShowTimeDate(showTimeDate);
-	                            showTimes.add(st);
-	                        }
-	                        showTimeDate.setShowTimes(showTimes);
-	                        showTimeDates.add(showTimeDate);
-	                    }
-	                }
-
-	            } else {
-	                // Non-Movie: auto-generate dates from startDate → endDate
-	                if (startDate != null && endDate != null) {
-	                    List<LocalTime> baseTimes = new ArrayList<>();
-	                    if (showDTO.getShowtimesdate() != null && !showDTO.getShowtimesdate().isEmpty()) {
-	                        baseTimes = showDTO.getShowtimesdate().get(0).getShowTime();
-	                    }
-
-	                    for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-	                        ShowTimeDate showTimeDate = new ShowTimeDate();
-	                        showTimeDate.setShowDate(date);
-	                        showTimeDate.setShow(show);
-	                        showTimeDate.setVenue(show.getVenue());
-
-	                        List<ShowTime> showTimes = new ArrayList<>();
-	                        for (LocalTime time : baseTimes) {
-	                            ShowTime st = new ShowTime();
-	                            st.setShowTime(time);
-	                            st.setShowTimeDate(showTimeDate);
-	                            showTimes.add(st);
-	                        }
-	                        showTimeDate.setShowTimes(showTimes);
-	                        showTimeDates.add(showTimeDate);
-	                    }
-	                }
-	            }
-
-	            show.setShowstimedate(showTimeDates);
-	            show.setEvent(event);
-	            shows.add(show);
-	        }
-
-	        event.setShows(shows);
-	    } else {
-	        event.setShows(Collections.emptyList());
-	    }
-
-	    Event savedEvent = eventRepository.save(event);
-
-	    eventPublisher.publishEvent(new NotificationEvent(this,
-	            "New " + savedEvent.getEventType() + " Added",
-	            savedEvent.getName() + " is now available!", savedEvent.getEventType()));
-
-	    return toDto(savedEvent);
+		return toDto(savedEvent);
 	}
-
 
 	@Override
 	public EventResponseDto getEventById(Long id) {
