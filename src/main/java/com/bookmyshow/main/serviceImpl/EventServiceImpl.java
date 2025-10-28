@@ -42,7 +42,7 @@ import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.ShowDTO;
 import com.bookmyshow.main.dto.ShowTimeDTO;
-import com.bookmyshow.main.dto.Show_layoutDto;
+import com.bookmyshow.main.dto.ShowLayoutDto;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.events.NotificationEvent;
 import com.bookmyshow.main.exception.EventCustomException;
@@ -400,7 +400,7 @@ public class EventServiceImpl implements EventService {
 		      
 		        List<Show_layout> showLayouts = new ArrayList<>();
 		        if (showDTO.getCategory() != null) {
-		            for (Show_layoutDto layoutDto : showDTO.getCategory()) {
+		            for (ShowLayoutDto layoutDto : showDTO.getCategory()) {
 		                Show_layout showLayout = new Show_layout();
 		                showLayout.setMoviePrice(layoutDto.getMoviePrice());
 		                showLayout.setShow(show);

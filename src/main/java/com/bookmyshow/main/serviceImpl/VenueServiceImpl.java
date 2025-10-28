@@ -1,15 +1,15 @@
+
 package com.bookmyshow.main.serviceImpl;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,10 +17,10 @@ import org.springframework.stereotype.Service;
 
 import com.bookmyshow.main.dto.AddressDTO;
 import com.bookmyshow.main.dto.LayoutDTO;
-import com.bookmyshow.main.dto.LayoutRowDTO;
 import com.bookmyshow.main.dto.ScreenDTO;
 import com.bookmyshow.main.dto.TimeSlotDTO;
 import com.bookmyshow.main.dto.VenueDTO;
+import com.bookmyshow.main.events.NotificationEvent;
 import com.bookmyshow.main.exception.VenueNotFoundException;
 import com.bookmyshow.main.model.Address;
 import com.bookmyshow.main.model.Amenity;
@@ -34,12 +34,21 @@ import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.SupportedCategory;
 import com.bookmyshow.main.model.Venue;
-import com.bookmyshow.main.repository.*;
+import com.bookmyshow.main.repository.AddressRepository;
+import com.bookmyshow.main.repository.AmenityRepository;
+import com.bookmyshow.main.repository.BookingRepository;
+import com.bookmyshow.main.repository.CityRepository;
+import com.bookmyshow.main.repository.LayoutRepository;
+import com.bookmyshow.main.repository.LayoutRowRepository;
+import com.bookmyshow.main.repository.ScreenRepository;
+import com.bookmyshow.main.repository.SeatRepository;
+import com.bookmyshow.main.repository.ShowRepository;
+import com.bookmyshow.main.repository.ShowTimeRepository;
+import com.bookmyshow.main.repository.ShowtimedateRepository;
+import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
 
 import jakarta.transaction.Transactional;
-
-import com.bookmyshow.main.events.NotificationEvent;
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -237,6 +246,7 @@ public class VenueServiceImpl implements VenueService {
 	}
 
 	@Override
+	@Transactional
 	public VenueDTO createVenue(VenueDTO dto) {
 		Venue entity = dtoToEntity(dto);
 		if (dto.getAddress() != null) {
@@ -270,14 +280,19 @@ public class VenueServiceImpl implements VenueService {
 
 			for (Screen screen : entity.getScreens()) {
 				screen.setVenue(entity);
+				Screen savedScreen = screenRepository.save(screen);
+
 				if (screen.getLayouts() != null) {
 					for (Layout layout : screen.getLayouts()) {
-						layout.setScreen(screen);
+						layout.setScreen(savedScreen);
+						Layout savedLayout = layoutRepository.save(layout);
+
 						if (layout.getLayoutRows() != null) {
 							for (LayoutRow layoutRow : layout.getLayoutRows()) {
-								layoutRow.setLayout(layout);
+								layoutRow.setLayout(savedLayout);
+								LayoutRow savedLayoutRow = layoutRowRepository.save(layoutRow);
 
-								createSeatsForLayoutRow(layoutRow, screen, layout.getCols());
+								createSeatsForLayoutRow(savedLayoutRow, savedScreen, layout.getCols());
 							}
 						}
 					}
@@ -295,19 +310,18 @@ public class VenueServiceImpl implements VenueService {
 	}
 
 	private void createSeatsForLayoutRow(LayoutRow layoutRow, Screen screen, int numberOfSeatsPerRow) {
+
 		List<Seat> seats = new ArrayList<>();
 
 		for (int i = 1; i <= numberOfSeatsPerRow; i++) {
 			Seat seat = new Seat();
-			seat.setSeatNumber(layoutRow.getRowName() + i);
-			seat.setReserved(false);
+			String seatNumber = layoutRow.getRowName() + i;
+			seat.setSeatNumber(seatNumber);
 			seat.setLayoutRow(layoutRow);
 			seat.setScreen(screen);
-
 			seats.add(seat);
 		}
 
-		layoutRow.setSeats(seats);
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package com.bookmyshow.main.model;
 
-import java.sql.Time;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -20,24 +18,23 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name="showtimedate")
+@Table(name = "showtimedate")
 public class ShowTimeDate {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private LocalDate showDate;
-    @OneToMany(mappedBy = "showTimeDate", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ShowTime> showTimes;
+	private LocalDate showDate;
+	@OneToMany(mappedBy = "showTimeDate", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<ShowTime> showTimes;
 
-    
-    @ManyToOne
-    @JoinColumn(name = "show_id", referencedColumnName = "id")
-    @JsonBackReference 
-    private Show show; 
+	@ManyToOne
+	@JoinColumn(name = "show_id", referencedColumnName = "id")
+	@JsonBackReference
+	private Show show;
 
-    @ManyToOne
-    @JoinColumn(name = "venue_id", referencedColumnName = "id")
-    private Venue venue;
-   
+	@ManyToOne
+	@JoinColumn(name = "venue_id", referencedColumnName = "id")
+	private Venue venue;
+
 }
