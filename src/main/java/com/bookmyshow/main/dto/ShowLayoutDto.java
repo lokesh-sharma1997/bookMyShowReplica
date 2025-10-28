@@ -5,7 +5,7 @@ import com.bookmyshow.main.model.Layout;
 import lombok.Data;
  
 @Data
-public class Show_layoutDto {
+public class ShowLayoutDto {
 	private Layout layoutId;
 	private int moviePrice;
  

@@ -42,7 +42,7 @@ import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.ShowDTO;
 import com.bookmyshow.main.dto.ShowTimeDTO;
-import com.bookmyshow.main.dto.Show_layoutDto;
+import com.bookmyshow.main.dto.ShowLayoutDto;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.events.NotificationEvent;
 import com.bookmyshow.main.exception.EventCustomException;
@@ -433,7 +433,7 @@ public class EventServiceImpl implements EventService {
 		        
 		        List<ShowCategory> showCategories = new ArrayList<>();
 		        if (showDTO.getCategory() != null && !showDTO.getCategory().isEmpty()) {
-		            for (Show_layoutDto show_layoutDto : showDTO.getCategory()) {
+		            for (ShowLayoutDto show_layoutDto : showDTO.getCategory()) {
  
 		                ShowCategory showCategory = new ShowCategory();
 		                showCategory.setLayoutId(show_layoutDto.getLayoutId());

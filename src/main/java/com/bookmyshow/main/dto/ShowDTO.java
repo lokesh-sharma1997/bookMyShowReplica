@@ -14,5 +14,5 @@ public class ShowDTO {
 	private Long screen;
 	private Integer showPrice;
 	private List<ShowTimeDTO> showtimesdate;
-	private List<Show_layoutDto> category;
+	private List<ShowLayoutDto> category;
 }
