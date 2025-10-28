@@ -340,112 +340,81 @@ public class VenueServiceImpl implements VenueService {
 
 	@Override
 	public List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date) {
-	    Venue venue = venueRepository.findById(venueId)
-	            .orElseThrow(() -> new RuntimeException("Venue not found"));
+		Venue venue = venueRepository.findById(venueId).orElseThrow(() -> new RuntimeException("Venue not found"));
 
-	    if ("movie".equalsIgnoreCase(venue.getVenueType())) {
-	        if (screenId == null) throw new IllegalArgumentException("ScreenId is required for movie venues");
+		if ("movie".equalsIgnoreCase(venue.getVenueType())) {
+			if (screenId == null) {
+				throw new IllegalArgumentException("ScreenId is required for movie venues");
+			}
+			Show show = showRepository.findByVenueIdAndScreenId(venueId, screenId)
+					.orElseThrow(() -> new RuntimeException("Show not found for venue and screen"));
+			return getAvailableSlotsForShow(show, date);
+		} else {
+			List<Show> shows = showRepository.findByVenueId(venueId);
+			if (shows.isEmpty()) {
+				throw new RuntimeException("No shows found for venue");
+			}
 
-	        List<Show> shows = showRepository.findByVenueIdAndScreenId(venueId, screenId);
+			List<TimeSlotDTO> availableSlots = new ArrayList<>();
+			for (Show show : shows) {
+				availableSlots.addAll(getAvailableSlotsForShow(show, date));
+			}
+			if (availableSlots.isEmpty()) {
+				throw new RuntimeException("No available timeslots found for the given date");
+			}
 
-	        if (shows.isEmpty()) return List.of(fullDaySlot());
+			List<TimeSlotDTO> uniqueSlots = availableSlots.stream().distinct()
+					.sorted(Comparator.comparing(TimeSlotDTO::getStartTime)).collect(Collectors.toList());
 
-	        List<ShowTimeWrapper> allShowTimes = new ArrayList<>();
-	        for (Show show : shows) {
-	            show.getShowstimedate().stream()
-	                    .filter(std -> std.getShowDate().equals(date))
-	                    .forEach(std -> std.getShowTimes().forEach(st ->
-	                            allShowTimes.add(new ShowTimeWrapper(show, st))
-	                    ));
-	        }
-
-	        if (allShowTimes.isEmpty()) return List.of(fullDaySlot());
-
-	        allShowTimes.sort(Comparator.comparing(stw -> stw.showTime.getShowTime()));
-
-	        List<TimeSlotDTO> freeSlots = new ArrayList<>();
-	        LocalTime prevEnd = LocalTime.of(0, 0);
-	        int buffer = 30;
-
-	        for (ShowTimeWrapper stw : allShowTimes) {
-	            LocalTime start = stw.showTime.getShowTime();
-	            int duration = parseRuntimeToMinutes(stw.show.getEvent().getRunTime());
-
-	            if (prevEnd.isBefore(start)) {
-	                freeSlots.add(new TimeSlotDTO(null, prevEnd, start)); // id=null for DTO
-	            }
-
-	            prevEnd = start.plusMinutes(duration + buffer);
-	            if (prevEnd.isAfter(LocalTime.of(23, 59))) prevEnd = LocalTime.of(23, 59);
-	        }
-
-	        if (prevEnd.isBefore(LocalTime.of(23, 59))) {
-	            freeSlots.add(new TimeSlotDTO(null, prevEnd, LocalTime.of(23, 59, 59)));
-	        }
-
-	        return freeSlots;
-	    }
-
-	    List<Show> shows = showRepository.findByVenueId(venueId);
-	    if (shows.isEmpty()) return List.of(fullDaySlot());
-
-	    List<TimeSlotDTO> freeSlots = new ArrayList<>();
-	    for (Show show : shows) {
-	        freeSlots.addAll(getAvailableSlotsForShow(show, date));
-	    }
-
-	    return freeSlots.stream()
-	            .distinct()
-	            .sorted(Comparator.comparing(TimeSlotDTO::getStartTime))
-	            .collect(Collectors.toList());
-	}
-
-	private TimeSlotDTO fullDaySlot() {
-	    return new TimeSlotDTO(null, LocalTime.of(0, 0), LocalTime.of(23, 59, 59));
-	}
-
-	private static class ShowTimeWrapper {
-	    Show show;
-	    ShowTime showTime;
-
-	    ShowTimeWrapper(Show show, ShowTime showTime) {
-	        this.show = show;
-	        this.showTime = showTime;
-	    }
+			return uniqueSlots;
+		}
 	}
 
 	private List<TimeSlotDTO> getAvailableSlotsForShow(Show show, LocalDate date) {
-	    Optional<ShowTimeDate> showTimeDateOpt = show.getShowstimedate().stream()
-	            .filter(std -> std.getShowDate().equals(date))
-	            .findFirst();
+		Optional<ShowTimeDate> showTimeDateOpt = show.getShowstimedate().stream()
+				.filter(std -> std.getShowDate().equals(date)).findFirst();
 
-	    if (showTimeDateOpt.isEmpty()) return List.of(fullDaySlot());
+		if (showTimeDateOpt.isEmpty())
+			return Collections.emptyList();
 
-	    ShowTimeDate showTimeDate = showTimeDateOpt.get();
-	    List<ShowTime> showTimes = new ArrayList<>(showTimeDate.getShowTimes());
-	    showTimes.sort(Comparator.comparing(ShowTime::getShowTime));
+		ShowTimeDate showTimeDate = showTimeDateOpt.get();
 
-	    List<TimeSlotDTO> freeSlots = new ArrayList<>();
-	    LocalTime prevEnd = LocalTime.of(0, 0);
-	    int buffer = 30;
+		List<ShowTime> allShowTimes = new ArrayList<>(showTimeDate.getShowTimes());
+		allShowTimes.sort(Comparator.comparing(ShowTime::getShowTime));
 
-	    for (ShowTime st : showTimes) {
-	        LocalTime start = st.getShowTime();
-	        int duration = parseRuntimeToMinutes(show.getEvent().getRunTime());
+		List<Long> bookedShowTimeIds = showTimeRepository.findBookedShowTimes(showTimeDate.getId());
 
-	        if (prevEnd.isBefore(start)) {
-	            freeSlots.add(new TimeSlotDTO(null, prevEnd, start));
-	        }
+		int duration = parseRuntimeToMinutes(show.getEvent().getRunTime());
+		int buffer = 30;
 
-	        prevEnd = start.plusMinutes(duration + buffer);
-	        if (prevEnd.isAfter(LocalTime.of(23, 59))) prevEnd = LocalTime.of(23, 59);
-	    }
+		List<TimeSlotDTO> freeSlots = new ArrayList<>();
+		LocalTime prevEnd = LocalTime.of(0, 0); // day start
 
-	    if (prevEnd.isBefore(LocalTime.of(23, 59))) {
-	        freeSlots.add(new TimeSlotDTO(null, prevEnd, LocalTime.of(23, 59, 59)));
-	    }
+		for (ShowTime current : allShowTimes) {
+			LocalTime currentStart = current.getShowTime();
 
-	    return freeSlots;
+			if (prevEnd.isBefore(currentStart)) {
+				long freeMinutes = Duration.between(prevEnd, currentStart).toMinutes();
+				if (freeMinutes >= duration) {
+					TimeSlotDTO dto = new TimeSlotDTO();
+					dto.setStartTime(prevEnd);
+					dto.setEndTime(currentStart);
+					freeSlots.add(dto);
+				}
+			}
+
+			if (bookedShowTimeIds.contains(current.getId())) {
+				LocalTime busyEnd = currentStart.plusMinutes(duration + buffer);
+				if (busyEnd.isAfter(LocalTime.of(23, 59))) {
+					busyEnd = LocalTime.of(23, 59);
+				}
+				prevEnd = busyEnd;
+			} else {
+				prevEnd = currentStart;
+			}
+		}
+
+		return freeSlots;
 	}
 
 

@@ -15,8 +15,8 @@ public interface ShowRepository extends JpaRepository<Show, Long> {
 
 	List<Show> findByVenueId(Long venueId);
 
-	@Query("SELECT s FROM Show s WHERE s.venue.id = :venueId AND s.screen.id = :screenId")
-    List<Show> findByVenueIdAndScreenId(Long venueId, Long screenId);
+	Optional<Show> findByVenueIdAndScreenId(Long venueId, Long screenId);
+
 
 	 @Query("SELECT s FROM Show s JOIN s.showstimedate std " +
 	           "WHERE s.event.eventId = :eventId AND std.showDate = :showDate")
