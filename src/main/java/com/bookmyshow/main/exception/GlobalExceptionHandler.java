@@ -2,10 +2,13 @@ package com.bookmyshow.main.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.bookmyshow.main.response.ApiResponse;
+
+import jakarta.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -71,5 +74,29 @@ public class GlobalExceptionHandler {
 	private ResponseEntity<ApiResponse<Object>> buildResponse(HttpStatus status, String message, boolean success) {
 		ApiResponse<Object> response = new ApiResponse<>(status.value(), message, success, null);
 		return new ResponseEntity<>(response, status);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ApiResponse<Object>> handleConstraintViolation(ConstraintViolationException ex) {
+		StringBuilder message = new StringBuilder();
+		ex.getConstraintViolations()
+				.forEach(v -> message.append(v.getPropertyPath()).append(": ").append(v.getMessage()).append("; "));
+		ApiResponse<Object> response = new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), message.toString(), false,
+				null);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(TransactionSystemException.class)
+	public ResponseEntity<ApiResponse<Object>> handleTransactionSystemException(TransactionSystemException ex) {
+		Throwable cause = ex.getRootCause();
+		if (cause instanceof ConstraintViolationException cve) {
+			StringBuilder message = new StringBuilder();
+			cve.getConstraintViolations()
+					.forEach(v -> message.append(v.getPropertyPath()).append(": ").append(v.getMessage()).append("; "));
+			ApiResponse<Object> response = new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), message.toString(), false,
+					null);
+			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		}
+		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Transaction failed: " + ex.getMessage(), false);
 	}
 }

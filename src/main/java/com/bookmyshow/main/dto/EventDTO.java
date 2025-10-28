@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 public class EventDTO {
     private Long eventId;
+    private Long adminId;
     private String name;
     private String description;
     private String runTime;

@@ -66,6 +66,7 @@ import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Show_layout;
 import com.bookmyshow.main.model.Tag;
+import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
 import com.bookmyshow.main.repository.CategoriesRepository;
@@ -84,6 +85,7 @@ import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.TagRepository;
+import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import java.util.Objects;
@@ -130,6 +132,8 @@ public class EventServiceImpl implements EventService {
 	private ShowRepository showRepository;
 	@Autowired
 	private ShowtimedateRepository showtimedateRepository;
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -267,7 +271,12 @@ public class EventServiceImpl implements EventService {
 			List<MoreFilters> moreFilters = moreFiltersRepository.findAllById(eventDto.getMoreFilters());
 			event.setMoreFilters(moreFilters);
 		}
-
+         
+		if(eventDto.getAdminId()!=null)
+		{
+			UserMaster userMaster = userRepository.findByUserId(eventDto.getAdminId());
+			event.setUserMaster(userMaster);
+		}
 		if (eventDto.getCast() != null) {
 
 			if (castImages != null) {
@@ -560,9 +569,11 @@ public class EventServiceImpl implements EventService {
 		return prices.stream().map(price -> mapper.map(price, PriceDTO.class)).collect(Collectors.toList());
 	}
 
+	
 	@Override
 	public EventDTO updateEvent(Long id, EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
 			List<MultipartFile> crewImages) throws IOException {
+		try {
 		Event event = eventRepository.findById(id)
 				.orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
 		if (event.getDeleted()) {
@@ -704,7 +715,6 @@ public class EventServiceImpl implements EventService {
 		if (eventDto.getCity() != null) {
 			event.setCity(cityRepository.findAllById(eventDto.getCity()));
 		}
-
 		if (eventDto.getShow() != null) {
 			List<Show> shows = new ArrayList<>();
 			for (ShowDTO showDTO : eventDto.getShow()) {
@@ -763,6 +773,10 @@ public class EventServiceImpl implements EventService {
 
 		Event updated = eventRepository.save(event);
 		return toDto(updated);
+	}catch (Exception e) {
+	    e.printStackTrace();  // very important: see full nested exception trace
+	    throw e;
+	}
 	}
 
 	public List<EventSearchDTO> searchEventNames(String name, List<String> eventTypes) {
@@ -782,10 +796,15 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public boolean deleteEvent(Long id) {
+	public boolean deleteEvent(Long id,Long adminid) {
 		Event event = eventRepository.findById(id)
 				.orElseThrow(() -> new EventCustomException("Event not found with this id: " + id));
+		UserMaster user = userRepository.findById(adminid).orElseThrow(() -> new RuntimeException("User not found"));
 
+		if(event.getUserMaster()!=user)
+		{
+			throw new EventCustomException("Event not found or not owned by Admin");
+		}
 		event.setDeleted(true);
 		eventRepository.save(event);
 

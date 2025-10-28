@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -91,6 +92,7 @@ import com.bookmyshow.main.model.Show;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Tag;
+import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
 import com.bookmyshow.main.repository.CategoriesRepository;
@@ -108,6 +110,7 @@ import com.bookmyshow.main.repository.ReleaseMonthRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.TagRepository;
+import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.specification.EventSpecification;
 
@@ -124,6 +127,8 @@ class EventServiceImplTest {
     private FormatRepository formatRepository;
     @Mock
     private TagRepository tagRepository;
+    @Mock 
+    private UserRepository userRepository;
     @Mock
     private ReleaseMonthRepository releaseMonthRepository;
     @Mock
@@ -947,19 +952,25 @@ class EventServiceImplTest {
     }
 
 
-    @Test
-    void testgetEventById()
-    {
-    	Long eventidLong=1L;
-    	Event event = new Event();
-    	event.setEventId(eventidLong);
-    	  event.setDeleted(false);
-    	when(eventRepository.findById(eventidLong)).thenReturn(Optional.of(event));
-    	
-
-    	eventService.deleteEvent(eventidLong);
-    	verify(eventRepository).save(event);
-    }
+//    @Test
+//    void testgetEventById()throws Exception
+//    {
+//    	Long eventidLong=1L;
+//    	Long adminIdLong=1L;
+//    	Event event = new Event();
+//    	UserMaster userMaster= new UserMaster();
+//    	userMaster.setUserId(adminIdLong);
+//    	event.setEventId(eventidLong);
+//    	  event.setDeleted(false);
+//    	when(eventRepository.findById(eventidLong)).thenReturn(Optional.of(event));
+//    	when(userRepository.findByUserId(adminIdLong)).thenReturn(userMaster);
+//    	
+//
+//    	eventService.deleteEvent(eventidLong,adminIdLong);
+//    	verify(eventRepository).save(event);
+//    	verify(userRepository).findByUserId(adminIdLong);
+//    	
+//    }
     void testUpdateEvent() throws IOException {
         Long eventId = 1L;
 

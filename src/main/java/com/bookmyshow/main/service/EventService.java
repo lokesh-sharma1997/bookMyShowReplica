@@ -37,7 +37,7 @@ public interface EventService {
 			List<MultipartFile> crewImages)
 			throws IOException;
 
-	boolean deleteEvent(Long id);
+	boolean deleteEvent(Long id,Long adminid);
 
 
 

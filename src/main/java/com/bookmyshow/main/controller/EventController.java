@@ -166,9 +166,9 @@ public class EventController {
 	}
 
 	@Operation(summary = "Delete a event")
-	@PatchMapping("/delete/{id}")
-	public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id) {
-		boolean deleted = eventService.deleteEvent(id);
+	@PatchMapping("/delete/{id}/{adminId}")
+	public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id,@PathVariable Long adminId) {
+		boolean deleted = eventService.deleteEvent(id,adminId);
 
 		ApiResponse<Void> response = new ApiResponse<>(HttpStatus.CREATED.value(), "Event deleted successfully", true,
 				null);

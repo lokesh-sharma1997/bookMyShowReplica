@@ -9,6 +9,8 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -81,5 +83,9 @@ public class UserMaster {
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Booking> bookings;
+	
+	@OneToMany(mappedBy = "userMaster", cascade = CascadeType.ALL)
+	  @JsonManagedReference
+	  private List<Event> events;
 
 }

@@ -280,11 +280,12 @@ class EventControllerTest {
     @Test
     void testDeleteEvent() throws Exception {
         Long eventId = 1L;
+        Long adminId=1L;
  
         
-        when(eventService.deleteEvent(eventId)).thenReturn(true);
+        when(eventService.deleteEvent(eventId,adminId)).thenReturn(true);
  
-        mockMvc.perform(patch("/api/events/delete/{id}", eventId))
+        mockMvc.perform(patch("/api/events/delete/{id}/{adminId}", eventId,adminId))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.statusCode").value(201))
             .andExpect(jsonPath("$.message").value("Event deleted successfully"))
