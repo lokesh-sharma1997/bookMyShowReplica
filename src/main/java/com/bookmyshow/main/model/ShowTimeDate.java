@@ -33,11 +33,12 @@ public class ShowTimeDate {
     
     @ManyToOne
     @JoinColumn(name = "show_id", referencedColumnName = "id")
-    @JsonBackReference 
+    @JsonBackReference("show-showtimedate")
     private Show show; 
 
     @ManyToOne
     @JoinColumn(name = "venue_id", referencedColumnName = "id")
+    @JsonBackReference("venue-showtimedate")
     private Venue venue;
    
 }
