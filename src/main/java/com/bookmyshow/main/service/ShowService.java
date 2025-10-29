@@ -5,10 +5,8 @@ import java.util.List;
 import com.bookmyshow.main.dto.ShowRequestDTO;
 import com.bookmyshow.main.dto.VenueShowDTO;
 
-public  interface ShowService {
+public interface ShowService {
 
-    List<VenueShowDTO> getShows(ShowRequestDTO request);
+	List<VenueShowDTO> getShows(ShowRequestDTO request);
 
- 
-	
 }

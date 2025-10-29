@@ -19,4 +19,6 @@ public class BookTicketRequestDTO {
     private LocalTime time;
     private List<String> reservedSeats;
     private List<String> eventSeats;
+    private Double totalPrice;
 }
+ 
