@@ -6,8 +6,10 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,8 @@ import com.bookmyshow.main.repository.ShowTimeRepository;
 import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.VenueService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -139,7 +143,7 @@ public class VenueServiceImpl implements VenueService {
 					layoutDto.setId(layout.getId());
 					layoutDto.setLayoutName(layout.getLayoutName());
 					layoutDto.setCols(layout.getCols());
-					layoutDto.setScreenId(screen.getId());
+//					layoutDto.setScreenId(screen.getId());
 
 					if (layout.getLayoutRows() != null) {
 						List<String> rowStrings = layout.getLayoutRows().stream().map(LayoutRow::getRowName)
@@ -243,6 +247,7 @@ public class VenueServiceImpl implements VenueService {
 	}
 
 	@Override
+	@Transactional
 	public VenueDTO createVenue(VenueDTO dto) {
 		Venue entity = dtoToEntity(dto);
 		if (dto.getAddress() != null) {
@@ -276,14 +281,19 @@ public class VenueServiceImpl implements VenueService {
 
 			for (Screen screen : entity.getScreens()) {
 				screen.setVenue(entity);
+				Screen savedScreen = screenRepository.save(screen);
+
 				if (screen.getLayouts() != null) {
 					for (Layout layout : screen.getLayouts()) {
-						layout.setScreen(screen);
+						layout.setScreen(savedScreen);
+						Layout savedLayout = layoutRepository.save(layout);
+
 						if (layout.getLayoutRows() != null) {
 							for (LayoutRow layoutRow : layout.getLayoutRows()) {
-								layoutRow.setLayout(layout);
+								layoutRow.setLayout(savedLayout);
+								LayoutRow savedLayoutRow = layoutRowRepository.save(layoutRow);
 
-								createSeatsForLayoutRow(layoutRow, screen, layout.getCols());
+								createSeatsForLayoutRow(savedLayoutRow, savedScreen, layout.getCols());
 							}
 						}
 					}
@@ -305,15 +315,13 @@ public class VenueServiceImpl implements VenueService {
 
 		for (int i = 1; i <= numberOfSeatsPerRow; i++) {
 			Seat seat = new Seat();
-			seat.setSeatNumber(layoutRow.getRowName() + i);
-			seat.setReserved(false);
+			String seatNumber = layoutRow.getRowName() + i;
+			seat.setSeatNumber(seatNumber);
 			seat.setLayoutRow(layoutRow);
 			seat.setScreen(screen);
-
 			seats.add(seat);
 		}
-
-		layoutRow.setSeats(seats);
+		seatRepository.saveAll(seats);
 	}
 
 	@Override
@@ -324,7 +332,7 @@ public class VenueServiceImpl implements VenueService {
 
 	@Override
 	public List<VenueDTO> getVenuesByCity(String city) {
-		List<Venue> venues = Optional.ofNullable(venueRepository.findByAddress_City_Name(city))
+		List<Venue> venues = Optional.ofNullable(venueRepository.findByAddressCityNameAndDeletedFalse(city))
 				.orElse(Collections.emptyList());
 		return venues.stream().map(this::entityToDto).collect(Collectors.toList());
 	}

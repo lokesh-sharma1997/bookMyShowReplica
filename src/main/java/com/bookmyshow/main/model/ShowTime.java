@@ -1,7 +1,5 @@
 package com.bookmyshow.main.model;
 
-
-
 import java.time.LocalTime;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,19 +12,19 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name="showtime")
+@Table(name = "showtime")
 public class ShowTime {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private LocalTime showTime;
+	private LocalTime showTime;
 
-    private Boolean isBooked;
+	private Boolean isBooked;
 
-    @ManyToOne
-    @JoinColumn(name = "show_time_date_id", referencedColumnName = "id")
-    private ShowTimeDate showTimeDate; // Link back to ShowTimeDate
+	@ManyToOne
+	@JoinColumn(name = "show_time_date_id", referencedColumnName = "id")
+	private ShowTimeDate showTimeDate;
 
 }

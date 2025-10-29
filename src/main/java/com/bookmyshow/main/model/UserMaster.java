@@ -66,9 +66,6 @@ public class UserMaster {
 	@UpdateTimestamp
 	private LocalDateTime updatedOn;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Seat> seats;
-
 	@ManyToMany
 	@JoinTable(name = "user_show", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "show_id"))
 	private Set<Show> shows = new HashSet<>();
