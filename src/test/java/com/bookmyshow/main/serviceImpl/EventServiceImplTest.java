@@ -358,7 +358,7 @@ class EventServiceImplTest {
         when(eventRepository.save(any(Event.class))).thenReturn(savedEvent);
 
         Show savedShow = new Show();
-        when(showRepository.save(any(Show.class))).thenReturn(savedShow);
+
 
        
         Event event = spy(new Event());
@@ -377,7 +377,6 @@ class EventServiceImplTest {
         verify(venueRepository).findById(10L);
         verify(screenRepository).findById(1L);
         verify(eventRepository).save(event); 
-        verify(showRepository).save(any(Show.class)); 
 
      
         Show show = event.getShows().get(0);
@@ -952,25 +951,24 @@ class EventServiceImplTest {
     }
 
 
-//    @Test
-//    void testgetEventById()throws Exception
-//    {
-//    	Long eventidLong=1L;
-//    	Long adminIdLong=1L;
-//    	Event event = new Event();
-//    	UserMaster userMaster= new UserMaster();
-//    	userMaster.setUserId(adminIdLong);
-//    	event.setEventId(eventidLong);
-//    	  event.setDeleted(false);
-//    	when(eventRepository.findById(eventidLong)).thenReturn(Optional.of(event));
-//    	when(userRepository.findByUserId(adminIdLong)).thenReturn(userMaster);
-//    	
-//
-//    	eventService.deleteEvent(eventidLong,adminIdLong);
-//    	verify(eventRepository).save(event);
-//    	verify(userRepository).findByUserId(adminIdLong);
-//    	
-//    }
+    @Test
+    void testgetEventById()throws Exception
+    {
+    	Long eventidLong=1L;
+    	Long adminIdLong=1L;
+    	Event event = new Event();
+    	UserMaster userMaster= new UserMaster();
+    	userMaster.setUserId(adminIdLong);
+    	event.setEventId(eventidLong);
+    	event.setUserMaster(userMaster);
+    	  event.setDeleted(false);
+    	when(eventRepository.findById(eventidLong)).thenReturn(Optional.of(event));
+    	when(userRepository.findById(adminIdLong)).thenReturn(Optional.of(userMaster));
+    	eventService.deleteEvent(eventidLong,adminIdLong);
+    	verify(eventRepository).save(event);
+    	verify(userRepository).findById(adminIdLong);
+    	
+    }
     void testUpdateEvent() throws IOException {
         Long eventId = 1L;
 
