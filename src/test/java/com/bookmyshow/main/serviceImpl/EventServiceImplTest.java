@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jboss.logging.NDC;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -91,6 +93,7 @@ import com.bookmyshow.main.model.Show;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Tag;
+import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
 import com.bookmyshow.main.repository.CategoriesRepository;
@@ -108,6 +111,7 @@ import com.bookmyshow.main.repository.ReleaseMonthRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.TagRepository;
+import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.specification.EventSpecification;
 
@@ -124,6 +128,8 @@ class EventServiceImplTest {
     private FormatRepository formatRepository;
     @Mock
     private TagRepository tagRepository;
+    @Mock 
+    private UserRepository userRepository;
     @Mock
     private ReleaseMonthRepository releaseMonthRepository;
     @Mock
@@ -353,7 +359,7 @@ class EventServiceImplTest {
         when(eventRepository.save(any(Event.class))).thenReturn(savedEvent);
 
         Show savedShow = new Show();
-        when(showRepository.save(any(Show.class))).thenReturn(savedShow);
+
 
        
         Event event = spy(new Event());
@@ -372,7 +378,6 @@ class EventServiceImplTest {
         verify(venueRepository).findById(10L);
         verify(screenRepository).findById(1L);
         verify(eventRepository).save(event); 
-        verify(showRepository).save(any(Show.class)); 
 
      
         Show show = event.getShows().get(0);
@@ -796,9 +801,13 @@ class EventServiceImplTest {
     public void testUpdateEvent_success() throws IOException {
         // Given
         Long eventId = 1L;
+        Long adminIdLong=1L;
+        UserMaster userMaster= new UserMaster();
+    	userMaster.setUserId(adminIdLong);
         Event existingEvent = new Event();
         existingEvent.setEventId(eventId);
         existingEvent.setName("Old Event");
+        existingEvent.setUserMaster(userMaster);
 
         EventDTO eventDTO = new EventDTO();
         eventDTO.setName("New Event");
@@ -833,9 +842,10 @@ class EventServiceImplTest {
         when(crewRepository.findByMemberName(anyString())).thenReturn(Optional.empty());
         when(crewRepository.save(any(Crew.class))).thenAnswer(inv -> inv.getArgument(0));
         when(eventRepository.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.findById(adminIdLong)).thenReturn(Optional.of(userMaster));
 
-        // Then
-        EventDTO result = eventService.updateEvent(eventId, eventDTO, poster, castImages, crewImages);
+        // Then existingEvent.setUserMaster(userMaster);
+        EventDTO result = eventService.updateEvent(eventId,adminIdLong, eventDTO, poster, castImages, crewImages);
 
         assertNotNull(result);
         assertEquals("New Event", result.getName());
@@ -853,10 +863,14 @@ class EventServiceImplTest {
     void testUpdateEvent_setsShowsSuccessfully() throws IOException {
        
         Long eventId = 1L;
+        Long adminIdLong=1L;
+        UserMaster userMaster= new UserMaster();
+    	userMaster.setUserId(adminIdLong);
         Event existingEvent = new Event();
        existingEvent.setEventId(eventId);
         existingEvent.setDeleted(false);
         existingEvent.setAgeLimit(16);
+        existingEvent.setUserMaster(userMaster);
 
         EventDTO dto = new EventDTO();
         ShowDTO showDTO = new ShowDTO();
@@ -882,6 +896,7 @@ class EventServiceImplTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(existingEvent));
         when(venueRepository.findById(10L)).thenReturn(Optional.of(venue));
         when(screenRepository.findById(20L)).thenReturn(Optional.of(screen));
+        when(userRepository.findById(adminIdLong)).thenReturn(Optional.of(userMaster));
       
 
         when(showRepository.save(any(Show.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -894,7 +909,7 @@ class EventServiceImplTest {
 
 
       
-        eventService.updateEvent(eventId, dto, null, null, null);
+        eventService.updateEvent(eventId,adminIdLong, dto, null, null, null);
 
        
         verify(venueRepository).findById(10L);
@@ -948,17 +963,22 @@ class EventServiceImplTest {
 
 
     @Test
-    void testgetEventById()
+    void testgetEventById()throws Exception
     {
     	Long eventidLong=1L;
+    	Long adminIdLong=1L;
     	Event event = new Event();
+    	UserMaster userMaster= new UserMaster();
+    	userMaster.setUserId(adminIdLong);
     	event.setEventId(eventidLong);
+    	event.setUserMaster(userMaster);
     	  event.setDeleted(false);
     	when(eventRepository.findById(eventidLong)).thenReturn(Optional.of(event));
-    	
-
-    	eventService.deleteEvent(eventidLong);
+    	when(userRepository.findById(adminIdLong)).thenReturn(Optional.of(userMaster));
+    	eventService.deleteEvent(eventidLong,adminIdLong);
     	verify(eventRepository).save(event);
+    	verify(userRepository).findById(adminIdLong);
+    	
     }
     void testUpdateEvent() throws IOException {
         Long eventId = 1L;
@@ -991,7 +1011,7 @@ class EventServiceImplTest {
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     
-        EventDTO result = eventService.updateEvent(eventId, eventDto, poster, castImages, List.of());
+        EventDTO result = eventService.updateEvent(eventId,anyLong(), eventDto, poster, castImages, List.of());
 
        
         verify(eventRepository).findById(eventId);

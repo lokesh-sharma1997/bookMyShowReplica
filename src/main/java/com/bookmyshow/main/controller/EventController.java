@@ -138,8 +138,8 @@ public class EventController {
 	}
 
 	@Operation(summary = "Update a event")
-	@PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<ApiResponse<Void>> updateEvent(@PathVariable Long id, @RequestPart("Event") String eventJson,
+	@PutMapping(value = "/update/{id}/{adminId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ApiResponse<Void>> updateEvent(@PathVariable Long id,@PathVariable Long adminId ,@RequestPart("Event") String eventJson,
 			@RequestPart(value = "poster", required = false) MultipartFile poster,
 			@RequestPart(value = "castImages", required = false) List<MultipartFile> castImages,
 			@RequestPart(value = "crewImages", required = false) List<MultipartFile> crewImages
@@ -148,7 +148,7 @@ public class EventController {
 
 		EventDTO eventDto = objectMapper.readValue(eventJson, EventDTO.class);
 
-		eventService.updateEvent(id, eventDto, poster, castImages, crewImages);
+		eventService.updateEvent(id,adminId, eventDto, poster, castImages, crewImages);
 		ApiResponse<Void> response = new ApiResponse<>(HttpStatus.CREATED.value(), "Event update successfully", true,
 				null);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -166,9 +166,9 @@ public class EventController {
 	}
 
 	@Operation(summary = "Delete a event")
-	@PatchMapping("/delete/{id}")
-	public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id) {
-		boolean deleted = eventService.deleteEvent(id);
+	@PatchMapping("/delete/{id}/{adminId}")
+	public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id,@PathVariable Long adminId) {
+		boolean deleted = eventService.deleteEvent(id,adminId);
 
 		ApiResponse<Void> response = new ApiResponse<>(HttpStatus.CREATED.value(), "Event deleted successfully", true,
 				null);

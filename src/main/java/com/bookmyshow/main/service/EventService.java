@@ -33,11 +33,11 @@ public interface EventService {
 
 	List<EventSearchDTO> searchEventNames(String name, List<String> eventTypes);
 
-	EventDTO updateEvent(Long id, EventDTO movieDto, MultipartFile poster, List<MultipartFile> castImages,
+	EventDTO updateEvent(Long id,Long adminid, EventDTO movieDto, MultipartFile poster, List<MultipartFile> castImages,
 			List<MultipartFile> crewImages)
 			throws IOException;
 
-	boolean deleteEvent(Long id);
+	boolean deleteEvent(Long id,Long adminid);
 
 
 
