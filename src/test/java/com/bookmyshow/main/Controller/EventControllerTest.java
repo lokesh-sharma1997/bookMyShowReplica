@@ -155,7 +155,7 @@ class EventControllerTest {
         
        
       
-        when(eventService.updateEvent(anyLong(), any(), any(), any(), any()))
+        when(eventService.updateEvent(anyLong(),anyLong(), any(), any(), any(), any()))
         .thenReturn(eventDto);
 
 
@@ -174,7 +174,7 @@ class EventControllerTest {
             MediaType.IMAGE_JPEG_VALUE,
             "fake-image".getBytes()
         );
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/events/update/{id}", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/events/update/{id}/{adminId}", 1L,1L)
                 .file(eventJson)
                 .file(poster)
                
@@ -280,11 +280,12 @@ class EventControllerTest {
     @Test
     void testDeleteEvent() throws Exception {
         Long eventId = 1L;
+        Long adminId=1L;
  
         
-        when(eventService.deleteEvent(eventId)).thenReturn(true);
+        when(eventService.deleteEvent(eventId,adminId)).thenReturn(true);
  
-        mockMvc.perform(patch("/api/events/delete/{id}", eventId))
+        mockMvc.perform(patch("/api/events/delete/{id}/{adminId}", eventId,adminId))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.statusCode").value(201))
             .andExpect(jsonPath("$.message").value("Event deleted successfully"))
