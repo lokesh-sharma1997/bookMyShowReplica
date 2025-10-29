@@ -332,7 +332,7 @@ public class VenueServiceImpl implements VenueService {
 
 	@Override
 	public List<VenueDTO> getVenuesByCity(String city) {
-		List<Venue> venues = Optional.ofNullable(venueRepository.findByAddress_City_NameAndDeletedFalse(city))
+		List<Venue> venues = Optional.ofNullable(venueRepository.findByAddressCityNameAndDeletedFalse(city))
 				.orElse(Collections.emptyList());
 		return venues.stream().map(this::entityToDto).collect(Collectors.toList());
 	}

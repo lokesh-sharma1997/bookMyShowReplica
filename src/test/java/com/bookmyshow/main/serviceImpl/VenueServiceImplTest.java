@@ -123,7 +123,7 @@ public class VenueServiceImplTest {
         venue.setId(1L);
         venue.setVenueName("City Venue");
 
-        when(venueRepository.findByAddress_City_NameAndDeletedFalse("TestCity")).thenReturn(Arrays.asList(venue));
+        when(venueRepository.findByAddressCityNameAndDeletedFalse("TestCity")).thenReturn(Arrays.asList(venue));
 
         List<VenueDTO> result = venueService.getVenuesByCity("TestCity");
 
@@ -134,7 +134,7 @@ public class VenueServiceImplTest {
     @Test
     public void testGetVenuesByCity_noVenues_returnsEmptyList() {
     	 injectDependencies(); 
-        when(venueRepository.findByAddress_City_NameAndDeletedFalse("UnknownCity")).thenReturn(null);
+        when(venueRepository.findByAddressCityNameAndDeletedFalse("UnknownCity")).thenReturn(null);
 
         List<VenueDTO> result = venueService.getVenuesByCity("UnknownCity");
 
