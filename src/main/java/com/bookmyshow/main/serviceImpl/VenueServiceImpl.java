@@ -1,4 +1,3 @@
-
 package com.bookmyshow.main.serviceImpl;
 
 import java.time.Duration;
@@ -142,7 +141,7 @@ public class VenueServiceImpl implements VenueService {
 					layoutDto.setId(layout.getId());
 					layoutDto.setLayoutName(layout.getLayoutName());
 					layoutDto.setCols(layout.getCols());
-					layoutDto.setScreenId(screen.getId());
+//					layoutDto.setScreenId(screen.getId());
 
 					if (layout.getLayoutRows() != null) {
 						List<String> rowStrings = layout.getLayoutRows().stream().map(LayoutRow::getRowName)
@@ -310,7 +309,6 @@ public class VenueServiceImpl implements VenueService {
 	}
 
 	private void createSeatsForLayoutRow(LayoutRow layoutRow, Screen screen, int numberOfSeatsPerRow) {
-
 		List<Seat> seats = new ArrayList<>();
 
 		for (int i = 1; i <= numberOfSeatsPerRow; i++) {
@@ -321,7 +319,7 @@ public class VenueServiceImpl implements VenueService {
 			seat.setScreen(screen);
 			seats.add(seat);
 		}
-
+		seatRepository.saveAll(seats);
 	}
 
 	@Override
@@ -357,9 +355,25 @@ public class VenueServiceImpl implements VenueService {
 			if (screenId == null) {
 				throw new IllegalArgumentException("ScreenId is required for movie venues");
 			}
-			Show show = showRepository.findByVenueIdAndScreenId(venueId, screenId)
-					.orElseThrow(() -> new RuntimeException("Show not found for venue and screen"));
-			return getAvailableSlotsForShow(show, date);
+			// Changed here: fetch list instead of single show
+			List<Show> shows = showRepository.findByVenueIdAndScreenId(venueId, screenId);
+			if (shows.isEmpty()) {
+				throw new RuntimeException("Show not found for venue and screen");
+			}
+
+			List<TimeSlotDTO> allAvailableSlots = new ArrayList<>();
+			for (Show show : shows) {
+				allAvailableSlots.addAll(getAvailableSlotsForShow(show, date));
+			}
+
+			// Remove duplicates and sort the list by start time
+			List<TimeSlotDTO> uniqueSlots = allAvailableSlots.stream().distinct()
+					.sorted(Comparator.comparing(TimeSlotDTO::getStartTime)).collect(Collectors.toList());
+
+			if (uniqueSlots.isEmpty()) {
+				throw new RuntimeException("No available timeslots found for the given date");
+			}
+			return uniqueSlots;
 		} else {
 			List<Show> shows = showRepository.findByVenueId(venueId);
 			if (shows.isEmpty()) {
@@ -385,43 +399,55 @@ public class VenueServiceImpl implements VenueService {
 		Optional<ShowTimeDate> showTimeDateOpt = show.getShowstimedate().stream()
 				.filter(std -> std.getShowDate().equals(date)).findFirst();
 
-		if (showTimeDateOpt.isEmpty())
+		if (showTimeDateOpt.isEmpty()) {
 			return Collections.emptyList();
+		}
 
 		ShowTimeDate showTimeDate = showTimeDateOpt.get();
 
+		// Fetch all scheduled show times for that date
 		List<ShowTime> allShowTimes = new ArrayList<>(showTimeDate.getShowTimes());
 		allShowTimes.sort(Comparator.comparing(ShowTime::getShowTime));
 
+		// Filter out booked show times
 		List<Long> bookedShowTimeIds = showTimeRepository.findBookedShowTimes(showTimeDate.getId());
+		allShowTimes.removeIf(st -> bookedShowTimeIds.contains(st.getId()));
 
-		int duration = parseRuntimeToMinutes(show.getEvent().getRunTime());
-		int buffer = 30;
+		int duration = parseRuntimeToMinutes(show.getEvent().getRunTime()); // e.g. 148 mins
+		int buffer = 30; // margin time in minutes
 
 		List<TimeSlotDTO> freeSlots = new ArrayList<>();
-		LocalTime prevEnd = LocalTime.of(0, 0); // day start
+
+		// Define operational hours (06:00 → 23:00)
+		LocalTime dayStart = LocalTime.of(06, 0);
+		LocalTime dayEnd = LocalTime.of(23, 0);
+		LocalTime prevEnd = dayStart;
 
 		for (ShowTime current : allShowTimes) {
 			LocalTime currentStart = current.getShowTime();
+			LocalTime currentEnd = currentStart.plusMinutes(duration + buffer);
 
-			if (prevEnd.isBefore(currentStart)) {
-				long freeMinutes = Duration.between(prevEnd, currentStart).toMinutes();
-				if (freeMinutes >= duration) {
-					TimeSlotDTO dto = new TimeSlotDTO();
-					dto.setStartTime(prevEnd);
-					dto.setEndTime(currentStart);
-					freeSlots.add(dto);
-				}
+			// Check if there is enough gap before this show
+			long freeMinutes = Duration.between(prevEnd, currentStart).toMinutes();
+			if (freeMinutes >= (duration + buffer)) {
+				TimeSlotDTO dto = new TimeSlotDTO();
+				dto.setStartTime(prevEnd);
+				dto.setEndTime(currentStart.minusMinutes(buffer)); // leave margin before next show
+				freeSlots.add(dto);
 			}
 
-			if (bookedShowTimeIds.contains(current.getId())) {
-				LocalTime busyEnd = currentStart.plusMinutes(duration + buffer);
-				if (busyEnd.isAfter(LocalTime.of(23, 59))) {
-					busyEnd = LocalTime.of(23, 59);
-				}
-				prevEnd = busyEnd;
-			} else {
-				prevEnd = currentStart;
+			// Update previous end (next possible free start)
+			prevEnd = currentEnd;
+		}
+
+		// Check after last show till day end
+		if (prevEnd.isBefore(dayEnd)) {
+			long freeMinutes = Duration.between(prevEnd, dayEnd).toMinutes();
+			if (freeMinutes >= duration) {
+				TimeSlotDTO dto = new TimeSlotDTO();
+				dto.setStartTime(prevEnd);
+				dto.setEndTime(dayEnd);
+				freeSlots.add(dto);
 			}
 		}
 

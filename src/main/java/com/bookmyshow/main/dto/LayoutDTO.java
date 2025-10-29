@@ -19,7 +19,7 @@ public class LayoutDTO {
 	@JsonIgnore
 	private int price;
 
-	@JsonIgnore
-	private Long ScreenId;
+//	@JsonIgnore
+//	private Long ScreenId;
 
 }
