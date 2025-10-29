@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jboss.logging.NDC;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -800,9 +801,13 @@ class EventServiceImplTest {
     public void testUpdateEvent_success() throws IOException {
         // Given
         Long eventId = 1L;
+        Long adminIdLong=1L;
+        UserMaster userMaster= new UserMaster();
+    	userMaster.setUserId(adminIdLong);
         Event existingEvent = new Event();
         existingEvent.setEventId(eventId);
         existingEvent.setName("Old Event");
+        existingEvent.setUserMaster(userMaster);
 
         EventDTO eventDTO = new EventDTO();
         eventDTO.setName("New Event");
@@ -837,9 +842,10 @@ class EventServiceImplTest {
         when(crewRepository.findByMemberName(anyString())).thenReturn(Optional.empty());
         when(crewRepository.save(any(Crew.class))).thenAnswer(inv -> inv.getArgument(0));
         when(eventRepository.save(any(Event.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.findById(adminIdLong)).thenReturn(Optional.of(userMaster));
 
-        // Then
-        EventDTO result = eventService.updateEvent(eventId, eventDTO, poster, castImages, crewImages);
+        // Then existingEvent.setUserMaster(userMaster);
+        EventDTO result = eventService.updateEvent(eventId,adminIdLong, eventDTO, poster, castImages, crewImages);
 
         assertNotNull(result);
         assertEquals("New Event", result.getName());
@@ -857,10 +863,14 @@ class EventServiceImplTest {
     void testUpdateEvent_setsShowsSuccessfully() throws IOException {
        
         Long eventId = 1L;
+        Long adminIdLong=1L;
+        UserMaster userMaster= new UserMaster();
+    	userMaster.setUserId(adminIdLong);
         Event existingEvent = new Event();
        existingEvent.setEventId(eventId);
         existingEvent.setDeleted(false);
         existingEvent.setAgeLimit(16);
+        existingEvent.setUserMaster(userMaster);
 
         EventDTO dto = new EventDTO();
         ShowDTO showDTO = new ShowDTO();
@@ -886,6 +896,7 @@ class EventServiceImplTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(existingEvent));
         when(venueRepository.findById(10L)).thenReturn(Optional.of(venue));
         when(screenRepository.findById(20L)).thenReturn(Optional.of(screen));
+        when(userRepository.findById(adminIdLong)).thenReturn(Optional.of(userMaster));
       
 
         when(showRepository.save(any(Show.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -898,7 +909,7 @@ class EventServiceImplTest {
 
 
       
-        eventService.updateEvent(eventId, dto, null, null, null);
+        eventService.updateEvent(eventId,adminIdLong, dto, null, null, null);
 
        
         verify(venueRepository).findById(10L);
@@ -1000,7 +1011,7 @@ class EventServiceImplTest {
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     
-        EventDTO result = eventService.updateEvent(eventId, eventDto, poster, castImages, List.of());
+        EventDTO result = eventService.updateEvent(eventId,anyLong(), eventDto, poster, castImages, List.of());
 
        
         verify(eventRepository).findById(eventId);

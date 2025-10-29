@@ -538,12 +538,18 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventDTO updateEvent(Long id, EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
+	public EventDTO updateEvent(Long id,Long adminid, EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
 			List<MultipartFile> crewImages) throws IOException {
 		Event event = eventRepository.findById(id)
 				.orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
 		if (event.getDeleted()) {
 			throw new EventCustomException("Event not found with id: " + id);
+		}
+		UserMaster user = userRepository.findById(adminid).orElseThrow(() -> new RuntimeException("User not found"));
+
+		if(event.getUserMaster()!=user)
+		{
+			throw new EventCustomException("Event not found or not owned by Admin");
 		}
 		event.setDeleted(false);
 		if (eventDto.getCurrentlyPlaying() == null) {

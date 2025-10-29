@@ -155,7 +155,7 @@ class EventControllerTest {
         
        
       
-        when(eventService.updateEvent(anyLong(), any(), any(), any(), any()))
+        when(eventService.updateEvent(anyLong(),anyLong(), any(), any(), any(), any()))
         .thenReturn(eventDto);
 
 
@@ -174,7 +174,7 @@ class EventControllerTest {
             MediaType.IMAGE_JPEG_VALUE,
             "fake-image".getBytes()
         );
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/events/update/{id}", 1L)
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/events/update/{id}/{adminId}", 1L,1L)
                 .file(eventJson)
                 .file(poster)
                
