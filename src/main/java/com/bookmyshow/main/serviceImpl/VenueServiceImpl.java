@@ -349,7 +349,6 @@ public class VenueServiceImpl implements VenueService {
 		}).orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + id));
 	}
 
-
 	@Override
 	public List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date) {
 		Venue venue = venueRepository.findById(venueId).orElseThrow(() -> new RuntimeException("Venue not found"));
@@ -456,18 +455,6 @@ public class VenueServiceImpl implements VenueService {
 
 		return freeSlots;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
 
 	@Override
 	public VenueDTO updateVenue(Long venueId, VenueDTO dto) {
