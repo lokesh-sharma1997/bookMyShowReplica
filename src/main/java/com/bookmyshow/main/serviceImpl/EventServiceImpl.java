@@ -11,26 +11,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.bookmyshow.main.dto.CastDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bookmyshow.main.dto.CastDTO;
 import com.bookmyshow.main.dto.CategoryDTO;
 import com.bookmyshow.main.dto.CrewDTO;
 import com.bookmyshow.main.dto.DateFilterDTO;
 import com.bookmyshow.main.dto.EventDTO;
-
 import com.bookmyshow.main.dto.EventResponseDto;
 import com.bookmyshow.main.dto.EventResponseDtoCard;
 import com.bookmyshow.main.dto.EventSearchDTO;
@@ -41,6 +38,7 @@ import com.bookmyshow.main.dto.MoreFilterDTO;
 import com.bookmyshow.main.dto.PriceDTO;
 import com.bookmyshow.main.dto.ReleaseMonthDTO;
 import com.bookmyshow.main.dto.ShowDTO;
+import com.bookmyshow.main.dto.ShowLayoutDto;
 import com.bookmyshow.main.dto.ShowTimeDTO;
 import com.bookmyshow.main.dto.TagDTO;
 import com.bookmyshow.main.events.NotificationEvent;
@@ -50,19 +48,19 @@ import com.bookmyshow.main.model.Categories;
 import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.model.Crew;
 import com.bookmyshow.main.model.DateFilter;
-
 import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
 import com.bookmyshow.main.model.Genres;
 import com.bookmyshow.main.model.Languages;
-import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Show;
+import com.bookmyshow.main.model.ShowCategory;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
+import com.bookmyshow.main.model.Show_layout;
 import com.bookmyshow.main.model.Tag;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
@@ -84,8 +82,6 @@ import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.TagRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
-import java.util.Objects;
-
 import com.bookmyshow.main.specification.EventSpecification;
 
 @Service
@@ -123,11 +119,7 @@ public class EventServiceImpl implements EventService {
 	@Autowired
 	private ScreenRepository screenRepository;
 	@Autowired
-	private LayoutRepository layoutRepository;
-	@Autowired
 	private ShowRepository showRepository;
-	@Autowired
-	private ShowtimedateRepository showtimedateRepository;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -345,6 +337,7 @@ public class EventServiceImpl implements EventService {
 
 		if (eventDto.getShow() != null) {
 			List<Show> shows = new ArrayList<>();
+
 			for (ShowDTO showDTO : eventDto.getShow()) {
 				Show show = new Show();
 				show.setId(showDTO.getShowid());
@@ -354,26 +347,23 @@ public class EventServiceImpl implements EventService {
 							.orElseThrow(() -> new RuntimeException("Venue not found"));
 					show.setVenue(venue);
 				}
+
 				if (showDTO.getScreen() != null) {
 					Screen screen = screenRepository.findById(showDTO.getScreen())
 							.orElseThrow(() -> new RuntimeException("Screen not found"));
 					show.setScreen(screen);
 				}
-				if (showDTO.getLayout() != null) {
-					Layout layout = layoutRepository.findById(showDTO.getLayout())
-							.orElseThrow(() -> new RuntimeException("Layout not found"));
-					show.setLayout(layout);
-				}
 
-				show.setShowPrice(showDTO.getShowPrice());
+				show.setShowPrice(showDTO.getShowPrice() != null ? showDTO.getShowPrice() : 0);
 
-				List<ShowTimeDate> showtimes = new ArrayList<>();
+				List<ShowTimeDate> showTimeDates = new ArrayList<>();
 				if (showDTO.getShowtimesdate() != null) {
 					for (ShowTimeDTO showTimeDTO : showDTO.getShowtimesdate()) {
 
 						ShowTimeDate showTimeDate = new ShowTimeDate();
 						showTimeDate.setShowDate(showTimeDTO.getShowDate());
 						showTimeDate.setShow(show);
+						showTimeDate.setVenue(show.getVenue());
 
 						List<ShowTime> showTimes = new ArrayList<>();
 
@@ -387,14 +377,25 @@ public class EventServiceImpl implements EventService {
 						}
 
 						showTimeDate.setShowTimes(showTimes);
-
-						showtimes.add(showTimeDate);
+						showTimeDates.add(showTimeDate);
 					}
 				}
+				show.setShowstimedate(showTimeDates);
+
+				List<ShowCategory> showCategories = new ArrayList<>();
+				if (showDTO.getCategory() != null && !showDTO.getCategory().isEmpty()) {
+					for (ShowLayoutDto show_layoutDto : showDTO.getCategory()) {
+
+						ShowCategory showCategory = new ShowCategory();
+						showCategory.setLayoutId(show_layoutDto.getLayoutId());
+						showCategory.setPrice(show_layoutDto.getMoviePrice());
+						showCategory.setShow(show);
+
+					}
+				}
+				show.setShowCategories(showCategories);
 
 				show.setEvent(event);
-
-				show.setShowstimedate(showtimes);
 
 				shows.add(show);
 			}
@@ -409,14 +410,6 @@ public class EventServiceImpl implements EventService {
 		eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
 				savedEvent.getName() + " is now available!", savedEvent.getEventType()));
 
-		for (Show show : event.getShows()) {
-
-			for (ShowTimeDate showTimeDate : show.getShowstimedate()) {
-
-			}
-
-			showRepository.save(show);
-		}
 		return toDto(savedEvent);
 	}
 
@@ -695,9 +688,6 @@ public class EventServiceImpl implements EventService {
 				if (showDTO.getScreen() != null) {
 					screenRepository.findById(showDTO.getScreen()).ifPresent(show::setScreen);
 				}
-				if (showDTO.getLayout() != null) {
-					layoutRepository.findById(showDTO.getLayout()).ifPresent(show::setLayout);
-				}
 
 				if (showDTO.getShowPrice() != null) {
 					show.setShowPrice(showDTO.getShowPrice());
@@ -783,7 +773,7 @@ public class EventServiceImpl implements EventService {
 		if ("Movie".equalsIgnoreCase(type)) {
 			// Add condition to specification that currentlyPlaying must be false
 			Specification<Event> currentlyPlayingSpec = (root, query, criteriaBuilder) -> criteriaBuilder
-					.equal(root.get("currentlyPlaying"),includeCurrentlyPlaying);
+					.equal(root.get("currentlyPlaying"), includeCurrentlyPlaying);
 			spec = spec.and(currentlyPlayingSpec);
 		}
 
@@ -823,8 +813,20 @@ public class EventServiceImpl implements EventService {
 		dto.setAgeLimit(event.getAgeLimit());
 
 		if (event.getShows() != null && !event.getShows().isEmpty()) {
-			List<Integer> showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
+			List<Integer> showPrices;
+
+			if ("Movie".equalsIgnoreCase(event.getEventType())) {
+
+				showPrices = event.getShows().stream().filter(s -> s.getShowLayouts() != null)
+						.flatMap(s -> s.getShowLayouts().stream()).map(Show_layout::getMoviePrice).toList();
+			} else {
+
+				showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
+			}
+
 			dto.setPricelist(showPrices);
+		} else {
+			dto.setPricelist(List.of());
 		}
 
 		if (event.getShows() != null && !event.getShows().isEmpty()) {
@@ -950,10 +952,21 @@ public class EventServiceImpl implements EventService {
 
 		dto.setCity(event.getCity() != null ? event.getCity().stream().map(City::getName).toList() : new ArrayList<>());
 
-		// Price extract
 		if (event.getShows() != null && !event.getShows().isEmpty()) {
-			List<Integer> showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
+			List<Integer> showPrices;
+
+			if ("Movie".equalsIgnoreCase(event.getEventType())) {
+
+				showPrices = event.getShows().stream().filter(s -> s.getShowLayouts() != null)
+						.flatMap(s -> s.getShowLayouts().stream()).map(Show_layout::getMoviePrice).toList();
+			} else {
+
+				showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
+			}
+
 			dto.setPricelist(showPrices);
+		} else {
+			dto.setPricelist(List.of());
 		}
 
 		if (event.getShows() != null && !event.getShows().isEmpty()) {

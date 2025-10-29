@@ -326,7 +326,6 @@ class EventServiceImplTest {
         showDTO.setShowPrice(100);
         showDTO.setVenue(10L); 
         showDTO.setScreen(1L); 
-        showDTO.setLayout(1L); 
 
         ShowTimeDTO showTimeDTO = new ShowTimeDTO();
         showTimeDTO.setShowDate(LocalDate.of(2025, 9, 25));
@@ -346,7 +345,6 @@ class EventServiceImplTest {
 
         Layout layout = new Layout();
         layout.setId(1L);
-        when(layoutRepository.findById(1L)).thenReturn(Optional.of(layout));
 
       
         Event savedEvent = new Event();
@@ -373,7 +371,6 @@ class EventServiceImplTest {
 
         verify(venueRepository).findById(10L);
         verify(screenRepository).findById(1L);
-        verify(layoutRepository).findById(1L);
         verify(eventRepository).save(event); 
         verify(showRepository).save(any(Show.class)); 
 
@@ -866,7 +863,6 @@ class EventServiceImplTest {
         showDTO.setShowPrice(500);
         showDTO.setVenue(10L);
         showDTO.setScreen(20L);
-        showDTO.setLayout(30L);
         showDTO.setShowid(null);
 
         ShowTimeDTO showTimeDTO = new ShowTimeDTO();
@@ -886,7 +882,7 @@ class EventServiceImplTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(existingEvent));
         when(venueRepository.findById(10L)).thenReturn(Optional.of(venue));
         when(screenRepository.findById(20L)).thenReturn(Optional.of(screen));
-        when(layoutRepository.findById(30L)).thenReturn(Optional.of(layout));
+      
 
         when(showRepository.save(any(Show.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(eventRepository.save(any(Event.class)))
@@ -903,7 +899,6 @@ class EventServiceImplTest {
        
         verify(venueRepository).findById(10L);
         verify(screenRepository).findById(20L);
-        verify(layoutRepository).findById(30L);
         verify(showRepository, times(1)).save(any(Show.class));
 
         List<Show> savedShows = existingEvent.getShows();
@@ -912,7 +907,6 @@ class EventServiceImplTest {
         assertEquals(500, savedShow.getShowPrice());
         assertEquals(venue, savedShow.getVenue());
         assertEquals(screen, savedShow.getScreen());
-        assertEquals(layout, savedShow.getLayout());
         assertEquals(existingEvent, savedShow.getEvent());
 
        
