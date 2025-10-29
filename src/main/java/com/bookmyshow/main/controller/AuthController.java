@@ -102,7 +102,7 @@ public class AuthController {
 		ApiResponse<Void> response = new ApiResponse<>();
 		response.setStatusCode(200);
 		response.setSuccess(true);
-		response.setMessage("Logout successful, all tokens removed for userId = " + userId);
+		response.setMessage("Logout successful");
 		response.setData(null);
 
 		return ResponseEntity.ok(response);
