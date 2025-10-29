@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -236,7 +237,7 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public List<BookingContentDTO> getAllBookingsByUser(Long userId) {
-//	    List<Booking> bookings = bookingRepository.findAllByUserUserId(userId);
+
 		List<Booking> bookings = bookingRepository.findByUser_UserId(userId);
 		if (bookings.isEmpty()) {
 			throw new RuntimeException("No bookings found for this user");
@@ -245,26 +246,32 @@ public class BookingServiceImpl implements BookingService {
 		List<BookingContentDTO> bookingContents = new ArrayList<>();
 
 		for (Booking booking : bookings) {
-			int totalSeats = booking.getSeats() != null ? booking.getSeats().size() : 0;
-			int totalAmount = totalSeats * booking.getShow().getShowPrice();
-
 			BookingContentDTO content = new BookingContentDTO();
 			content.setEventName(booking.getEvent().getName());
 			content.setEventPoster(booking.getEvent().getImageurl());
 			content.setVenue(booking.getVenue().getVenueName());
 			content.setCity(booking.getVenue().getAddress().getCity().getName());
 
-			// <CHANGE> Added null check for screen - it can be null for non-movie events
 			content.setScreen(booking.getScreen() != null ? booking.getScreen().getScreenName() : "N/A");
 
 			content.setDate(booking.getShowTimeDate().getShowDate().toString());
 			content.setTime(booking.getShowTime().getShowTime().toString());
+			// eventSeats column
+			List<String> seats = new ArrayList<>();
+			if ("Movie".equalsIgnoreCase(booking.getEvent().getEventType())) {
+				// For movies: fetch seats from seat table
+				if (booking.getSeats() != null) {
+					seats = booking.getSeats().stream().map(Seat::getSeatNumber).toList();
+				}
+			} else {
+				// For non-movies: fetch seats from eventSeats column (comma-separated string)
+				if (booking.getEventSeats() != null && !booking.getEventSeats().isEmpty()) {
+					seats = Arrays.asList(booking.getEventSeats().split(","));
+				}
+			}
+			content.setSeats(seats);
 
-			// <CHANGE> Added null check for seats list
-			content.setSeats(booking.getSeats() != null ? booking.getSeats().stream().map(Seat::getSeatNumber).toList()
-					: new ArrayList<>());
-
-			content.setTotalAmount(totalAmount);
+			content.setTotalAmount(booking.getTotalPrice());
 
 			bookingContents.add(content);
 		}
