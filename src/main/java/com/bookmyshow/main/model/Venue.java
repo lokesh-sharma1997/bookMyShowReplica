@@ -27,7 +27,7 @@ public class Venue {
     private String venueName;
 
 
-    private int venueCapacity;
+    private Integer venueCapacity;
 
     private String venueFor;  
 
