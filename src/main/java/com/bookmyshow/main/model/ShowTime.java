@@ -21,8 +21,6 @@ public class ShowTime {
 
 	private LocalTime showTime;
 
-	private Boolean isBooked;
-
 	@ManyToOne
 	@JoinColumn(name = "show_time_date_id", referencedColumnName = "id")
 	private ShowTimeDate showTimeDate;

@@ -25,6 +25,7 @@ import com.bookmyshow.main.events.NotificationEvent;
 import com.bookmyshow.main.exception.VenueNotFoundException;
 import com.bookmyshow.main.model.Address;
 import com.bookmyshow.main.model.Amenity;
+import com.bookmyshow.main.model.Booking;
 import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.LayoutRow;
@@ -411,16 +412,20 @@ public class VenueServiceImpl implements VenueService {
 		List<ShowTime> allShowTimes = new ArrayList<>(showTimeDate.getShowTimes());
 		allShowTimes.sort(Comparator.comparing(ShowTime::getShowTime));
 
-		// Filter out booked show times
-		List<Long> bookedShowTimeIds = showTimeRepository.findBookedShowTimes(showTimeDate.getId());
+		// Get all bookings for this ShowTimeDate and extract ShowTime IDs
+		List<Booking> bookingsForDate = bookingRepository.findAll().stream()
+				.filter(b -> b.getShowTimeDate().getId().equals(showTimeDate.getId())).collect(Collectors.toList());
+
+		List<Long> bookedShowTimeIds = bookingsForDate.stream().map(b -> b.getShowTime().getId()).distinct()
+				.collect(Collectors.toList());
+
 		allShowTimes.removeIf(st -> bookedShowTimeIds.contains(st.getId()));
 
-		int duration = parseRuntimeToMinutes(show.getEvent().getRunTime()); // e.g. 148 mins
-		int buffer = 30; // margin time in minutes
+		int duration = parseRuntimeToMinutes(show.getEvent().getRunTime());
+		int buffer = 30;
 
 		List<TimeSlotDTO> freeSlots = new ArrayList<>();
 
-		// Define operational hours (06:00 → 23:00)
 		LocalTime dayStart = LocalTime.of(06, 0);
 		LocalTime dayEnd = LocalTime.of(23, 0);
 		LocalTime prevEnd = dayStart;
@@ -429,20 +434,17 @@ public class VenueServiceImpl implements VenueService {
 			LocalTime currentStart = current.getShowTime();
 			LocalTime currentEnd = currentStart.plusMinutes(duration + buffer);
 
-			// Check if there is enough gap before this show
 			long freeMinutes = Duration.between(prevEnd, currentStart).toMinutes();
 			if (freeMinutes >= (duration + buffer)) {
 				TimeSlotDTO dto = new TimeSlotDTO();
 				dto.setStartTime(prevEnd);
-				dto.setEndTime(currentStart.minusMinutes(buffer)); // leave margin before next show
+				dto.setEndTime(currentStart.minusMinutes(buffer));
 				freeSlots.add(dto);
 			}
 
-			// Update previous end (next possible free start)
 			prevEnd = currentEnd;
 		}
 
-		// Check after last show till day end
 		if (prevEnd.isBefore(dayEnd)) {
 			long freeMinutes = Duration.between(prevEnd, dayEnd).toMinutes();
 			if (freeMinutes >= duration) {
