@@ -175,9 +175,7 @@ public class BookingServiceImpl implements BookingService {
 		booking.setSeats(allSeatsInDatabase);
 		booking.setStatus("CONFIRMED");
 		booking.setTotalPrice(dto.getTotalPrice());
-
 		bookingRepository.save(booking);
-		showTime.setIsBooked(true);
 		showTimeRepository.save(showTime);
 	}
 
@@ -225,7 +223,6 @@ public class BookingServiceImpl implements BookingService {
 		booking.setTotalPrice(dto.getTotalPrice());
 
 		bookingRepository.save(booking);
-		showTime.setIsBooked(true);
 		showTimeRepository.save(showTime);
 	}
 
