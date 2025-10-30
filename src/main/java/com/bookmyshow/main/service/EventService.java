@@ -47,6 +47,7 @@ public interface EventService {
 	
 	Page<EventResponseDtoCard> filterEvents(
 		    String type,
+		    Integer cityid,
 		    List<Integer> languages,
 		    List<Integer> genres,
 		    List<Integer> formats,

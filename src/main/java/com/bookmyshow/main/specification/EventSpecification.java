@@ -17,6 +17,7 @@ public class EventSpecification {
 	
 	public static Specification<Event> filterEvents(
 	        String type,
+	        Integer cityid,
 	        List<Integer> languages,
 	        List<Integer> genres,
 	        List<Integer> formats,
@@ -37,6 +38,10 @@ public class EventSpecification {
 	      
 	        if (type != null && !type.isEmpty()) {
 	            predicates.add(builder.equal(builder.lower(root.get("eventType")), type.toLowerCase()));
+	        }
+	        if (cityid != null ) {
+	        	Join<Event, ?> cityJoin = root.join("city");
+	            predicates.add(cityJoin.get("cityId").in(cityid));
 	        }
 
 	     

@@ -181,7 +181,7 @@ public class EventController {
 			@RequestParam int page, @RequestParam int size,
 			@RequestParam(required = false, defaultValue = "true") boolean upcomingMovie) {
 
-		Specification<Event> spec = EventSpecification.filterEvents(filterRequest.getType(),
+		Specification<Event> spec = EventSpecification.filterEvents(filterRequest.getType(),filterRequest.getCityid(),
 				filterRequest.getLanguages(), filterRequest.getGenres(), filterRequest.getFormats(),
 				filterRequest.getTags(), filterRequest.getCategories(), filterRequest.getPrice(),
 				filterRequest.getMorefilter(), filterRequest.getReleaseMonths(), filterRequest.getDateFilters());
@@ -201,7 +201,7 @@ public class EventController {
 			count = eventRepository.findAll(spec).stream().filter(event -> !event.getDeleted()).count();
 		}
 
-		Page<EventResponseDtoCard> eventsPage = eventService.filterEvents(filterRequest.getType(),
+		Page<EventResponseDtoCard> eventsPage = eventService.filterEvents(filterRequest.getType(),filterRequest.getCityid(),
 				filterRequest.getLanguages(), filterRequest.getGenres(), filterRequest.getFormats(),
 				filterRequest.getTags(), filterRequest.getCategories(), filterRequest.getPrice(),
 				filterRequest.getMorefilter(), filterRequest.getReleaseMonths(), filterRequest.getDateFilters(), page,
