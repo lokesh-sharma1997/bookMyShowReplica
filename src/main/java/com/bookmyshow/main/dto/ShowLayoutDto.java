@@ -1,12 +1,13 @@
 package com.bookmyshow.main.dto;
  
-import com.bookmyshow.main.model.Layout;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
  
 @Data
 public class ShowLayoutDto {
-	private Layout layoutId;
+	@JsonProperty("layout")
+	private Long layoutId;
 	private int moviePrice;
  
 }

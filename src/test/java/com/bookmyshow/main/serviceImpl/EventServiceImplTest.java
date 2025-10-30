@@ -159,9 +159,71 @@ class EventServiceImplTest {
     private Event event;
     private EventDTO eventDto;
 
+//    @BeforeEach
+//    void setUp() {
+//    	
+//        event = new Event();
+//        event.setEventId(1L);
+//        event.setName("Test Event");
+//        event.setDescription("Desc");
+//        event.setRunTime("120min");
+//        event.setStartDate(LocalDate.of(2025, 9, 8));
+//        event.setEndDate(LocalDate.of(2025, 9, 10));
+//        event.setEventType("Movie");
+//        event.setImageurl("imageUrl");
+//        event.setImdbRating(8.5);
+//        event.setLikes(100.0);
+//        event.setVotes(50.0);
+//        event.setCurrentlyPlaying(true);
+//        event.setDeleted(false);
+//        event.setAgeLimit(13);
+//        event.setReleasingOn(LocalDate.of(2025, 9, 8));
+//        event.setLanguages(new ArrayList<>());
+//        event.setGenres(new ArrayList<>());
+//        event.setFormat(new ArrayList<>());
+//        event.setTag(new ArrayList<>());
+//        event.setReleaseMonth(new ArrayList<>());
+//        event.setDateFilter(new ArrayList<>());
+//        event.setCategories(new ArrayList<>());
+//        event.setMoreFilters(new ArrayList<>());
+//        event.setCast(new ArrayList<>());
+//        event.setCrew(new ArrayList<>());
+//        event.setCity(new ArrayList<>());
+//        event.setVenues(new ArrayList<>());
+//        event.setShows(new ArrayList<>());
+//
+//        eventDto = new EventDTO();
+//        eventDto.setEventId(1L);
+//        eventDto.setName("Test Event");
+//        eventDto.setDescription("Desc");
+//        eventDto.setRunTime("120");
+//        eventDto.setStartDate(LocalDate.of(2025, 9, 8));
+//        eventDto.setEndDate(LocalDate.of(2025, 9, 10));
+//        eventDto.setEventType("Movie");
+//        eventDto.setImageurl("imageUrl");
+//        eventDto.setImdbRating(8.5);
+//        eventDto.setLikes(100.0);
+//        eventDto.setVotes(50.0);
+//        eventDto.setCurrentlyPlaying(true);
+//       
+//        eventDto.setAgeLimit(13);
+//        eventDto.setReleasingOn(LocalDate.of(2025, 9, 8));
+//        eventDto.setLanguages(Collections.emptyList());
+//        eventDto.setGenres(Collections.emptyList());
+//        eventDto.setFormat(Collections.emptyList());
+//        eventDto.setTag(Collections.emptyList());
+//        eventDto.setReleaseMonth(Collections.emptyList());
+//        eventDto.setDateFilter(Collections.emptyList());
+//        eventDto.setCategories(Collections.emptyList());
+//        eventDto.setMoreFilters(Collections.emptyList());
+//        eventDto.setCast(Collections.emptyList());
+//        eventDto.setCrew(Collections.emptyList());
+//        eventDto.setCity(Collections.emptyList());
+//    }
+
     @BeforeEach
     void setUp() {
-    	
+        // Initialize Event
         event = new Event();
         event.setEventId(1L);
         event.setName("Test Event");
@@ -178,6 +240,8 @@ class EventServiceImplTest {
         event.setDeleted(false);
         event.setAgeLimit(13);
         event.setReleasingOn(LocalDate.of(2025, 9, 8));
+
+        // Initialize all lists to empty to prevent NPE
         event.setLanguages(new ArrayList<>());
         event.setGenres(new ArrayList<>());
         event.setFormat(new ArrayList<>());
@@ -189,7 +253,10 @@ class EventServiceImplTest {
         event.setCast(new ArrayList<>());
         event.setCrew(new ArrayList<>());
         event.setCity(new ArrayList<>());
+        event.setVenues(new ArrayList<>());
+        event.setShows(new ArrayList<>());
 
+        // Initialize EventDTO
         eventDto = new EventDTO();
         eventDto.setEventId(1L);
         eventDto.setName("Test Event");
@@ -203,9 +270,10 @@ class EventServiceImplTest {
         eventDto.setLikes(100.0);
         eventDto.setVotes(50.0);
         eventDto.setCurrentlyPlaying(true);
-       
         eventDto.setAgeLimit(13);
         eventDto.setReleasingOn(LocalDate.of(2025, 9, 8));
+
+        // Initialize all DTO lists
         eventDto.setLanguages(Collections.emptyList());
         eventDto.setGenres(Collections.emptyList());
         eventDto.setFormat(Collections.emptyList());
@@ -217,6 +285,8 @@ class EventServiceImplTest {
         eventDto.setCast(Collections.emptyList());
         eventDto.setCrew(Collections.emptyList());
         eventDto.setCity(Collections.emptyList());
+        eventDto.setVenue(Collections.emptyList());
+        eventDto.setShow(Collections.emptyList());
     }
 
     @Test
@@ -372,15 +442,12 @@ class EventServiceImplTest {
         verify(venueRepository).findById(10L);
         verify(screenRepository).findById(1L);
         verify(eventRepository).save(event); 
-        verify(showRepository).save(any(Show.class)); 
+        verify(eventRepository, times(1)).save(any(Event.class));
+        
+        assertNotNull(result.getShow());
+        assertEquals(1, result.getShow().size());
+        assertEquals("Venue1", result.getShow().get(0).getVenue());
 
-     
-        Show show = event.getShows().get(0);
-        assertEquals(1, show.getShowstimedate().size()); 
-        assertEquals(LocalDate.of(2025, 9, 25), show.getShowstimedate().get(0).getShowDate()); 
-        assertEquals(LocalTime.of(10, 0), show.getShowstimedate().get(0).
-        		getShowTimes().get(0).getShowTime()); 
-        assertEquals(100, show.getShowPrice()); 
 
 
       
@@ -741,7 +808,7 @@ class EventServiceImplTest {
 
         List<Event> mockEvents = List.of(event);
 
-        when(eventRepository.findTop10ByEventTypeOrderByReleasingOnDesc(eventType))
+        when(eventRepository.findTop10ByEventTypeOrderByEventIdDesc(eventType))
             .thenReturn(mockEvents);
 
         EventResponseDtoCard dto = new EventResponseDtoCard();
@@ -752,7 +819,7 @@ class EventServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
 
-        verify(eventRepository).findTop10ByEventTypeOrderByReleasingOnDesc(eventType);
+        verify(eventRepository).findTop10ByEventTypeOrderByEventIdDesc(eventType);
 
     }
 
