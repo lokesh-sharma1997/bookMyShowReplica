@@ -65,10 +65,14 @@ import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.service.EventService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 @ExtendWith(MockitoExtension.class)
 class EventControllerTest {
  
-   
+   private Validator validator;
     private MockMvc mockMvc;
  
     @Mock
@@ -87,6 +91,8 @@ class EventControllerTest {
  
     @BeforeEach
     void setUp() {
+    	ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     	 MockitoAnnotations.openMocks(this); 
     	objectMapper = new ObjectMapper();
     	objectMapper.registerModule(new JavaTimeModule());
@@ -143,8 +149,8 @@ class EventControllerTest {
         );
  
         mockMvc.perform(multipart("/api/events/create-event")
-                .file(eventJson)
-                .file(poster)
+              .file(eventJson)
+               .file(poster)
         )
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.message").value("Event created successfully"))
