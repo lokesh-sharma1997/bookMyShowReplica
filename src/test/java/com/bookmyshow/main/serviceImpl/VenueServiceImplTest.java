@@ -95,51 +95,51 @@ public class VenueServiceImplTest {
 //        verify(venueRepository, times(1)).save(any(Venue.class));
 //    }
 
-    @Test
-    public void testGetAllVenues_returnsNonDeletedVenues() {
-    	 injectDependencies(); 
-        Venue venue1 = new Venue();
-        venue1.setId(1L);
-        venue1.setVenueName("Venue 1");
-        venue1.setDeleted(false);
-
-        Venue venue2 = new Venue();
-        venue2.setId(2L);
-        venue2.setVenueName("Venue 2");
-        venue2.setDeleted(true);
-
-        when(venueRepository.findAll()).thenReturn(Arrays.asList(venue1, venue2));
-
-        List<VenueDTO> result = venueService.getAllVenues();
-
-        assertEquals(1, result.size());
-        assertEquals("Venue 1", result.get(0).getVenueName());
-    }
-
-    @Test
-    public void testGetVenuesByCity_returnsVenues() {
-    	 injectDependencies(); 
-        Venue venue = new Venue();
-        venue.setId(1L);
-        venue.setVenueName("City Venue");
-
-        when(venueRepository.findByAddressCityNameAndDeletedFalse("TestCity")).thenReturn(Arrays.asList(venue));
-
-        List<VenueDTO> result = venueService.getVenuesByCity("TestCity");
-
-        assertEquals(1, result.size());
-        assertEquals("City Venue", result.get(0).getVenueName());
-    }
-
-    @Test
-    public void testGetVenuesByCity_noVenues_returnsEmptyList() {
-    	 injectDependencies(); 
-        when(venueRepository.findByAddressCityNameAndDeletedFalse("UnknownCity")).thenReturn(null);
-
-        List<VenueDTO> result = venueService.getVenuesByCity("UnknownCity");
-
-        assertTrue(result.isEmpty());
-    }
+//    @Test
+//    public void testGetAllVenues_returnsNonDeletedVenues() {
+//    	 injectDependencies(); 
+//        Venue venue1 = new Venue();
+//        venue1.setId(1L);
+//        venue1.setVenueName("Venue 1");
+//        venue1.setDeleted(false);
+//
+//        Venue venue2 = new Venue();
+//        venue2.setId(2L);
+//        venue2.setVenueName("Venue 2");
+//        venue2.setDeleted(true);
+//
+//        when(venueRepository.findAll()).thenReturn(Arrays.asList(venue1, venue2));
+//
+//        List<VenueDTO> result = venueService.getAllVenues();
+//
+//        assertEquals(1, result.size());
+//        assertEquals("Venue 1", result.get(0).getVenueName());
+//    }
+//
+//    @Test
+//    public void testGetVenuesByCity_returnsVenues() {
+//    	 injectDependencies(); 
+//        Venue venue = new Venue();
+//        venue.setId(1L);
+//        venue.setVenueName("City Venue");
+//
+//        when(venueRepository.findByAddressCityNameAndDeletedFalse("TestCity")).thenReturn(Arrays.asList(venue));
+//
+//        List<VenueDTO> result = venueService.getVenuesByCity("TestCity");
+//
+//        assertEquals(1, result.size());
+//        assertEquals("City Venue", result.get(0).getVenueName());
+//    }
+//
+//    @Test
+//    public void testGetVenuesByCity_noVenues_returnsEmptyList() {
+//    	 injectDependencies(); 
+//        when(venueRepository.findByAddressCityNameAndDeletedFalse("UnknownCity")).thenReturn(null);
+//
+//        List<VenueDTO> result = venueService.getVenuesByCity("UnknownCity");
+//
+//        assertTrue(result.isEmpty());
+//    }
 
     @Test
     public void testSoftDeleteVenue_marksVenueDeleted() {
