@@ -41,7 +41,7 @@ public class Show {
 
 	@OneToMany(mappedBy = "show", cascade = CascadeType.ALL)
 	@JsonManagedReference
-	private List<Show_layout> showLayouts;
+	private List<ShowLayout> showLayouts;
 	@ManyToOne
 	@JoinColumn(name = "event_id", referencedColumnName = "event_id")
 	@JsonBackReference

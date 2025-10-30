@@ -29,7 +29,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
    
 	
-	List<Event> findTop10ByEventTypeOrderByReleasingOnDesc(String eventType);
+	List<Event> findTop10ByEventTypeOrderByEventIdDesc(String eventType);
 
 	List<Event> findTop10ByOrderByReleasingOnDesc();
 	
