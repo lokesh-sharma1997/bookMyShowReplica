@@ -6,8 +6,10 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -331,7 +333,7 @@ public class VenueServiceImpl implements VenueService {
 
 	@Override
 	public List<VenueDTO> getVenuesByCity(String city) {
-		List<Venue> venues = Optional.ofNullable(venueRepository.findByAddress_City_Name(city))
+		List<Venue> venues = Optional.ofNullable(venueRepository.findByAddressCityNameAndDeletedFalse(city))
 				.orElse(Collections.emptyList());
 		return venues.stream().map(this::entityToDto).collect(Collectors.toList());
 	}
