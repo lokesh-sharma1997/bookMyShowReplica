@@ -16,13 +16,14 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "show_layout")
-public class Show_layout {
+public class ShowLayout {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private int moviePrice;
 	@ManyToOne
 	@JoinColumn(name = "layout_id", referencedColumnName = "id")
+	@JsonBackReference
 	private Layout layout;
 	@ManyToOne
 	@JoinColumn(name = "show_id", referencedColumnName = "id")

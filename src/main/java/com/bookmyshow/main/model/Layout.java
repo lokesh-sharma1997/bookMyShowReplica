@@ -1,6 +1,8 @@
 package com.bookmyshow.main.model;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,7 +37,8 @@ public class Layout {
     private List<LayoutRow> layoutRows;
 
     @OneToMany(mappedBy = "layout", cascade = CascadeType.PERSIST)
-    private List<Show_layout> show_layouts;
+    @JsonManagedReference
+    private List<ShowLayout> showLayouts;
 	
 
 

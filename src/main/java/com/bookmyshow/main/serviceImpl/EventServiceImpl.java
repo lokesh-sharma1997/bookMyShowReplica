@@ -52,15 +52,15 @@ import com.bookmyshow.main.model.Event;
 import com.bookmyshow.main.model.Format;
 import com.bookmyshow.main.model.Genres;
 import com.bookmyshow.main.model.Languages;
+import com.bookmyshow.main.model.Layout;
 import com.bookmyshow.main.model.MoreFilters;
 import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Show;
-import com.bookmyshow.main.model.ShowCategory;
+import com.bookmyshow.main.model.ShowLayout;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
-import com.bookmyshow.main.model.Show_layout;
 import com.bookmyshow.main.model.Tag;
 import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.model.Venue;
@@ -79,7 +79,6 @@ import com.bookmyshow.main.repository.PriceRepository;
 import com.bookmyshow.main.repository.ReleaseMonthRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
-import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.TagRepository;
 import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
@@ -122,6 +121,8 @@ public class EventServiceImpl implements EventService {
 	private ScreenRepository screenRepository;
 	@Autowired
 	private ShowRepository showRepository;
+	@Autowired
+	private LayoutRepository layoutRepository;
 	@Autowired
 	private UserRepository userRepository;
 
@@ -261,8 +262,7 @@ public class EventServiceImpl implements EventService {
 			List<MoreFilters> moreFilters = moreFiltersRepository.findAllById(eventDto.getMoreFilters());
 			event.setMoreFilters(moreFilters);
 		}
-		if(eventDto.getAdminId()!=null)
-		{
+		if (eventDto.getAdminId() != null) {
 			UserMaster userMaster = userRepository.findByUserId(eventDto.getAdminId());
 			event.setUserMaster(userMaster);
 		}
@@ -390,22 +390,27 @@ public class EventServiceImpl implements EventService {
 				}
 				show.setShowstimedate(showTimeDates);
 
-				List<ShowCategory> showCategories = new ArrayList<>();
+				List<ShowLayout> showLayouts = new ArrayList<>();
 				if (showDTO.getCategory() != null && !showDTO.getCategory().isEmpty()) {
-					for (ShowLayoutDto show_layoutDto : showDTO.getCategory()) {
+					for (ShowLayoutDto showLayoutDto : showDTO.getCategory()) {
 
-						ShowCategory showCategory = new ShowCategory();
-						showCategory.setLayoutId(show_layoutDto.getLayoutId());
-						showCategory.setPrice(show_layoutDto.getMoviePrice());
-						showCategory.setShow(show);
+						ShowLayout showLayout = new ShowLayout();
+						showLayout.setMoviePrice(showLayoutDto.getMoviePrice());
+						showLayout.setShow(show);
 
+						if (showLayoutDto.getLayoutId() != null) {
+							Layout layout = layoutRepository.findById(showLayoutDto.getLayoutId())
+									.orElseThrow(() -> new RuntimeException(
+											"Layout not found with id: " + showLayoutDto.getLayoutId()));
+							showLayout.setLayout(layout);
+						}
+						showLayouts.add(showLayout);
 					}
 				}
-				show.setShowCategories(showCategories);
-
+				show.setShowLayouts(showLayouts);
 				show.setEvent(event);
-
 				shows.add(show);
+
 			}
 
 			event.setShows(shows);
@@ -418,7 +423,9 @@ public class EventServiceImpl implements EventService {
 		eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
 				savedEvent.getName() + " is now available!", savedEvent.getEventType()));
 
-		return toDto(savedEvent);
+		return
+
+		toDto(savedEvent);
 	}
 
 	@Override
@@ -538,8 +545,8 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventDTO updateEvent(Long id,Long adminid, EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
-			List<MultipartFile> crewImages) throws IOException {
+	public EventDTO updateEvent(Long id, Long adminid, EventDTO eventDto, MultipartFile poster,
+			List<MultipartFile> castImages, List<MultipartFile> crewImages) throws IOException {
 		Event event = eventRepository.findById(id)
 				.orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
 		if (event.getDeleted()) {
@@ -547,8 +554,7 @@ public class EventServiceImpl implements EventService {
 		}
 		UserMaster user = userRepository.findById(adminid).orElseThrow(() -> new RuntimeException("User not found"));
 
-		if(event.getUserMaster()!=user)
-		{
+		if (event.getUserMaster() != user) {
 			throw new EventCustomException("Event not found or not owned by Admin");
 		}
 		event.setDeleted(false);
@@ -765,13 +771,12 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public boolean deleteEvent(Long id,Long adminid) {
+	public boolean deleteEvent(Long id, Long adminid) {
 		Event event = eventRepository.findById(id)
 				.orElseThrow(() -> new EventCustomException("Event not found with this id: " + id));
 		UserMaster user = userRepository.findById(adminid).orElseThrow(() -> new RuntimeException("User not found"));
 
-		if(event.getUserMaster()!=user)
-		{
+		if (event.getUserMaster() != user) {
 			throw new EventCustomException("Event not found or not owned by Admin");
 		}
 		event.setDeleted(true);
@@ -809,7 +814,7 @@ public class EventServiceImpl implements EventService {
 		List<Event> events;
 
 		if (eventType != null && !eventType.isEmpty()) {
-			events = eventRepository.findTop10ByEventTypeOrderByReleasingOnDesc(eventType);
+			events = eventRepository.findTop10ByEventTypeOrderByEventIdDesc(eventType);
 		} else {
 			events = eventRepository.findTop10ByOrderByReleasingOnDesc();
 		}
@@ -837,7 +842,7 @@ public class EventServiceImpl implements EventService {
 			if ("Movie".equalsIgnoreCase(event.getEventType())) {
 
 				showPrices = event.getShows().stream().filter(s -> s.getShowLayouts() != null)
-						.flatMap(s -> s.getShowLayouts().stream()).map(Show_layout::getMoviePrice).toList();
+						.flatMap(s -> s.getShowLayouts().stream()).map(ShowLayout::getMoviePrice).toList();
 			} else {
 
 				showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
@@ -977,7 +982,7 @@ public class EventServiceImpl implements EventService {
 			if ("Movie".equalsIgnoreCase(event.getEventType())) {
 
 				showPrices = event.getShows().stream().filter(s -> s.getShowLayouts() != null)
-						.flatMap(s -> s.getShowLayouts().stream()).map(Show_layout::getMoviePrice).toList();
+						.flatMap(s -> s.getShowLayouts().stream()).map(ShowLayout::getMoviePrice).toList();
 			} else {
 
 				showPrices = event.getShows().stream().map(Show::getShowPrice).toList();
