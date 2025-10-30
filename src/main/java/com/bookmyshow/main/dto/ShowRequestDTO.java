@@ -14,10 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShowRequestDTO {
-	
-	 private Long eventId;
-	 private String date;
+
+	private Long eventId;
+	private String date;
 }
-
-
-

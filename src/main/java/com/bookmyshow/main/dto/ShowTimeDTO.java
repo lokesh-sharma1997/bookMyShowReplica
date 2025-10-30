@@ -8,6 +8,6 @@ import lombok.Data;
 
 @Data
 public class ShowTimeDTO {
-    private LocalDate showDate;  
-    private List<LocalTime> showTime;  
+	private LocalDate showDate;
+	private List<LocalTime> showTime;
 }
