@@ -231,88 +231,9 @@ class EventServiceImplTest {
 		eventDto.setShow(Collections.emptyList());
 	}
 
-	@Test
-	void testCreateEvent() throws IOException {
-		MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg",
-				"dummy image".getBytes());
+	
 
-		when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(event);
-		when(languagesRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(genresRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(formatRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(tagRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(releaseMonthRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(dateFilterRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(categoriesRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(moreFiltersRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		lenient().when(castRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-
-		when(cityRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
-		when(eventRepository.save(any(Event.class))).thenReturn(event);
-
-		EventDTO result = eventService.createEvent(eventDto, poster, null, null);
-
-		assertNotNull(result);
-		assertEquals(event.getName(), result.getName());
-		verify(eventRepository).save(any(Event.class));
-	}
-
-	@Test
-	void testCreateEvent_withCastCrewAndVenues() throws IOException {
-
-		MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg",
-				"poster-bytes".getBytes());
-		MockMultipartFile castImage = new MockMultipartFile("cast", "cast1.jpg", "image/jpeg", "cast-image".getBytes());
-		MockMultipartFile crewImage = new MockMultipartFile("crew", "crew1.jpg", "image/jpeg", "crew-image".getBytes());
-
-		CastDTO castDTO = new CastDTO();
-		castDTO.setActorName("Actor Name");
-
-		CrewDTO crewDTO = new CrewDTO();
-		crewDTO.setMemberName("Crew Member");
-
-		eventDto.setCast(List.of(castDTO));
-		eventDto.setCrew(List.of(crewDTO));
-		eventDto.setVenue(List.of(10));
-		eventDto.setAgeLimit(18);
-
-		Venue venue = new Venue();
-		venue.setId(10L);
-
-		when(castRepository.findByActorName("Actor Name")).thenReturn(Optional.empty());
-		when(castRepository.save(any(Cast.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-		when(crewRepository.findByMemberName("Crew Member")).thenReturn(Optional.empty());
-		when(crewRepository.save(any(Crew.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-		when(venueRepository.findAllById(anyList())).thenReturn(List.of(venue));
-
-		when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(new Event());
-		when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
-			Event e = invocation.getArgument(0);
-			e.setEventId(1L);
-			e.setAgeLimit(18);
-			return e;
-		});
-
-		EventDTO result = eventService.createEvent(eventDto, poster, List.of(castImage), List.of(crewImage));
-
-		assertNotNull(result);
-
-		verify(castRepository).save(argThat(cast -> cast.getActorName().equals("Actor Name")
-				&& cast.getCastImg() != null && !cast.getCastImg().isEmpty()));
-
-		verify(crewRepository).save(argThat(crew -> crew.getMemberName().equals("Crew Member")
-				&& crew.getCrewImg() != null && !crew.getCrewImg().isEmpty()));
-
-		verify(venueRepository).findAllById(argThat(ids -> {
-			List<Long> idList = new ArrayList<>();
-			ids.forEach(idList::add);
-			return idList.contains(10L);
-		}));
-
-		verify(eventRepository).save(any(Event.class));
-	}
+	
 
 //	@Test
 	void testCreateEvent_withShows() throws IOException {

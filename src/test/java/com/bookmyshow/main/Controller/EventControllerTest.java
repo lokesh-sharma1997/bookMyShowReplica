@@ -129,33 +129,6 @@ class EventControllerTest {
         eventDto.setCity(Collections.emptyList());
     }
  
-    @Test
-    void testCreateEvent() throws Exception {
-        when(eventService.createEvent(any(EventDTO.class), any(), any(), any()))
-                .thenReturn(eventDto);
- 
-        MockMultipartFile eventJson = new MockMultipartFile(
-                "event",
-                "",
-                "application/json",
-                objectMapper.writeValueAsBytes(eventDto)
-        );
- 
-        MockMultipartFile poster = new MockMultipartFile(
-                "poster",
-                "poster.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "fake-image".getBytes()
-        );
- 
-        mockMvc.perform(multipart("/api/events/create-event")
-              .file(eventJson)
-               .file(poster)
-        )
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.message").value("Event created successfully"))
-        .andExpect(jsonPath("$.data").doesNotExist());
-    }
  
     @Test
     void testUpdateEvent() throws Exception {

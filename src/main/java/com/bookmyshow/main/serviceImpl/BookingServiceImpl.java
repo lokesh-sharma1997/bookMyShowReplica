@@ -72,7 +72,7 @@ public class BookingServiceImpl implements BookingService {
 		Venue venue = validateVenue(dto.getVenueId());
 		Show show = validateShow(dto.getShowId(), event);
 
-		boolean isMovieEvent = "Movie".equals(event.getEventType());
+		boolean isMovieEvent = "Movie".equalsIgnoreCase(event.getEventType());
 
 		if (isMovieEvent) {
 			handleMovieBooking(dto, user, event, venue, show);
@@ -128,7 +128,6 @@ public class BookingServiceImpl implements BookingService {
 
 		List<String> requestedSeats = dto.getReservedSeats();
 
-		// Added validation for empty seat list
 		if (requestedSeats == null || requestedSeats.isEmpty()) {
 			throw new RuntimeException("At least one seat must be selected for booking");
 		}
@@ -136,13 +135,11 @@ public class BookingServiceImpl implements BookingService {
 		List<String> normalizedRequestedSeats = requestedSeats.stream().map(String::trim).map(String::toUpperCase)
 				.collect(Collectors.toList());
 
-		// Validate seat format before database query
 		validateSeatFormat(normalizedRequestedSeats);
 
 		List<Seat> allSeatsInDatabase = seatRepository.findSeatsByNumberAndScreenIdWithoutStatusCheck(screen.getId(),
 				normalizedRequestedSeats);
 
-		// Strict validation - all requested seats must exist in database
 		if (allSeatsInDatabase.size() != normalizedRequestedSeats.size()) {
 			List<String> foundSeatNumbers = allSeatsInDatabase.stream().map(s -> s.getSeatNumber().trim().toUpperCase())
 					.collect(Collectors.toList());
@@ -151,7 +148,6 @@ public class BookingServiceImpl implements BookingService {
 			throw new RuntimeException("INVALID_SEATS: These seats do not exist in the seat table: " + invalidSeats);
 		}
 
-		// Check for already booked seats
 		List<String> alreadyReserved = bookingRepository
 				.findBookedSeatsForShowTimeDate(showTimeDate.getId(), showTime.getId()).stream()
 				.map(Seat::getSeatNumber).map(String::trim).map(String::toUpperCase).collect(Collectors.toList());
@@ -179,10 +175,8 @@ public class BookingServiceImpl implements BookingService {
 		showTimeRepository.save(showTime);
 	}
 
-	// New validation method to check seat name format
 	private void validateSeatFormat(List<String> seatNumbers) {
 		for (String seatNumber : seatNumbers) {
-			// Seat format should be like: A1, B2, F10 (Letter + Number)
 			if (!seatNumber.matches("^[A-Z]+\\d+$")) {
 				throw new RuntimeException("INVALID_SEAT_FORMAT: Seat '" + seatNumber
 						+ "' has invalid format. Expected format: Letter(s) followed by number(s) (e.g., A1, B2, F10)");
@@ -209,6 +203,10 @@ public class BookingServiceImpl implements BookingService {
 			eventSeats = String.join(",", dto.getEventSeats());
 		}
 
+		// Capacity validation for non-movie events
+		int seatsRequested = (dto.getEventSeats() != null) ? dto.getEventSeats().size() : 1;
+		validateVenueCapacity(venue, showTimeDate, showTime, seatsRequested, false);
+
 		Booking booking = new Booking();
 		booking.setUser(user);
 		booking.setShow(show);
@@ -226,6 +224,28 @@ public class BookingServiceImpl implements BookingService {
 		showTimeRepository.save(showTime);
 	}
 
+	private void validateVenueCapacity(Venue venue, ShowTimeDate showTimeDate, ShowTime showTime, int seatsRequested,
+			boolean isMovieEvent) {
+		if (venue.getVenueCapacity() == null || venue.getVenueCapacity() <= 0) {
+			// No capacity limit defined
+			return;
+		}
+
+		int alreadyBookedSeats;
+
+		// Count from eventSeats string (comma-separated)
+		alreadyBookedSeats = bookingRepository.countBookedEventSeatsForShowTimeDateAndTime(showTimeDate.getId(),
+				showTime.getId());
+
+		int totalAfterBooking = alreadyBookedSeats + seatsRequested;
+
+		if (totalAfterBooking > venue.getVenueCapacity()) {
+			int remaining = Math.max(venue.getVenueCapacity() - alreadyBookedSeats, 0);
+			throw new RuntimeException(
+					"VENUE_FULL: Venue capacity exceeded. Only " + remaining + " seats left for this show.");
+		}
+	}
+
 	@Override
 	public List<String> getBookedSeats(Long showTimeDateId, Long showTimeId) {
 		return bookingRepository.findBookedSeatsForShowTimeDate(showTimeDateId, showTimeId).stream()
@@ -234,7 +254,6 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public List<BookingContentDTO> getAllBookingsByUser(Long userId) {
-
 		List<Booking> bookings = bookingRepository.findByUser_UserId(userId);
 		if (bookings.isEmpty()) {
 			throw new RuntimeException("No bookings found for this user");
@@ -248,28 +267,23 @@ public class BookingServiceImpl implements BookingService {
 			content.setEventPoster(booking.getEvent().getImageurl());
 			content.setVenue(booking.getVenue().getVenueName());
 			content.setCity(booking.getVenue().getAddress().getCity().getName());
-
 			content.setScreen(booking.getScreen() != null ? booking.getScreen().getScreenName() : "N/A");
-
 			content.setDate(booking.getShowTimeDate().getShowDate().toString());
 			content.setTime(booking.getShowTime().getShowTime().toString());
-			// eventSeats column
+
 			List<String> seats = new ArrayList<>();
 			if ("Movie".equalsIgnoreCase(booking.getEvent().getEventType())) {
-				// For movies: fetch seats from seat table
 				if (booking.getSeats() != null) {
 					seats = booking.getSeats().stream().map(Seat::getSeatNumber).toList();
 				}
 			} else {
-				// For non-movies: fetch seats from eventSeats column (comma-separated string)
 				if (booking.getEventSeats() != null && !booking.getEventSeats().isEmpty()) {
 					seats = Arrays.asList(booking.getEventSeats().split(","));
 				}
 			}
+
 			content.setSeats(seats);
-
 			content.setTotalAmount(booking.getTotalPrice());
-
 			bookingContents.add(content);
 		}
 
