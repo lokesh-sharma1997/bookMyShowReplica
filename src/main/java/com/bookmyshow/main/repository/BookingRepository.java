@@ -1,7 +1,6 @@
 package com.bookmyshow.main.repository;
 
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +12,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 	// Find all bookings for a specific show
 	List<Booking> findByShowId(Long showId);
 
-	// <CHANGE> Fixed method name - use underscore for nested User.userId property
+	// Find all bookings for a specific user
 	List<Booking> findByUser_UserId(Long userId);
 
 	// Find bookings by status
@@ -22,22 +21,28 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 	// Find bookings by show and status
 	List<Booking> findByShowIdAndStatus(Long showId, String status);
 
-	// Find bookings by show, screen and status
+	// Find bookings by show, screen, and status
 	List<Booking> findByShowIdAndScreenIdAndStatus(Long showId, Long screenId, String status);
 
 	// Check if a specific seat is booked for a show
-	@Query("SELECT CASE WHEN COUNT(booking) > 0 THEN true ELSE false END " +
-	       "FROM Booking booking JOIN booking.seats seat " +
-	       "WHERE booking.show.id = :showId AND seat.id = :seatId AND booking.status = 'CONFIRMED'")
+	@Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " + "FROM Booking b JOIN b.seats s "
+			+ "WHERE b.show.id = :showId AND s.id = :seatId AND b.status = 'CONFIRMED'")
 	boolean isSeatBookedForShow(@Param("showId") Long showId, @Param("seatId") Long seatId);
 
 	// Get all booked seats for a show
-	@Query("SELECT DISTINCT seat FROM Booking booking JOIN booking.seats seat " +
-	       "WHERE booking.show.id = :showId AND booking.status = 'CONFIRMED'")
+	@Query("SELECT DISTINCT s FROM Booking b JOIN b.seats s " + "WHERE b.show.id = :showId AND b.status = 'CONFIRMED'")
 	List<Seat> findBookedSeatsForShow(@Param("showId") Long showId);
 
-	@Query("SELECT DISTINCT seat FROM Booking booking JOIN booking.seats seat " +
-	       "WHERE booking.showTimeDate.id = :showTimeDateId AND booking.showTime.id = :showTimeId AND booking.status = 'CONFIRMED'")
+	// Get all booked seats for a specific show date & time
+	@Query("SELECT DISTINCT s FROM Booking b JOIN b.seats s " + "WHERE b.showTimeDate.id = :showTimeDateId "
+			+ "AND b.showTime.id = :showTimeId " + "AND b.status = 'CONFIRMED'")
 	List<Seat> findBookedSeatsForShowTimeDate(@Param("showTimeDateId") Long showTimeDateId,
-	                                          @Param("showTimeId") Long showTimeId);
+			@Param("showTimeId") Long showTimeId);
+
+	// Count booked seats for Non-Movie events
+	@Query("SELECT COALESCE(SUM(LENGTH(b.eventSeats) - LENGTH(REPLACE(b.eventSeats, ',', '')) + 1), 0) "
+			+ "FROM Booking b " + "WHERE b.showTimeDate.id = :showTimeDateId " + "AND b.showTime.id = :showTimeId "
+			+ "AND b.status = 'CONFIRMED' " + "AND b.eventSeats IS NOT NULL " + "AND b.eventSeats <> ''")
+	int countBookedEventSeatsForShowTimeDateAndTime(@Param("showTimeDateId") Long showTimeDateId,
+			@Param("showTimeId") Long showTimeId);
 }
