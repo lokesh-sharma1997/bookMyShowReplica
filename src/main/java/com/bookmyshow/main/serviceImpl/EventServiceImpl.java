@@ -58,11 +58,11 @@ import com.bookmyshow.main.model.Price;
 import com.bookmyshow.main.model.ReleaseMonth;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Show;
-import com.bookmyshow.main.model.ShowCategory;
 import com.bookmyshow.main.model.ShowLayout;
 import com.bookmyshow.main.model.ShowTime;
 import com.bookmyshow.main.model.ShowTimeDate;
 import com.bookmyshow.main.model.Tag;
+import com.bookmyshow.main.model.UserMaster;
 import com.bookmyshow.main.model.Venue;
 import com.bookmyshow.main.repository.CastRepository;
 import com.bookmyshow.main.repository.CategoriesRepository;
@@ -80,6 +80,7 @@ import com.bookmyshow.main.repository.ReleaseMonthRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.TagRepository;
+import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import com.bookmyshow.main.specification.EventSpecification;
@@ -122,6 +123,8 @@ public class EventServiceImpl implements EventService {
 	private ShowRepository showRepository;
 	@Autowired
 	private LayoutRepository layoutRepository;
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -259,7 +262,10 @@ public class EventServiceImpl implements EventService {
 			List<MoreFilters> moreFilters = moreFiltersRepository.findAllById(eventDto.getMoreFilters());
 			event.setMoreFilters(moreFilters);
 		}
-
+		if (eventDto.getAdminId() != null) {
+			UserMaster userMaster = userRepository.findByUserId(eventDto.getAdminId());
+			event.setUserMaster(userMaster);
+		}
 		if (eventDto.getCast() != null) {
 
 			if (castImages != null) {
@@ -384,23 +390,6 @@ public class EventServiceImpl implements EventService {
 				}
 				show.setShowstimedate(showTimeDates);
 
-//				List<ShowCategory> showCategories = new ArrayList<>();
-//				if (showDTO.getCategory() != null && !showDTO.getCategory().isEmpty()) {
-//					for (ShowLayoutDto show_layoutDto : showDTO.getCategory()) {
-//
-//						ShowCategory showCategory = new ShowCategory();
-//						showCategory.setLayoutId(show_layoutDto.getLayoutId());
-//						showCategory.setPrice(show_layoutDto.getMoviePrice());
-//						showCategory.setShow(show);
-//
-//					}
-//				}
-//				show.setShowCategories(showCategories);
-//
-//				show.setEvent(event);
-//
-//				shows.add(show);
-
 				List<ShowLayout> showLayouts = new ArrayList<>();
 				if (showDTO.getCategory() != null && !showDTO.getCategory().isEmpty()) {
 					for (ShowLayoutDto showLayoutDto : showDTO.getCategory()) {
@@ -411,7 +400,8 @@ public class EventServiceImpl implements EventService {
 
 						if (showLayoutDto.getLayoutId() != null) {
 							Layout layout = layoutRepository.findById(showLayoutDto.getLayoutId())
-									.orElseThrow(() -> new RuntimeException("Layout not found with id: " + showLayoutDto.getLayoutId()));
+									.orElseThrow(() -> new RuntimeException(
+											"Layout not found with id: " + showLayoutDto.getLayoutId()));
 							showLayout.setLayout(layout);
 						}
 						showLayouts.add(showLayout);
@@ -421,19 +411,21 @@ public class EventServiceImpl implements EventService {
 				show.setEvent(event);
 				shows.add(show);
 
-	}
+			}
 
-	event.setShows(shows);
-	}else{
-		event.setShows(Collections.emptyList());}
+			event.setShows(shows);
+		} else {
+			event.setShows(Collections.emptyList());
+		}
 
-	Event savedEvent = eventRepository.save(event);
+		Event savedEvent = eventRepository.save(event);
 
-	eventPublisher.publishEvent(new NotificationEvent(this,"New "+savedEvent.getEventType()+" Added",savedEvent.getName()+" is now available!",savedEvent.getEventType()));
+		eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
+				savedEvent.getName() + " is now available!", savedEvent.getEventType()));
 
-	return
+		return
 
-	toDto(savedEvent);
+		toDto(savedEvent);
 	}
 
 	@Override
@@ -553,12 +545,17 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public EventDTO updateEvent(Long id, EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
-			List<MultipartFile> crewImages) throws IOException {
+	public EventDTO updateEvent(Long id, Long adminid, EventDTO eventDto, MultipartFile poster,
+			List<MultipartFile> castImages, List<MultipartFile> crewImages) throws IOException {
 		Event event = eventRepository.findById(id)
 				.orElseThrow(() -> new EventCustomException("Event not found with id: " + id));
 		if (event.getDeleted()) {
 			throw new EventCustomException("Event not found with id: " + id);
+		}
+		UserMaster user = userRepository.findById(adminid).orElseThrow(() -> new RuntimeException("User not found"));
+
+		if (event.getUserMaster() != user) {
+			throw new EventCustomException("Event not found or not owned by Admin");
 		}
 		event.setDeleted(false);
 		if (eventDto.getCurrentlyPlaying() == null) {
@@ -774,10 +771,14 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public boolean deleteEvent(Long id) {
+	public boolean deleteEvent(Long id, Long adminid) {
 		Event event = eventRepository.findById(id)
 				.orElseThrow(() -> new EventCustomException("Event not found with this id: " + id));
+		UserMaster user = userRepository.findById(adminid).orElseThrow(() -> new RuntimeException("User not found"));
 
+		if (event.getUserMaster() != user) {
+			throw new EventCustomException("Event not found or not owned by Admin");
+		}
 		event.setDeleted(true);
 		eventRepository.save(event);
 

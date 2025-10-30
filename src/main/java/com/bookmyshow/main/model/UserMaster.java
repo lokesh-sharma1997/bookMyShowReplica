@@ -9,6 +9,8 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -64,9 +66,6 @@ public class UserMaster {
 	@UpdateTimestamp
 	private LocalDateTime updatedOn;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Seat> seats;
-
 	@ManyToMany
 	@JoinTable(name = "user_show", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "show_id"))
 	private Set<Show> shows = new HashSet<>();
@@ -81,5 +80,9 @@ public class UserMaster {
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Booking> bookings;
+	
+	@OneToMany(mappedBy = "userMaster", cascade = CascadeType.ALL)
+	  @JsonManagedReference
+	  private List<Event> events;
 
 }

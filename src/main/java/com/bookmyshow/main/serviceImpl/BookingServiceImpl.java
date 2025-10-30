@@ -1,7 +1,11 @@
+
 package com.bookmyshow.main.serviceImpl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,8 +16,6 @@ import com.bookmyshow.main.dto.BookTicketRequestDTO;
 import com.bookmyshow.main.dto.BookingContentDTO;
 import com.bookmyshow.main.model.Booking;
 import com.bookmyshow.main.model.Event;
-import com.bookmyshow.main.model.Layout;
-import com.bookmyshow.main.model.LayoutRow;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Seat;
 import com.bookmyshow.main.model.Show;
@@ -28,7 +30,7 @@ import com.bookmyshow.main.repository.LayoutRowRepository;
 import com.bookmyshow.main.repository.ScreenRepository;
 import com.bookmyshow.main.repository.SeatRepository;
 import com.bookmyshow.main.repository.ShowRepository;
-
+import com.bookmyshow.main.repository.ShowTimeRepository;
 import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
@@ -59,20 +61,60 @@ public class BookingServiceImpl implements BookingService {
 	private LayoutRepository layoutRepository;
 	@Autowired
 	private LayoutRowRepository layoutRowRepository;
+	@Autowired
+	private ShowTimeRepository showTimeRepository;
 
 	@Override
 	@Transactional
-	public void bookTickets(BookTicketRequestDTO dto)
+	public void bookTickets(BookTicketRequestDTO dto) {
+		UserMaster user = validateUser(dto.getUserId());
+		Event event = validateEvent(dto.getEventId());
+		Venue venue = validateVenue(dto.getVenueId());
+		Show show = validateShow(dto.getShowId(), event);
 
-	{
-		UserMaster user = userRepository.findById(dto.getUserId())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+		boolean isMovieEvent = "Movie".equals(event.getEventType());
 
-		Event event = eventRepository.findById(dto.getEventId())
-				.orElseThrow(() -> new RuntimeException("Event not found"));
+		if (isMovieEvent) {
+			handleMovieBooking(dto, user, event, venue, show);
+		} else {
+			handleNonMovieBooking(dto, user, event, venue, show);
+		}
+	}
 
-		Venue venue = venueRepository.findById(dto.getVenueId())
-				.orElseThrow(() -> new RuntimeException("Venue not found"));
+	private UserMaster validateUser(Long userId) {
+		return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+	}
+
+	private Event validateEvent(Long eventId) {
+		return eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+	}
+
+	private Venue validateVenue(Long venueId) {
+		return venueRepository.findById(venueId).orElseThrow(() -> new RuntimeException("Venue not found"));
+	}
+
+	private Show validateShow(Long showId, Event event) {
+		Show show = showRepository.findById(showId).orElseThrow(() -> new RuntimeException("Show not found"));
+		if (!show.getEvent().getEventId().equals(event.getEventId())) {
+			throw new RuntimeException("Show does not belong to the given event");
+		}
+		return show;
+	}
+
+	private ShowTimeDate getShowTimeDate(Show show, LocalDate localDate) {
+		return show.getShowstimedate().stream().filter(std -> std.getShowDate().equals(localDate)).findFirst()
+				.orElseThrow(() -> new RuntimeException("No show available on the selected date"));
+	}
+
+	private ShowTime getShowTime(ShowTimeDate showTimeDate, LocalTime localTime) {
+		return showTimeDate.getShowTimes().stream().filter(st -> st.getShowTime().equals(localTime)).findFirst()
+				.orElseThrow(() -> new RuntimeException("No show at the selected time"));
+	}
+
+	private void handleMovieBooking(BookTicketRequestDTO dto, UserMaster user, Event event, Venue venue, Show show) {
+		if (dto.getScreenId() == null) {
+			throw new RuntimeException("ScreenId is required for movie events.");
+		}
 
 		Screen screen = screenRepository.findById(dto.getScreenId())
 				.orElseThrow(() -> new RuntimeException("Screen not found"));
@@ -81,54 +123,45 @@ public class BookingServiceImpl implements BookingService {
 			throw new RuntimeException("Screen does not belong to the given venue");
 		}
 
-		Layout layout = screen.getLayouts().stream().findFirst()
-				.orElseThrow(() -> new RuntimeException("Layout not found for the selected screen"));
-
-		List<Seat> allSeatsInLayout = layout.getLayoutRows().stream().flatMap(row -> row.getSeats().stream())
-				.filter(seat -> seat.getScreen().getId().equals(screen.getId())).collect(Collectors.toList());
+		ShowTimeDate showTimeDate = getShowTimeDate(show, dto.getDate());
+		ShowTime showTime = getShowTime(showTimeDate, dto.getTime());
 
 		List<String> requestedSeats = dto.getReservedSeats();
 
-		List<String> missingSeats = requestedSeats.stream()
-				.filter(rs -> allSeatsInLayout.stream().noneMatch(seat -> seat.getSeatNumber().equals(rs)))
-				.collect(Collectors.toList());
-
-		if (!missingSeats.isEmpty()) {
-			throw new RuntimeException("Requested seats not found in layout: " + missingSeats);
+		// Added validation for empty seat list
+		if (requestedSeats == null || requestedSeats.isEmpty()) {
+			throw new RuntimeException("At least one seat must be selected for booking");
 		}
 
-		Show show = showRepository.findById(dto.getShowId()).orElseThrow(() -> new RuntimeException("Show not found"));
-
-		if (!show.getEvent().getEventId().equals(event.getEventId())) {
-			throw new RuntimeException("Show does not belong to the given event");
-		}
-
-		ShowTimeDate showTimeDate = show.getShowstimedate().stream()
-				.filter(std -> std.getShowDate().equals(dto.getDate())).findFirst()
-				.orElseThrow(() -> new RuntimeException("No show available on the selected date"));
-
-		ShowTime showTime = showTimeDate.getShowTimes().stream().filter(st -> st.getShowTime().equals(dto.getTime()))
-				.findFirst().orElseThrow(() -> new RuntimeException("No show at the selected time"));
-
-		List<String> alreadyReserved = allSeatsInLayout.stream().filter(Seat::isReserved).map(Seat::getSeatNumber)
+		List<String> normalizedRequestedSeats = requestedSeats.stream().map(String::trim).map(String::toUpperCase)
 				.collect(Collectors.toList());
 
-		List<String> conflict = dto.getReservedSeats().stream().filter(alreadyReserved::contains)
+		// Validate seat format before database query
+		validateSeatFormat(normalizedRequestedSeats);
+
+		List<Seat> allSeatsInDatabase = seatRepository.findSeatsByNumberAndScreenIdWithoutStatusCheck(screen.getId(),
+				normalizedRequestedSeats);
+
+		// Strict validation - all requested seats must exist in database
+		if (allSeatsInDatabase.size() != normalizedRequestedSeats.size()) {
+			List<String> foundSeatNumbers = allSeatsInDatabase.stream().map(s -> s.getSeatNumber().trim().toUpperCase())
+					.collect(Collectors.toList());
+			List<String> invalidSeats = normalizedRequestedSeats.stream().filter(rs -> !foundSeatNumbers.contains(rs))
+					.collect(Collectors.toList());
+			throw new RuntimeException("INVALID_SEATS: These seats do not exist in the seat table: " + invalidSeats);
+		}
+
+		// Check for already booked seats
+		List<String> alreadyReserved = bookingRepository
+				.findBookedSeatsForShowTimeDate(showTimeDate.getId(), showTime.getId()).stream()
+				.map(Seat::getSeatNumber).map(String::trim).map(String::toUpperCase).collect(Collectors.toList());
+
+		List<String> conflict = normalizedRequestedSeats.stream().filter(alreadyReserved::contains)
 				.collect(Collectors.toList());
 
 		if (!conflict.isEmpty()) {
-			throw new RuntimeException("Seats already booked: " + conflict);
+			throw new RuntimeException("ALREADY_BOOKED: Seats already booked for this show: " + conflict);
 		}
-
-		List<Seat> seatsToBook = allSeatsInLayout.stream()
-				.filter(seat -> dto.getReservedSeats().contains(seat.getSeatNumber())).collect(Collectors.toList());
-
-		for (Seat seat : seatsToBook) {
-			seat.setReserved(true);
-			seat.setUser(user);
-		}
-
-		seatRepository.saveAll(seatsToBook);
 
 		Booking booking = new Booking();
 		booking.setUser(user);
@@ -138,52 +171,111 @@ public class BookingServiceImpl implements BookingService {
 		booking.setEvent(event);
 		booking.setShowTimeDate(showTimeDate);
 		booking.setShowTime(showTime);
-		// booking.setTotalSeats(seatsToBook.size());
 		booking.setBookingTime(LocalDateTime.now());
-		booking.setSeats(seatsToBook);
+		booking.setSeats(allSeatsInDatabase);
+		booking.setStatus("CONFIRMED");
+		booking.setTotalPrice(dto.getTotalPrice());
 
 		bookingRepository.save(booking);
+		showTime.setIsBooked(true);
+		showTimeRepository.save(showTime);
+	}
+
+	// New validation method to check seat name format
+	private void validateSeatFormat(List<String> seatNumbers) {
+		for (String seatNumber : seatNumbers) {
+			// Seat format should be like: A1, B2, F10 (Letter + Number)
+			if (!seatNumber.matches("^[A-Z]+\\d+$")) {
+				throw new RuntimeException("INVALID_SEAT_FORMAT: Seat '" + seatNumber
+						+ "' has invalid format. Expected format: Letter(s) followed by number(s) (e.g., A1, B2, F10)");
+			}
+		}
+	}
+
+	private void handleNonMovieBooking(BookTicketRequestDTO dto, UserMaster user, Event event, Venue venue, Show show) {
+		Screen screen = null;
+		if (dto.getScreenId() != null && dto.getScreenId() > 0) {
+			screen = screenRepository.findById(dto.getScreenId())
+					.orElseThrow(() -> new RuntimeException("Screen not found"));
+
+			if (!screen.getVenue().getId().equals(venue.getId())) {
+				throw new RuntimeException("Screen does not belong to the given venue");
+			}
+		}
+
+		ShowTimeDate showTimeDate = getShowTimeDate(show, dto.getDate());
+		ShowTime showTime = getShowTime(showTimeDate, dto.getTime());
+
+		String eventSeats = null;
+		if (dto.getEventSeats() != null && !dto.getEventSeats().isEmpty()) {
+			eventSeats = String.join(",", dto.getEventSeats());
+		}
+
+		Booking booking = new Booking();
+		booking.setUser(user);
+		booking.setShow(show);
+		booking.setEvent(event);
+		booking.setVenue(venue);
+		booking.setScreen(screen);
+		booking.setShowTimeDate(showTimeDate);
+		booking.setShowTime(showTime);
+		booking.setBookingTime(LocalDateTime.now());
+		booking.setEventSeats(eventSeats);
+		booking.setStatus("CONFIRMED");
+		booking.setTotalPrice(dto.getTotalPrice());
+
+		bookingRepository.save(booking);
+		showTime.setIsBooked(true);
+		showTimeRepository.save(showTime);
 	}
 
 	@Override
-	public List<String> getBookedSeats(Long showId) {
-		return bookingRepository.findByShowId(showId).stream().flatMap(booking -> booking.getSeats().stream())
+	public List<String> getBookedSeats(Long showTimeDateId, Long showTimeId) {
+		return bookingRepository.findBookedSeatsForShowTimeDate(showTimeDateId, showTimeId).stream()
 				.map(Seat::getSeatNumber).toList();
 	}
 
 	@Override
 	public List<BookingContentDTO> getAllBookingsByUser(Long userId) {
-	    List<Booking> bookings = bookingRepository.findAllByUserUserId(userId);
 
-	    if (bookings.isEmpty()) {
-	        throw new RuntimeException("No bookings found for this user");
-	    }
+		List<Booking> bookings = bookingRepository.findByUser_UserId(userId);
+		if (bookings.isEmpty()) {
+			throw new RuntimeException("No bookings found for this user");
+		}
 
-	    List<BookingContentDTO> bookingContents = new ArrayList<>();
+		List<BookingContentDTO> bookingContents = new ArrayList<>();
 
-	    for (Booking booking : bookings) {
-	        int totalSeats = booking.getSeats().size();
-	        int  totalAmount = totalSeats * booking.getShow().getShowPrice();
-	       
+		for (Booking booking : bookings) {
+			BookingContentDTO content = new BookingContentDTO();
+			content.setEventName(booking.getEvent().getName());
+			content.setEventPoster(booking.getEvent().getImageurl());
+			content.setVenue(booking.getVenue().getVenueName());
+			content.setCity(booking.getVenue().getAddress().getCity().getName());
 
-	        BookingContentDTO content = new BookingContentDTO();
-	        content.setEventName(booking.getEvent().getName());
-	        content.setEventPoster(booking.getEvent().getImageurl());
-	        content.setVenue(booking.getVenue().getVenueName());
-	        content.setCity(booking.getVenue().getAddress().getCity().getName());
-	        content.setScreen(booking.getScreen().getScreenName());
-	        content.setDate(booking.getShowTimeDate().getShowDate().toString());
-	        content.setTime(booking.getShowTime().getShowTime().toString());
-	        content.setSeats(booking.getSeats().stream()
-	                .map(Seat::getSeatNumber)
-	                .toList());
-	        content.setTotalAmount(totalAmount);
+			content.setScreen(booking.getScreen() != null ? booking.getScreen().getScreenName() : "N/A");
 
-	        bookingContents.add(content);
-	    }
+			content.setDate(booking.getShowTimeDate().getShowDate().toString());
+			content.setTime(booking.getShowTime().getShowTime().toString());
+			// eventSeats column
+			List<String> seats = new ArrayList<>();
+			if ("Movie".equalsIgnoreCase(booking.getEvent().getEventType())) {
+				// For movies: fetch seats from seat table
+				if (booking.getSeats() != null) {
+					seats = booking.getSeats().stream().map(Seat::getSeatNumber).toList();
+				}
+			} else {
+				// For non-movies: fetch seats from eventSeats column (comma-separated string)
+				if (booking.getEventSeats() != null && !booking.getEventSeats().isEmpty()) {
+					seats = Arrays.asList(booking.getEventSeats().split(","));
+				}
+			}
+			content.setSeats(seats);
 
-	    return bookingContents;
+			content.setTotalAmount(booking.getTotalPrice());
+
+			bookingContents.add(content);
+		}
+
+		return bookingContents;
 	}
-
-	}
-
+}

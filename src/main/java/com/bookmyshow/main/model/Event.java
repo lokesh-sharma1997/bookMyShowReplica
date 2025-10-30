@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.bookmyshow.main.config.ValidEndDate;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
@@ -172,6 +173,12 @@ public class Event {
 	  @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
 	  @JsonManagedReference
 	  private List<Show> shows;
+	  
+	  @ManyToOne
+	  @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+	  @JsonBackReference
+	  private UserMaster userMaster;
+
 
 
 	
