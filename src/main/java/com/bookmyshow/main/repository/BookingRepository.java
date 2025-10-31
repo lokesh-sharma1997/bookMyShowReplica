@@ -24,10 +24,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 	// Find bookings by show, screen, and status
 	List<Booking> findByShowIdAndScreenIdAndStatus(Long showId, Long screenId, String status);
 
-	// Check if a specific seat is booked for a show
-	@Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " + "FROM Booking b JOIN b.seats s "
-			+ "WHERE b.show.id = :showId AND s.id = :seatId AND b.status = 'CONFIRMED'")
-	boolean isSeatBookedForShow(@Param("showId") Long showId, @Param("seatId") Long seatId);
+	@Query("""
+			SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
+			FROM Booking b
+			JOIN b.seats s
+			WHERE b.show.id = :showId
+			  AND b.showTime.id = :showTimeId
+			  AND s.id = :seatId
+			""")
+	boolean isSeatBookedForShowTime(@Param("showId") Long showId, @Param("showTimeId") Long showTimeId,
+			@Param("seatId") Long seatId);
 
 	// Get all booked seats for a show
 	@Query("SELECT DISTINCT s FROM Booking b JOIN b.seats s " + "WHERE b.show.id = :showId AND b.status = 'CONFIRMED'")
@@ -45,4 +51,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 			+ "AND b.status = 'CONFIRMED' " + "AND b.eventSeats IS NOT NULL " + "AND b.eventSeats <> ''")
 	int countBookedEventSeatsForShowTimeDateAndTime(@Param("showTimeDateId") Long showTimeDateId,
 			@Param("showTimeId") Long showTimeId);
+
 }
