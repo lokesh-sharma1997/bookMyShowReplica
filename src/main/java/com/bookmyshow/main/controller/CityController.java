@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bookmyshow.main.dto.CityDTO;
 import com.bookmyshow.main.service.CityService;
 import com.bookmyshow.main.response.ApiResponse;
+import com.bookmyshow.main.response.CityResponseDto;
 
 @RestController
 @RequestMapping("/api/city")
@@ -21,7 +22,7 @@ public class CityController {
 	private CityService cityService;
 
 	@GetMapping("/all")
-	public ResponseEntity<ApiResponse<List<CityDTO>>>getAllCities() {
+	public ResponseEntity<ApiResponse<List<CityResponseDto>>>getAllCities() {
 
 		
 		return ResponseEntity.ok(

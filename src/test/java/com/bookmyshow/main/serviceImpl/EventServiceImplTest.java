@@ -1,56 +1,47 @@
 package com.bookmyshow.main.serviceImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.longThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.modelmapper.TypeMap;
-import java.lang.reflect.Method;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jboss.logging.NDC;
+import javax.imageio.ImageIO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -111,7 +102,6 @@ import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.TagRepository;
 import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
-import com.bookmyshow.main.specification.EventSpecification;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceImplTest {
@@ -233,8 +223,12 @@ class EventServiceImplTest {
 
 	@Test
 	void testCreateEvent() throws IOException {
+		BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(img, "jpg", baos);
+		byte[] validImageBytes = baos.toByteArray();
 		MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg",
-				"dummy image".getBytes());
+				validImageBytes);
 
 		when(mapper.map(any(EventDTO.class), eq(Event.class))).thenReturn(event);
 		when(languagesRepository.findAllById(anyList())).thenReturn(Collections.emptyList());
@@ -259,11 +253,15 @@ class EventServiceImplTest {
 
 	@Test
 	void testCreateEvent_withCastCrewAndVenues() throws IOException {
+		BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(img, "jpg", baos);
+		byte[] validImageBytes = baos.toByteArray();
 
 		MockMultipartFile poster = new MockMultipartFile("poster", "poster.jpg", "image/jpeg",
-				"poster-bytes".getBytes());
-		MockMultipartFile castImage = new MockMultipartFile("cast", "cast1.jpg", "image/jpeg", "cast-image".getBytes());
-		MockMultipartFile crewImage = new MockMultipartFile("crew", "crew1.jpg", "image/jpeg", "crew-image".getBytes());
+				validImageBytes);
+		MockMultipartFile castImage = new MockMultipartFile("cast", "cast1.jpg", "image/jpeg", validImageBytes);
+		MockMultipartFile crewImage = new MockMultipartFile("crew", "crew1.jpg", "image/jpeg", validImageBytes);
 
 		CastDTO castDTO = new CastDTO();
 		castDTO.setActorName("Actor Name");
@@ -313,6 +311,8 @@ class EventServiceImplTest {
 
 		verify(eventRepository).save(any(Event.class));
 	}
+
+	
 
 //	@Test
 	void testCreateEvent_withShows() throws IOException {

@@ -3,16 +3,23 @@ package com.bookmyshow.main.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.bookmyshow.main.config.ValidEndDate;
+
+import jakarta.validation.constraints.FutureOrPresent;
+//import jakarta.validation.constraints.FutureOrPresent;
 import lombok.Data;
 
 // Master DTO
+
 @Data
+@ValidEndDate
 public class EventDTO {
     private Long eventId;
     private Long adminId;
     private String name;
     private String description;
     private String runTime;
+    @FutureOrPresent(message = "start date must be today or in the future")
     private LocalDate startDate;
     private LocalDate endDate;
     private String eventType;
@@ -22,6 +29,7 @@ public class EventDTO {
     private Double votes;
     private Boolean currentlyPlaying;
     private int ageLimit;
+    @FutureOrPresent(message = "ReleasingOn must be today or in the future")
     private LocalDate releasingOn;
 
     // Nested DTOs
