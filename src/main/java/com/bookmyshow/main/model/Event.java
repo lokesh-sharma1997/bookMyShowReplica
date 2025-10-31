@@ -20,7 +20,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Data
-@ValidEndDate
 @Entity
 @Table(name = "events")
 public class Event {
@@ -40,7 +39,6 @@ public class Event {
 	@NotBlank(message = "Run Time is required")
 	private String runTime;
 
-	@FutureOrPresent(message = "start date must be today or in the future")
 	private LocalDate startDate;
 
 	
@@ -105,7 +103,6 @@ public class Event {
 	private List<ReleaseMonth> releaseMonth;
 
 	
-	@FutureOrPresent(message = "Release date must be today or in the future")
 	private LocalDate releasingOn;
 
 	@ManyToMany

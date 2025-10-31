@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import com.bookmyshow.main.dto.CityDTO;
 import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.repository.CityRepository;
+import com.bookmyshow.main.response.CityResponseDto;
 
 @ExtendWith(MockitoExtension.class)
 class CityServiceTest {
@@ -30,37 +31,32 @@ class CityServiceTest {
 
 
     @Test
-    void testGetAllCities() {
+    void testGetAllCities() throws Exception{
       
         City city1 = new City();
         city1.setName("Delhi");
-        city1.setPopular(false);
+       
 
         City city2 = new City();
         city2.setName("Mumbai");
-        city2.setPopular(false);
+           
 
-        City city3 = new City();
-        city3.setName("Chennai");
-        city3.setPopular(true);
-
-        List<City> cities = List.of(city1, city2, city3);
+        List<City> cities = List.of(city1, city2);
 
         when(cityRepository.findAll()).thenReturn(cities);
 
-        CityDTO dto1 = new CityDTO();
+        CityResponseDto dto1 = new CityResponseDto();
         dto1.setCityName("Delhi");
-        dto1 .setPopularCity(false);
         
-        CityDTO dto2 = new CityDTO();
+        
+        CityResponseDto dto2 = new CityResponseDto();
         dto2.setCityName("Mumbai");
-        dto2 .setPopularCity(false);
-
-        when(mapper.map(city1, CityDTO.class)).thenReturn(dto1);
-        when(mapper.map(city2, CityDTO.class)).thenReturn(dto2);
+       
+        when(mapper.map(city1, CityResponseDto.class)).thenReturn(dto1);
+        when(mapper.map(city2, CityResponseDto.class)).thenReturn(dto2);
 
         
-        List<CityDTO> result = cityService.getAllCities();
+        List<CityResponseDto> result = cityService.getAllCities();
 
        
         assertEquals(2, result.size());
