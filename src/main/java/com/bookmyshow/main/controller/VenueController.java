@@ -25,7 +25,8 @@ public class VenueController {
 
 	@Autowired
 	private VenueService venueService;
-
+	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create")
 	public ResponseEntity<ApiResponse<Void>> createVenue(@RequestBody VenueDTO venueDto) {
 		venueService.createVenue(venueDto);
@@ -34,7 +35,7 @@ public class VenueController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
-
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/getAll")
 	public ResponseEntity<ApiResponse<List<VenueDTO>>> getAllVenues() {
 		List<VenueDTO> venues = venueService.getAllVenues();
@@ -54,7 +55,7 @@ public class VenueController {
 
 		return ResponseEntity.ok(response);
 	}
-
+	@PreAuthorize("hasRole('ADMIN')")
 	@PatchMapping("/delete/{id}")
 	public ResponseEntity<ApiResponse<String>> softDeleteVenue(@PathVariable Long id) {
 		boolean deleted = venueService.softDeleteVenue(id);
@@ -75,7 +76,7 @@ public class VenueController {
 
 		return ResponseEntity.ok(response);
 	}
-
+	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{venueId}/update")
 	public ResponseEntity<ApiResponse<VenueDTO>> updateVenue(@PathVariable Long venueId,
 			@RequestBody VenueDTO venueDto) {
@@ -90,7 +91,7 @@ public class VenueController {
 					.body(new ApiResponse<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), false, null));
 		}
 	}
-
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<VenueDTO>> getVenueById(@PathVariable Long id) {
 		VenueDTO venueDTO = venueService.getVenueById(id);

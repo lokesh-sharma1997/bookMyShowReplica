@@ -23,6 +23,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 	// Find bookings by show, screen, and status
 	List<Booking> findByShowIdAndScreenIdAndStatus(Long showId, Long screenId, String status);
+	
+	@Query("SELECT b FROM Booking b WHERE b.user.userId = :userId AND b.event.deleted = false")
+	List<Booking> findActiveBookingsByUserId(@Param("userId") Long userId);
 
 	// Check if a specific seat is booked for a show
 	@Query("SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END " + "FROM Booking b JOIN b.seats s "

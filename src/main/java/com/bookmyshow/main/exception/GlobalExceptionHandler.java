@@ -99,4 +99,11 @@ public class GlobalExceptionHandler {
 		}
 		return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Transaction failed: " + ex.getMessage(), false);
 	}
+	
+	// Access denied (Spring Security)
+	@ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+	public ResponseEntity<ApiResponse<Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+	    return buildResponse(HttpStatus.FORBIDDEN, "Access Denied: You do not have permission to perform this action.", false);
+	}
+
 }
