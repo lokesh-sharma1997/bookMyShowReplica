@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class ShowController {
 
     private final ShowService showService;
-
+    
     @GetMapping
     public ResponseEntity<ApiResponse<List<VenueShowDTO>>> getShows(
             @RequestParam Long eventId,
