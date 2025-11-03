@@ -251,6 +251,7 @@ public class VenueServiceImpl implements VenueService {
 	@Transactional
 	public VenueDTO createVenue(VenueDTO dto) {
 		Venue entity = dtoToEntity(dto);
+		validateCapacity(dto);
 		if (dto.getAddress() != null) {
 			Address address = new Address();
 			address.setStreet(dto.getAddress().getStreet());
@@ -309,6 +310,27 @@ public class VenueServiceImpl implements VenueService {
 		eventPublisher.publishEvent(new NotificationEvent(this, "New " + saved.getVenueType() + " Added",
 				saved.getVenueName() + " is now available!", "VENUE"));
 		return entityToDto(saved);
+	}
+
+	private void validateCapacity(VenueDTO dto) {
+		int totalSeats = 0;
+
+		if (dto.getScreens() != null) {
+			for (ScreenDTO screenDTO : dto.getScreens()) {
+				if (screenDTO.getLayouts() != null) {
+					for (LayoutDTO layoutDTO : screenDTO.getLayouts()) {
+						int rowCount = layoutDTO.getRows() != null ? layoutDTO.getRows().size() : 0;
+						int cols = layoutDTO.getCols();
+						totalSeats += rowCount * cols;
+					}
+				}
+			}
+		}
+
+		if (totalSeats > dto.getVenueCapacity()) {
+			throw new IllegalArgumentException(
+					"Total seats (" + totalSeats + ") exceed venue capacity (" + dto.getVenueCapacity() + ")");
+		}
 	}
 
 	private void createSeatsForLayoutRow(LayoutRow layoutRow, Screen screen, int numberOfSeatsPerRow) {

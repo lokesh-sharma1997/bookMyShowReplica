@@ -4,12 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,6 +53,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+
 
 @RestController
 @RequestMapping("/api/events")
@@ -67,6 +69,8 @@ public class EventController {
 	private EventService eventService;
 	@Autowired
 	private EventRepository eventRepository;
+	@Autowired
+	private Validator validator;
 
 	@Operation(summary = "${event.createEvent}")
 	@PostMapping(value = "/create-event", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
@@ -87,7 +91,13 @@ public class EventController {
 		ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule())
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		EventDTO eventDto = objectMapper.readValue(eventJson, EventDTO.class);
-
+		 Set<ConstraintViolation<EventDTO>> violations = validator.validate(eventDto);
+		    if (!violations.isEmpty()) {
+		        String errors = violations.stream()
+		                .map(ConstraintViolation::getMessage)
+		                .collect(Collectors.joining("; "));
+		        throw new EventCustomException(errors);
+		    }
 		if (eventDto.getName() == null || eventDto.getName().isBlank()) {
 			throw new EventCustomException("Event name must not be empty");
 		}
@@ -180,9 +190,12 @@ public class EventController {
 	@PostMapping("/filter")
 	public ResponseEntity<ApiResponse<Map<String, Object>>> filterEvents(@RequestBody EventFilterRequest filterRequest,
 			@RequestParam int page, @RequestParam int size,
-			@RequestParam(required = false, defaultValue = "true") boolean upcomingMovie) {
+			@RequestParam(required = false, defaultValue = "true") boolean upcomingMovie
+			,@RequestParam(required = false) Integer adminId) {
 
-		Specification<Event> spec = EventSpecification.filterEvents(filterRequest.getType(), filterRequest.getCityid(),
+
+		Specification<Event> spec = EventSpecification.filterEvents(filterRequest.getType(),
+				filterRequest.getCityid(),adminId,
 				filterRequest.getLanguages(), filterRequest.getGenres(), filterRequest.getFormats(),
 				filterRequest.getTags(), filterRequest.getCategories(), filterRequest.getPrice(),
 				filterRequest.getMorefilter(), filterRequest.getReleaseMonths(), filterRequest.getDateFilters());

@@ -1,5 +1,7 @@
 package com.bookmyshow.main.serviceImpl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.poi.hpsf.Thumbnail;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -84,6 +87,8 @@ import com.bookmyshow.main.repository.UserRepository;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.service.EventService;
 import com.bookmyshow.main.specification.EventSpecification;
+
+import net.coobird.thumbnailator.Thumbnails;
 
 @Service
 public class EventServiceImpl implements EventService {
@@ -209,8 +214,11 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public EventDTO createEvent(EventDTO eventDto, MultipartFile poster, List<MultipartFile> castImages,
 			List<MultipartFile> crewImages) throws IOException {
-
-		String base64Poster = Base64.getEncoder().encodeToString(poster.getBytes());
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		Thumbnails.of(poster.getInputStream()).size(240, 240).outputQuality(0.2f).outputFormat("jpg")
+				.toOutputStream(out);
+		byte[] compressedImage = out.toByteArray();
+		String base64Poster = Base64.getEncoder().encodeToString(compressedImage);
 
 		Event event = toEntity(eventDto);
 		event.setDeleted(false);
@@ -271,7 +279,12 @@ public class EventServiceImpl implements EventService {
 			if (castImages != null) {
 				for (int i = 0; i < eventDto.getCast().size(); i++) {
 					if (i < castImages.size()) {
-						String base64 = Base64.getEncoder().encodeToString(castImages.get(i).getBytes());
+						ByteArrayOutputStream castimage = new ByteArrayOutputStream();
+						Thumbnails.of(castImages.get(i).getInputStream()).size(240, 240).outputQuality(0.2f).outputFormat("jpg")
+								.toOutputStream(out);
+						byte[] compressedcastImage = out.toByteArray();
+						String base64 = Base64.getEncoder().encodeToString(compressedcastImage);
+
 						eventDto.getCast().get(i).setCastImg(base64);
 					}
 				}
@@ -302,7 +315,11 @@ public class EventServiceImpl implements EventService {
 			if (crewImages != null) {
 				for (int i = 0; i < eventDto.getCrew().size(); i++) {
 					if (i < crewImages.size()) {
-						String base64 = Base64.getEncoder().encodeToString(crewImages.get(i).getBytes());
+						ByteArrayOutputStream castimage = new ByteArrayOutputStream();
+						Thumbnails.of(crewImages.get(i).getInputStream()).size(240, 240).outputQuality(0.2f).outputFormat("jpg")
+								.toOutputStream(out);
+						byte[] compressedcastImage = out.toByteArray();
+						String base64 = Base64.getEncoder().encodeToString(compressedcastImage);
 						eventDto.getCrew().get(i).setCrewImg(base64);
 					}
 				}
@@ -785,14 +802,14 @@ public class EventServiceImpl implements EventService {
 		return true; // Successfully marked as deleted
 	}
 
-	public Page<EventResponseDtoCard> filterEvents(String type,Integer cityid, List<Integer> languages, List<Integer> genres,
-			List<Integer> formats, List<Integer> tags, List<Integer> categories, List<Integer> price,
-			List<Integer> moreFilters, List<Integer> releaseMonths, List<Integer> dateFilters, int page, int size,
-			boolean includeCurrentlyPlaying) {
+	public Page<EventResponseDtoCard> filterEvents(String type, Integer cityid,Integer adminId, List<Integer> languages,
+			List<Integer> genres, List<Integer> formats, List<Integer> tags, List<Integer> categories,
+			List<Integer> price, List<Integer> moreFilters, List<Integer> releaseMonths, List<Integer> dateFilters,
+			int page, int size, boolean includeCurrentlyPlaying) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		Specification<Event> spec = EventSpecification.filterEvents(type,cityid, languages, genres, formats, tags, categories,
-				price, moreFilters, releaseMonths, dateFilters);
+		Specification<Event> spec = EventSpecification.filterEvents(type, cityid,adminId, languages, genres, formats, tags,
+				categories, price, moreFilters, releaseMonths, dateFilters);
 
 		if ("Movie".equalsIgnoreCase(type)) {
 			// Add condition to specification that currentlyPlaying must be false

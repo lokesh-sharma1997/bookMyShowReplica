@@ -51,7 +51,7 @@ public class Venue {
     )
     private List<SupportedCategory> supportedCategories; 
 
-    @OneToMany(mappedBy = "venue",cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "venue",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Screen> screens= new ArrayList<>(); 
     
     

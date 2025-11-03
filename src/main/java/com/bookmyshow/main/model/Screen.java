@@ -30,7 +30,7 @@ public class Screen {
 
     private String screenName;
 
-    @ManyToOne(cascade = CascadeType.ALL)  // Ensure cascades to venue if needed
+    @ManyToOne
     @JoinColumn(name = "venue_id", referencedColumnName = "id")
     private Venue venue;
 

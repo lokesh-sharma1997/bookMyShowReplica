@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.bookmyshow.main.controller.CityController;
 import com.bookmyshow.main.dto.CityDTO;
+import com.bookmyshow.main.response.CityResponseDto;
 import com.bookmyshow.main.service.CityService;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +39,7 @@ public class CityControllerTest {
     @Test
     void testGetAllCities()throws Exception
     {
-    	CityDTO cities = new CityDTO();
+    	CityResponseDto cities = new CityResponseDto();
     	cities.setCityName("Agra");
     	when(cityService.getAllCities()).thenReturn(List.of(cities));
     	mockMvc.perform(get("/api/city/all"))
