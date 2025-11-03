@@ -189,9 +189,11 @@ public class EventController {
 	@PostMapping("/filter")
 	public ResponseEntity<ApiResponse<Map<String, Object>>> filterEvents(@RequestBody EventFilterRequest filterRequest,
 			@RequestParam int page, @RequestParam int size,
-			@RequestParam(required = false, defaultValue = "true") boolean upcomingMovie) {
+			@RequestParam(required = false, defaultValue = "true") boolean upcomingMovie
+			,@RequestParam(required = false) Integer adminId) {
 
-		Specification<Event> spec = EventSpecification.filterEvents(filterRequest.getType(),filterRequest.getCityid(),
+		Specification<Event> spec = EventSpecification.filterEvents(filterRequest.getType(),
+				filterRequest.getCityid(),adminId,
 				filterRequest.getLanguages(), filterRequest.getGenres(), filterRequest.getFormats(),
 				filterRequest.getTags(), filterRequest.getCategories(), filterRequest.getPrice(),
 				filterRequest.getMorefilter(), filterRequest.getReleaseMonths(), filterRequest.getDateFilters());
@@ -211,7 +213,8 @@ public class EventController {
 			count = eventRepository.findAll(spec).stream().filter(event -> !event.getDeleted()).count();
 		}
 
-		Page<EventResponseDtoCard> eventsPage = eventService.filterEvents(filterRequest.getType(),filterRequest.getCityid(),
+		Page<EventResponseDtoCard> eventsPage = eventService.filterEvents(filterRequest.getType(),
+				filterRequest.getCityid(),adminId,
 				filterRequest.getLanguages(), filterRequest.getGenres(), filterRequest.getFormats(),
 				filterRequest.getTags(), filterRequest.getCategories(), filterRequest.getPrice(),
 				filterRequest.getMorefilter(), filterRequest.getReleaseMonths(), filterRequest.getDateFilters(), page,

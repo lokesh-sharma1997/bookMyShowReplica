@@ -802,13 +802,13 @@ public class EventServiceImpl implements EventService {
 		return true; // Successfully marked as deleted
 	}
 
-	public Page<EventResponseDtoCard> filterEvents(String type, Integer cityid, List<Integer> languages,
+	public Page<EventResponseDtoCard> filterEvents(String type, Integer cityid,Integer adminId, List<Integer> languages,
 			List<Integer> genres, List<Integer> formats, List<Integer> tags, List<Integer> categories,
 			List<Integer> price, List<Integer> moreFilters, List<Integer> releaseMonths, List<Integer> dateFilters,
 			int page, int size, boolean includeCurrentlyPlaying) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		Specification<Event> spec = EventSpecification.filterEvents(type, cityid, languages, genres, formats, tags,
+		Specification<Event> spec = EventSpecification.filterEvents(type, cityid,adminId, languages, genres, formats, tags,
 				categories, price, moreFilters, releaseMonths, dateFilters);
 
 		if ("Movie".equalsIgnoreCase(type)) {
