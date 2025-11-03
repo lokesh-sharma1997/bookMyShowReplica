@@ -304,8 +304,13 @@ public class VenueServiceImpl implements VenueService {
 
 		Venue saved = venueRepository.save(entity);
 
-		eventPublisher.publishEvent(new NotificationEvent(this, "New " + saved.getVenueType() + " Added",
-				saved.getVenueName() + " is now available!", "VENUE"));
+		if (saved.equals(null) || saved.equals("")) {
+			throw new IllegalArgumentException("Venue not created.");
+		}else {
+			eventPublisher.publishEvent(new NotificationEvent(this, "New " + saved.getVenueType() + " Added",
+					saved.getVenueName() + " is now available!", "VENUE"));
+		}
+		
 		return entityToDto(saved);
 	}
 
