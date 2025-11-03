@@ -441,7 +441,7 @@ public class EventServiceImpl implements EventService {
 			throw new IllegalArgumentException("Event not created.");
 		}else {
 			eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
-					savedEvent.getName() + " is now available!", savedEvent.getEventType()));
+					savedEvent.getName() + " is now available!", "EVENT"));
 		}
 		
 

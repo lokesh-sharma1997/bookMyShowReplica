@@ -74,7 +74,6 @@ public class EventController {
 
 	@Operation(summary = "${event.createEvent}")
 	@PostMapping(value = "/create-event", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponse<Void>> createEvent(@RequestPart("event") String eventJson,
 			@RequestPart("poster") MultipartFile poster,
 			@RequestPart(value = "castImages", required = false) List<MultipartFile> castImages,
