@@ -54,14 +54,29 @@ public class ShowServiceImpl implements ShowService {
 								String price = layout.getMoviePrice() != 0 ? String.valueOf(layout.getMoviePrice())
 										: null;
 
-								boolean anyReserved = layout.getLayout() != null
-										&& layout.getLayout().getLayoutRows() != null
-										&& layout.getLayout().getLayoutRows().stream()
-												.flatMap(row -> row.getSeats().stream())
-												.anyMatch(seat -> bookingRepository.isSeatBookedForShow(show.getId(),
-														seat.getId()));
+								int totalSeats = 0;
+								int bookedSeats = 0;
 
-								String status = anyReserved ? "BOOKED" : "AVAILABLE";
+								if (layout.getLayout() != null && layout.getLayout().getLayoutRows() != null) {
+									totalSeats = layout.getLayout().getLayoutRows().stream()
+											.mapToInt(row -> row.getSeats().size()).sum();
+
+									bookedSeats = (int) layout.getLayout().getLayoutRows().stream()
+											.flatMap(row -> row.getSeats().stream()).filter(seat -> bookingRepository
+													.isSeatBookedForShowTime(show.getId(), st.getId(), seat.getId()))
+											.count();
+								}
+
+								double percentageBooked = totalSeats > 0 ? (bookedSeats * 100.0 / totalSeats) : 0.0;
+
+								String status;
+								if (percentageBooked == 100) {
+									status = "BOOKED";
+								} else if (percentageBooked >= 50) {
+									status = "FAST FILLING";
+								} else {
+									status = "AVAILABLE";
+								}
 
 								return new ShowCategoryDTO(layoutName, status, price);
 							}).toList();

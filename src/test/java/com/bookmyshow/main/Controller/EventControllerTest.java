@@ -65,10 +65,14 @@ import com.bookmyshow.main.repository.EventRepository;
 import com.bookmyshow.main.service.EventService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 @ExtendWith(MockitoExtension.class)
 class EventControllerTest {
  
-   
+   private Validator validator;
     private MockMvc mockMvc;
  
     @Mock
@@ -88,28 +92,29 @@ class EventControllerTest {
     @BeforeEach
     void setUp() {
     	 MockitoAnnotations.openMocks(this); 
+    	 ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    	    validator = factory.getValidator();
+    	    org.springframework.test.util.ReflectionTestUtils.setField(eventController, "validator", validator);
     	objectMapper = new ObjectMapper();
     	objectMapper.registerModule(new JavaTimeModule());
     	
         mockMvc = MockMvcBuilders.standaloneSetup(eventController).build();
-       
  
         eventDto = new EventDTO();
         eventDto.setEventId(1L);
         eventDto.setName("Test Event");
         eventDto.setDescription("Description");
         eventDto.setRunTime("120");
-        eventDto.setStartDate(LocalDate.of(2025, 9, 8));
-        eventDto.setEndDate(LocalDate.of(2025, 9, 10));
+        eventDto.setEndDate(LocalDate.now().plusDays(1));
         eventDto.setEventType("Movie");
         eventDto.setImageurl("imageUrl");
         eventDto.setImdbRating(8.5);
         eventDto.setLikes(100.0);
         eventDto.setVotes(50.0);
         eventDto.setCurrentlyPlaying(true);
-       
+        eventDto.setStartDate(LocalDate.now());
+        eventDto.setReleasingOn(LocalDate.now());
         eventDto.setAgeLimit(13);
-        eventDto.setReleasingOn(LocalDate.of(2025, 9, 8));
         eventDto.setLanguages(Collections.emptyList());
         eventDto.setGenres(Collections.emptyList());
         eventDto.setFormat(Collections.emptyList());
@@ -122,26 +127,25 @@ class EventControllerTest {
         eventDto.setCrew(Collections.emptyList());
         eventDto.setCity(Collections.emptyList());
     }
- 
     @Test
     void testCreateEvent() throws Exception {
         when(eventService.createEvent(any(EventDTO.class), any(), any(), any()))
                 .thenReturn(eventDto);
- 
+
         MockMultipartFile eventJson = new MockMultipartFile(
                 "event",
                 "",
                 "application/json",
                 objectMapper.writeValueAsBytes(eventDto)
         );
- 
+
         MockMultipartFile poster = new MockMultipartFile(
                 "poster",
                 "poster.jpg",
                 MediaType.IMAGE_JPEG_VALUE,
                 "fake-image".getBytes()
         );
- 
+
         mockMvc.perform(multipart("/api/events/create-event")
                 .file(eventJson)
                 .file(poster)
@@ -239,6 +243,7 @@ class EventControllerTest {
         when(eventService.filterEvents(
                 anyString(),
                 any(),
+                any(),
                 anyList(),
                 anyList(),
                 anyList(),
@@ -271,13 +276,6 @@ class EventControllerTest {
             .andExpect(jsonPath("$.data.content[0].eventId").value(1))
             .andExpect(jsonPath("$.data.count").value(1));
     }
-
-
-
-
-
-    
-    
  
     @Test
     void testDeleteEvent() throws Exception {

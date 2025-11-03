@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.bookmyshow.main.dto.CityDTO;
 import com.bookmyshow.main.model.City;
 import com.bookmyshow.main.repository.CityRepository;
+import com.bookmyshow.main.response.CityResponseDto;
 import com.bookmyshow.main.service.CityService;
 
 @Service
@@ -32,11 +33,14 @@ public class CityServiceImple implements CityService {
     }
 
  
-    public List<CityDTO> getAllCities() {
+    private CityResponseDto cityToCityResponseDto(City city) {
+        return mapper.map(city, CityResponseDto.class);
+    }
+
+    public List<CityResponseDto> getAllCities() {
         return cityRepository.findAll().stream()
-                .filter(city -> !city.getPopular())
-                .map(this::CityToDto)
-                .sorted(Comparator.comparing(CityDTO::getCityName))
+                .map(this::cityToCityResponseDto)
+                .sorted(Comparator.comparing(CityResponseDto::getCityName))
                 .collect(Collectors.toList());
     }
 
