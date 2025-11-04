@@ -16,22 +16,24 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
 
 public interface VenueService {
 
-    VenueDTO createVenue(VenueDTO dto);
+	VenueDTO createVenue(VenueDTO dto);
 
-    List<VenueDTO> getAllVenues();
+	List<VenueDTO> getVenuesByCity(String city);
 
-    List<VenueDTO> getVenuesByCity(String city);
+	boolean softDeleteVenue(Long id);
 
-    boolean softDeleteVenue(Long id);
-
-    VenueDTO updateVenue(Long venueId, VenueDTO dto);
+	VenueDTO updateVenue(Long venueId, VenueDTO dto);
 
 	List<TimeSlotDTO> getAvailableTimeSlots(Long venueId, Long screenId, LocalDate date);
 
 	VenueDTO getVenueById(Long id);
 
-    
+	Map<String, Object> getAllVenues(int page, int size);
+
 }

@@ -243,6 +243,7 @@ class EventControllerTest {
         when(eventService.filterEvents(
                 anyString(),
                 any(),
+                any(),
                 anyList(),
                 anyList(),
                 anyList(),

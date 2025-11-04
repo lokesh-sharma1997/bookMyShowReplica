@@ -254,7 +254,7 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public List<BookingContentDTO> getAllBookingsByUser(Long userId) {
-		List<Booking> bookings = bookingRepository.findByUser_UserId(userId);
+		List<Booking> bookings = bookingRepository.findActiveBookingsByUserId(userId);
 		if (bookings.isEmpty()) {
 			throw new RuntimeException("No bookings found for this user");
 		}

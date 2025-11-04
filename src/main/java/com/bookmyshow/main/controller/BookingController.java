@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,8 @@ public class BookingController {
 
 	@Autowired
 	private BookingService bookingService;
-
+   
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@PostMapping("/book")
 	public ResponseEntity<ApiResponse<String>> bookTickets(@RequestBody List<BookTicketRequestDTO> bookings) {
 		try {
@@ -45,7 +47,7 @@ public class BookingController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 		}
 	}
-
+	
 	@GetMapping("/booked-seats")
 	public ResponseEntity<ApiResponse<List<String>>> getBookedSeats(@RequestParam Long showTimeDateId,
 			@RequestParam Long showTimeId) {
@@ -56,7 +58,7 @@ public class BookingController {
 
 		return ResponseEntity.ok(response);
 	}
-
+	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 	@GetMapping("/user/{userId}/shows")
 	public ResponseEntity<ApiResponse<Map<String, List<BookingContentDTO>>>> getAllBookings(@PathVariable Long userId) {
 		try {

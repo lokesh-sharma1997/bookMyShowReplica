@@ -80,9 +80,9 @@ public class UserMaster {
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Booking> bookings;
-	
+
 	@OneToMany(mappedBy = "userMaster", cascade = CascadeType.ALL)
-	  @JsonManagedReference
-	  private List<Event> events;
+	@JsonManagedReference
+	private List<Event> events;
 
 }

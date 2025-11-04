@@ -1,4 +1,4 @@
-FROM openjdk:17-buster
+FROM eclipse-temurin:17-jdk
 
 RUN mkdir -p  /app/bookMyShow
 COPY ./target/*.jar /app/bookMyShow
