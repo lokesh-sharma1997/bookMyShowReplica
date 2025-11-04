@@ -17,5 +17,6 @@ public interface ScreenRepository extends JpaRepository<Screen, Long> {
 	Optional<Screen> findByVenueAndScreenName(Venue venue, String screenName);
 //	
     List<Screen> findByVenueId(Long venueId);
+	boolean existsByIdAndVenue_Id(Long screenId, Long venueId);
 
 }

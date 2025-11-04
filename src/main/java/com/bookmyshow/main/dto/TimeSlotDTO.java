@@ -17,4 +17,9 @@ public class TimeSlotDTO {
 	private Long id;
     private LocalTime startTime;
     private LocalTime endTime;
+    
+    public TimeSlotDTO(LocalTime startTime, LocalTime endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 }

@@ -216,7 +216,7 @@ public class EventController {
 		}
 
 		Page<EventResponseDtoCard> eventsPage = eventService.filterEvents(filterRequest.getType(),
-				filterRequest.getCityid(), filterRequest.getLanguages(), filterRequest.getGenres(),
+				filterRequest.getCityid(),adminId, filterRequest.getLanguages(), filterRequest.getGenres(),
 				filterRequest.getFormats(), filterRequest.getTags(), filterRequest.getCategories(),
 				filterRequest.getPrice(), filterRequest.getMorefilter(), filterRequest.getReleaseMonths(),
 				filterRequest.getDateFilters(), page, size, upcomingMovie);
