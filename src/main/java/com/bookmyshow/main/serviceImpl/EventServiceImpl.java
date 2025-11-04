@@ -281,8 +281,8 @@ public class EventServiceImpl implements EventService {
 					if (i < castImages.size()) {
 						ByteArrayOutputStream castimage = new ByteArrayOutputStream();
 						Thumbnails.of(castImages.get(i).getInputStream()).size(240, 240).outputQuality(0.2f).outputFormat("jpg")
-								.toOutputStream(out);
-						byte[] compressedcastImage = out.toByteArray();
+								.toOutputStream(castimage);
+						byte[] compressedcastImage = castimage.toByteArray();
 						String base64 = Base64.getEncoder().encodeToString(compressedcastImage);
 
 						eventDto.getCast().get(i).setCastImg(base64);
@@ -315,10 +315,10 @@ public class EventServiceImpl implements EventService {
 			if (crewImages != null) {
 				for (int i = 0; i < eventDto.getCrew().size(); i++) {
 					if (i < crewImages.size()) {
-						ByteArrayOutputStream castimage = new ByteArrayOutputStream();
+						ByteArrayOutputStream crewimage = new ByteArrayOutputStream();
 						Thumbnails.of(crewImages.get(i).getInputStream()).size(240, 240).outputQuality(0.2f).outputFormat("jpg")
-								.toOutputStream(out);
-						byte[] compressedcastImage = out.toByteArray();
+								.toOutputStream(crewimage);
+						byte[] compressedcastImage = crewimage.toByteArray();
 						String base64 = Base64.getEncoder().encodeToString(compressedcastImage);
 						eventDto.getCrew().get(i).setCrewImg(base64);
 					}
