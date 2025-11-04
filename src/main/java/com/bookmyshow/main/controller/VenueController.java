@@ -4,12 +4,15 @@ import com.bookmyshow.main.dto.TimeSlotDTO;
 import com.bookmyshow.main.dto.VenueDTO;
 import com.bookmyshow.main.exception.UserNotFoundException;
 import com.bookmyshow.main.exception.VenueNotFoundException;
+import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.response.ApiResponse;
+import com.bookmyshow.main.response.VenueListResponse;
 import com.bookmyshow.main.service.VenueService;
 
 import io.swagger.v3.oas.annotations.Operation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +20,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/venues")
@@ -25,7 +30,7 @@ public class VenueController {
 
 	@Autowired
 	private VenueService venueService;
-	
+
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create")
 	public ResponseEntity<ApiResponse<Void>> createVenue(@RequestBody VenueDTO venueDto) {
@@ -35,13 +40,15 @@ public class VenueController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
-	
-	@GetMapping("/getAll")
-	public ResponseEntity<ApiResponse<List<VenueDTO>>> getAllVenues() {
-		List<VenueDTO> venues = venueService.getAllVenues();
 
-		ApiResponse<List<VenueDTO>> response = new ApiResponse<>(HttpStatus.OK.value(),
-				"All venues fetched successfully", true, venues);
+	@GetMapping("/getAll")
+	public ResponseEntity<ApiResponse<VenueListResponse>> getAllVenues(@RequestParam int page, @RequestParam int size) {
+
+		VenueListResponse data = venueService.getAllVenues(page, size);
+
+		ApiResponse<VenueListResponse> response = new ApiResponse<>(HttpStatus.OK.value(),
+				data.getVenues().isEmpty() ? "No venues found" : "Venues fetched successfully",
+				!data.getVenues().isEmpty(), data);
 
 		return ResponseEntity.ok(response);
 	}
@@ -55,6 +62,7 @@ public class VenueController {
 
 		return ResponseEntity.ok(response);
 	}
+
 	@PreAuthorize("hasRole('ADMIN')")
 	@PatchMapping("/delete/{id}")
 	public ResponseEntity<ApiResponse<String>> softDeleteVenue(@PathVariable Long id) {
@@ -76,6 +84,7 @@ public class VenueController {
 
 		return ResponseEntity.ok(response);
 	}
+
 	@PreAuthorize("hasRole('ADMIN')")
 	@PutMapping("/{venueId}/update")
 	public ResponseEntity<ApiResponse<VenueDTO>> updateVenue(@PathVariable Long venueId,
@@ -91,7 +100,7 @@ public class VenueController {
 					.body(new ApiResponse<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), false, null));
 		}
 	}
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<VenueDTO>> getVenueById(@PathVariable Long id) {
 		VenueDTO venueDTO = venueService.getVenueById(id);
