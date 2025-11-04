@@ -1,4 +1,4 @@
-FROM openjdk:17-buster
+FROM openjdk:17-jdk-slim
 
 RUN mkdir -p  /app/bookMyShow
 COPY ./target/*.jar /app/bookMyShow
