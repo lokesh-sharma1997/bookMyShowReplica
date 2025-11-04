@@ -53,6 +53,7 @@ import com.bookmyshow.main.repository.ShowRepository;
 import com.bookmyshow.main.repository.ShowTimeRepository;
 import com.bookmyshow.main.repository.ShowtimedateRepository;
 import com.bookmyshow.main.repository.VenueRepository;
+import com.bookmyshow.main.response.VenueListResponse;
 import com.bookmyshow.main.service.VenueService;
 
 import jakarta.transaction.Transactional;
@@ -358,7 +359,7 @@ public class VenueServiceImpl implements VenueService {
 	}
 
 	@Override
-	public Map<String, Object> getAllVenues(int page, int size) {
+	public VenueListResponse getAllVenues(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
 		Page<Venue> venuePage = venueRepository.findAll((root, query, cb) -> cb.equal(root.get("deleted"), false),
@@ -368,10 +369,7 @@ public class VenueServiceImpl implements VenueService {
 
 		long count = venueRepository.count((root, query, cb) -> cb.equal(root.get("deleted"), false));
 
-		Map<String, Object> result = new HashMap<>();
-		result.put("content", venueDTOs);
-		result.put("count", count);
-		return result;
+		return new VenueListResponse(venueDTOs, count);
 	}
 
 	@Override

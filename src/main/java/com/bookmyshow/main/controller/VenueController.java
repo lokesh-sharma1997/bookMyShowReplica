@@ -6,6 +6,7 @@ import com.bookmyshow.main.exception.UserNotFoundException;
 import com.bookmyshow.main.exception.VenueNotFoundException;
 import com.bookmyshow.main.repository.VenueRepository;
 import com.bookmyshow.main.response.ApiResponse;
+import com.bookmyshow.main.response.VenueListResponse;
 import com.bookmyshow.main.service.VenueService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,14 +42,13 @@ public class VenueController {
 	}
 
 	@GetMapping("/getAll")
-	public ResponseEntity<ApiResponse<Map<String, Object>>> getAllVenues(@RequestParam int page,
-			@RequestParam int size) {
+	public ResponseEntity<ApiResponse<VenueListResponse>> getAllVenues(@RequestParam int page, @RequestParam int size) {
 
-		Map<String, Object> data = venueService.getAllVenues(page, size);
+		VenueListResponse data = venueService.getAllVenues(page, size);
 
-		ApiResponse<Map<String, Object>> response = new ApiResponse<>(HttpStatus.OK.value(),
-				((List<?>) data.get("content")).isEmpty() ? "No venues found" : "Venues fetched successfully",
-				!((List<?>) data.get("content")).isEmpty(), data);
+		ApiResponse<VenueListResponse> response = new ApiResponse<>(HttpStatus.OK.value(),
+				data.getVenues().isEmpty() ? "No venues found" : "Venues fetched successfully",
+				!data.getVenues().isEmpty(), data);
 
 		return ResponseEntity.ok(response);
 	}

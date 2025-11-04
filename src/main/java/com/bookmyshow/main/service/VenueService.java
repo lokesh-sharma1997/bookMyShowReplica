@@ -10,6 +10,7 @@ import com.bookmyshow.main.model.LayoutRow;
 import com.bookmyshow.main.model.Screen;
 import com.bookmyshow.main.model.Seat;
 import com.bookmyshow.main.model.Venue;
+import com.bookmyshow.main.response.VenueListResponse;
 
 import jakarta.transaction.Transactional;
 
@@ -34,6 +35,6 @@ public interface VenueService {
 
 	VenueDTO getVenueById(Long id);
 
-	Map<String, Object> getAllVenues(int page, int size);
+    VenueListResponse getAllVenues(int page, int size);
 
 }
