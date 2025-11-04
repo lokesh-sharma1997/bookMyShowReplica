@@ -1,3 +1,4 @@
+FROM ubuntu:22.04
 FROM openjdk:17
 
 RUN mkdir -p  /app/bookMyShow
