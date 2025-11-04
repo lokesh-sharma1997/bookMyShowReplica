@@ -437,12 +437,15 @@ public class EventServiceImpl implements EventService {
 
 		Event savedEvent = eventRepository.save(event);
 
-		eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
-				savedEvent.getName() + " is now available!", savedEvent.getEventType()));
+		if (savedEvent.equals(null) || savedEvent.equals("")) {
+			throw new IllegalArgumentException("Event not created.");
+		}else {
+			eventPublisher.publishEvent(new NotificationEvent(this, "New " + savedEvent.getEventType() + " Added",
+					savedEvent.getName() + " is now available!", "EVENT"));
+		}
+		
 
-		return
-
-		toDto(savedEvent);
+		return toDto(savedEvent);
 	}
 
 	@Override

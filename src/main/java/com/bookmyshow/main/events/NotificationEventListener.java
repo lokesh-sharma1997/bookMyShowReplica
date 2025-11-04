@@ -25,7 +25,9 @@ public class NotificationEventListener {
             // Broadcast to all users
             List<UserMaster> users = userRepository.findAll();
             for (UserMaster user : users) {
-                saveNotification(event, user);
+            	if (user.getDeleteFlag().equals(false)) {
+            		saveNotification(event, user);
+				}
             }
     }
 
