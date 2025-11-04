@@ -35,7 +35,7 @@ public class VenueController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
-	@PreAuthorize("hasRole('ADMIN')")
+	
 	@GetMapping("/getAll")
 	public ResponseEntity<ApiResponse<List<VenueDTO>>> getAllVenues() {
 		List<VenueDTO> venues = venueService.getAllVenues();
@@ -91,7 +91,7 @@ public class VenueController {
 					.body(new ApiResponse<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), false, null));
 		}
 	}
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<VenueDTO>> getVenueById(@PathVariable Long id) {
 		VenueDTO venueDTO = venueService.getVenueById(id);

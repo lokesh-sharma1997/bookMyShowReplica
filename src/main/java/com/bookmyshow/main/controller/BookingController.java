@@ -47,7 +47,7 @@ public class BookingController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 		}
 	}
-	@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+	
 	@GetMapping("/booked-seats")
 	public ResponseEntity<ApiResponse<List<String>>> getBookedSeats(@RequestParam Long showTimeDateId,
 			@RequestParam Long showTimeId) {
