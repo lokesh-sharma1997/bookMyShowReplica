@@ -2,6 +2,8 @@
 package com.bookmyshow.main.serviceImpl;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -87,7 +89,9 @@ public class ShowServiceImpl implements ShowService {
 
 						dto.setAvailableCategories(categories);
 						return dto;
-					})).toList();
+					}))
+
+					.sorted(Comparator.comparing(dto -> LocalTime.parse(dto.getTime()))).toList();
 
 			String screenId = null;
 			if ("Movie".equalsIgnoreCase(event.getEventType()) && screen != null) {
@@ -98,5 +102,4 @@ public class ShowServiceImpl implements ShowService {
 					String.valueOf(show.getId()), showDtos);
 		}).toList();
 	}
-
 }
