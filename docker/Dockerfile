@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:17
 
 RUN mkdir -p  /app/bookMyShow
 COPY ./target/*.jar /app/bookMyShow
