@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// Get All Users
-	@Override
+	@Override   
 	public Page<UserDTO> getAllUsers(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<UserMaster> usersPage = userRepository.findByDeleteFlagFalse(pageable);
