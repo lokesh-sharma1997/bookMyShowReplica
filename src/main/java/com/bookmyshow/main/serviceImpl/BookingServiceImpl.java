@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -255,8 +256,10 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	public List<BookingContentDTO> getAllBookingsByUser(Long userId) {
 		List<Booking> bookings = bookingRepository.findActiveBookingsByUserId(userId);
+
+		// Return empty list (success with no data)
 		if (bookings.isEmpty()) {
-			throw new RuntimeException("No bookings found for this user");
+			return Collections.emptyList();
 		}
 
 		List<BookingContentDTO> bookingContents = new ArrayList<>();
@@ -289,4 +292,5 @@ public class BookingServiceImpl implements BookingService {
 
 		return bookingContents;
 	}
+
 }
